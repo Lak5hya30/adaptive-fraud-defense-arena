@@ -228,9 +228,9 @@ def load_pipeline_summary():
 def load_demo_scores():
     """Precomputed scores/actions for the held-out test split.
 
-    Demo mode reads this instead of rebuilding 35 features over tens of thousands
-    of rows on every rerun — the difference between a page that appears and a page
-    a judge watches load.
+    Demo mode reads this instead of rebuilding the whole feature matrix over tens
+    of thousands of rows on every rerun — the difference between a page that
+    appears and a page a judge watches load.
     """
     import pandas as pd
     p = config.MODELS_DIR / "defend_demo.parquet"
