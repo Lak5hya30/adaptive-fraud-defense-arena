@@ -1,0 +1,3 @@
+# Live GenAI (Anthropic) responses are cached here by prompt hash when a key is set.
+# Empty in offline mode — the committed data/attack_artifacts.jsonl corpus is what the
+# app and text model use without a key.

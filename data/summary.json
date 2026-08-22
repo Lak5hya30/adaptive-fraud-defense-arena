@@ -1,0 +1,359 @@
+{
+  "schema_version": "2.0",
+  "n_transactions": 150000,
+  "n_fraud": 1800,
+  "fraud_rate": 0.012,
+  "n_cover_transactions": 667,
+  "n_cardholders": 6000,
+  "n_merchants": 1200,
+  "customer_archetypes": {
+    "digital_first": 1067,
+    "business_user": 712,
+    "low_frequency_retail": 1455,
+    "frequent_urban": 1315,
+    "traveller": 621,
+    "thin_file_new": 527,
+    "high_value": 303
+  },
+  "attack_type_counts": {
+    "legit": 148200,
+    "card_testing": 324,
+    "account_takeover": 234,
+    "otp_relay": 198,
+    "adversarial_mimicry": 180,
+    "scam_transfer": 180,
+    "merchant_laundering": 144,
+    "velocity_smurfing": 144,
+    "friendly_fraud": 108,
+    "bust_out": 108,
+    "wallet_provisioning": 108,
+    "geo_anomaly": 72
+  },
+  "attack_specs": {
+    "card_testing": {
+      "attack_family": "card_testing",
+      "strategy": "validate stolen card numbers with cheap probes across small merchants",
+      "intensity": 1.0,
+      "amount_profile": "micro",
+      "velocity_profile": "burst",
+      "device_behavior": "shared_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "new_low_risk_merchant",
+      "timing_profile": "any",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 0.05,
+        "txns_per_card": [
+          4,
+          9
+        ],
+        "velocity_window_hours": 1.5,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    },
+    "account_takeover": {
+      "attack_family": "account_takeover",
+      "strategy": "spend hard from an attacker device before the victim notices",
+      "intensity": 1.0,
+      "amount_profile": "high",
+      "velocity_profile": "moderate",
+      "device_behavior": "new_device",
+      "geo_behavior": "plausible",
+      "merchant_behavior": "new_high_risk_merchant",
+      "timing_profile": "any",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.9,
+        "txns_per_card": [
+          2,
+          4
+        ],
+        "velocity_window_hours": 24.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          5.0,
+          60.0
+        ]
+      }
+    },
+    "adversarial_mimicry": {
+      "attack_family": "adversarial_mimicry",
+      "strategy": "shape stolen-card spend onto the victim's own behavioural centroid",
+      "intensity": 1.0,
+      "amount_profile": "moderate",
+      "velocity_profile": "single",
+      "device_behavior": "secondary_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "known_merchant",
+      "timing_profile": "customer_normal",
+      "targets_signal": "every individual signal held inside the customer's normal range",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          1,
+          1
+        ],
+        "velocity_window_hours": 0.0,
+        "device_trust": 0.6,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    },
+    "otp_relay": {
+      "attack_family": "otp_relay",
+      "strategy": "walk the victim through a step-up challenge and relay the code live",
+      "intensity": 1.0,
+      "amount_profile": "high",
+      "velocity_profile": "low_and_slow",
+      "device_behavior": "new_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "new_high_risk_merchant",
+      "timing_profile": "customer_normal",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.9,
+        "txns_per_card": [
+          1,
+          2
+        ],
+        "velocity_window_hours": 72.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    },
+    "scam_transfer": {
+      "attack_family": "scam_transfer",
+      "strategy": "persuade the genuine cardholder to authorize a push to a new payee",
+      "intensity": 1.0,
+      "amount_profile": "high",
+      "velocity_profile": "low_and_slow",
+      "device_behavior": "trusted_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "cash_like",
+      "timing_profile": "customer_normal",
+      "targets_signal": "authentication itself (the real customer approves)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.9,
+        "txns_per_card": [
+          1,
+          2
+        ],
+        "velocity_window_hours": 72.0,
+        "device_trust": 1.0,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    },
+    "velocity_smurfing": {
+      "attack_family": "velocity_smurfing",
+      "strategy": "split value across a mule ring in sub-threshold amounts",
+      "intensity": 1.0,
+      "amount_profile": "moderate",
+      "velocity_profile": "burst",
+      "device_behavior": "shared_device",
+      "geo_behavior": "plausible",
+      "merchant_behavior": "front_merchant",
+      "timing_profile": "any",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          4,
+          9
+        ],
+        "velocity_window_hours": 1.5,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          5.0,
+          60.0
+        ]
+      }
+    },
+    "merchant_laundering": {
+      "attack_family": "merchant_laundering",
+      "strategy": "run stolen cards through a controlled front merchant",
+      "intensity": 1.0,
+      "amount_profile": "moderate",
+      "velocity_profile": "moderate",
+      "device_behavior": "shared_device",
+      "geo_behavior": "plausible",
+      "merchant_behavior": "front_merchant",
+      "timing_profile": "any",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          2,
+          4
+        ],
+        "velocity_window_hours": 24.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          5.0,
+          60.0
+        ]
+      }
+    },
+    "bust_out": {
+      "attack_family": "bust_out",
+      "strategy": "groom a synthetic account with ordinary spend, then drain it to the limit",
+      "intensity": 1.0,
+      "amount_profile": "extreme",
+      "velocity_profile": "moderate",
+      "device_behavior": "trusted_device",
+      "geo_behavior": "plausible",
+      "merchant_behavior": "cash_like",
+      "timing_profile": "customer_normal",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 3.4,
+        "txns_per_card": [
+          2,
+          4
+        ],
+        "velocity_window_hours": 24.0,
+        "device_trust": 1.0,
+        "geo_km_range": [
+          5.0,
+          60.0
+        ]
+      }
+    },
+    "friendly_fraud": {
+      "attack_family": "friendly_fraud",
+      "strategy": "make a genuine purchase and dispute it afterwards",
+      "intensity": 1.0,
+      "amount_profile": "moderate",
+      "velocity_profile": "single",
+      "device_behavior": "trusted_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "known_merchant",
+      "timing_profile": "customer_normal",
+      "targets_signal": "authorization-time observability (there is almost none)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          1,
+          1
+        ],
+        "velocity_window_hours": 0.0,
+        "device_trust": 1.0,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    },
+    "geo_anomaly": {
+      "attack_family": "geo_anomaly",
+      "strategy": "present a cloned card far from the cardholder's home geography",
+      "intensity": 1.0,
+      "amount_profile": "moderate",
+      "velocity_profile": "moderate",
+      "device_behavior": "new_device",
+      "geo_behavior": "foreign",
+      "merchant_behavior": "new_low_risk_merchant",
+      "timing_profile": "any",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          2,
+          4
+        ],
+        "velocity_window_hours": 24.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          1800.0,
+          7000.0
+        ]
+      }
+    },
+    "wallet_provisioning": {
+      "attack_family": "wallet_provisioning",
+      "strategy": "provision a compromised card into an attacker-controlled wallet, then spend on the inherited token trust",
+      "intensity": 1.0,
+      "amount_profile": "high",
+      "velocity_profile": "moderate",
+      "device_behavior": "new_device",
+      "geo_behavior": "plausible",
+      "merchant_behavior": "new_high_risk_merchant",
+      "timing_profile": "customer_normal",
+      "targets_signal": "none (pre-evolution baseline)",
+      "rationale": "",
+      "confidence": 0.5,
+      "source": "fixed",
+      "generation": 0,
+      "derived": {
+        "amount_scale": 1.9,
+        "txns_per_card": [
+          2,
+          4
+        ],
+        "velocity_window_hours": 24.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          5.0,
+          60.0
+        ]
+      }
+    }
+  },
+  "date_range": [
+    "2026-05-01 00:16:53.872999",
+    "2026-07-30 01:14:28.926531"
+  ],
+  "n_text_artifacts": 240,
+  "n_fraud_artifacts": 100
+}

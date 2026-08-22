@@ -1,0 +1,38 @@
+{
+  "n_corpus": 240,
+  "n_fraud": 100,
+  "n_benign": 140,
+  "roc_auc": 1.0,
+  "roc_auc_cv5": 1.0,
+  "report": {
+    "0": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 42.0
+    },
+    "1": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 30.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 72.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 72.0
+    }
+  },
+  "caveat": "A trivially separable synthetic sanity check, not evidence of detection capability. The corpus is composed from a fixed slot vocabulary, so the two classes separate on vocabulary alone. The benign class does deliberately include genuine security notices sharing the urgency, OTP and payment vocabulary of scam messages, and provenance markers and the attack's catalog name are stripped before training \u2014 but those measures only remove the crudest shortcuts; they do not make the task realistic. Every detection claim in this project rests on the transaction model alone.",
+  "trivially_separable": true,
+  "honest_reading": "This corpus is composed from a fixed slot vocabulary, so the two classes are almost perfectly separable by vocabulary alone. The near-perfect score measures the CORPUS, not the detector: it would not survive contact with real scam messages. The text arm is included to show where content signals attach to the architecture, and its score is reported here precisely so it is never mistaken for a headline result.",
+  "is_sanity_check_not_evidence": true
+}

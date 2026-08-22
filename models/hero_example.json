@@ -1,0 +1,78 @@
+{
+  "family": "scam_transfer",
+  "narrative": "A scam transfer that EVOLVED specifically to remove the signal the defense was leaning on. The stale model waves it through; the adapted model \u2014 retrained on such variants via cumulative replay \u2014 flags it.",
+  "evolved_spec": {
+    "attack_family": "scam_transfer",
+    "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+    "intensity": 0.512,
+    "amount_profile": "moderate",
+    "velocity_profile": "single",
+    "device_behavior": "trusted_device",
+    "geo_behavior": "home",
+    "merchant_behavior": "cash_like",
+    "timing_profile": "customer_normal",
+    "targets_signal": "residual velocity signal",
+    "rationale": "The defense catches 77% of scam_transfer and its ranking of this family depends most on residual velocity signal. Moving velocity_profile to single removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+    "confidence": 0.6,
+    "source": "heuristic",
+    "generation": 3,
+    "derived": {
+      "amount_scale": 1.0,
+      "txns_per_card": [
+        1,
+        1
+      ],
+      "velocity_window_hours": 0.0,
+      "device_trust": 1.0,
+      "geo_km_range": [
+        0.0,
+        12.0
+      ]
+    }
+  },
+  "targets_signal": "residual velocity signal",
+  "transaction": {
+    "txn_id": "T00004751",
+    "timestamp": "2026-06-17 13:33:34.333201",
+    "cardholder_id": "CH002999",
+    "card_id": "CARD002999",
+    "merchant_id": "M00525",
+    "mcc": "4829_money_transfer",
+    "mcc_risk": 0.6824548907581762,
+    "amount": 5289.48,
+    "channel": "upi",
+    "country": "IN",
+    "geo_city": "bengaluru",
+    "distance_from_home_km": 0.4,
+    "device_id": "DEV002999",
+    "ip_prefix": "145.129",
+    "is_3ds": true,
+    "otp_verified": true,
+    "is_new_payee": true,
+    "refund_flag": false,
+    "account_age_days": 1014,
+    "auth_result": "approved",
+    "is_fraud": 1,
+    "attack_type": "scam_transfer",
+    "actor_role": "fraud"
+  },
+  "stale": {
+    "score": 0.16945904615856391,
+    "flagged": false,
+    "threshold": 0.6980550750988563,
+    "probability": 0.009826152683295541,
+    "action": "APPROVE"
+  },
+  "adapted": {
+    "score": 0.8566688898956084,
+    "flagged": true,
+    "threshold": 0.836348915089901,
+    "probability": 0.23711340206185566,
+    "action": "STEP_UP"
+  },
+  "hero_family_recall": {
+    "stale": 0.6470588235294118,
+    "adapted": 0.7058823529411765,
+    "n": 68
+  }
+}

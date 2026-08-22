@@ -1,0 +1,102 @@
+{
+  "static_ml": {
+    "label": "static_ml",
+    "per_1000": {
+      "false_positives_per_1000_legit": 19.67,
+      "fraud_caught_per_1000_fraud": 676.3,
+      "flagged_per_1000_all": 25.73
+    },
+    "action_distribution": {
+      "approve": 0.9687,
+      "step_up": 0.0274,
+      "decline": 0.0039,
+      "genuine_customers_stepped_up": 0.024,
+      "genuine_customers_declined": 0.001
+    },
+    "scenario": {
+      "label": "synthetic illustrative scenario \u2014 not production economics",
+      "monthly_authorizations": 10000000,
+      "monthly_step_up_challenges": 274400,
+      "monthly_review_hours_if_all_manually_reviewed": 10976,
+      "estimated_genuine_customers_abandoning_after_step_up": 19185
+    },
+    "policy": {
+      "thresholds": {
+        "decline": 0.6,
+        "step_up": 0.041176470588235294
+      },
+      "tiers": {
+        "APPROVE": {
+          "share_all": 0.9687,
+          "share_of_legit": 0.975,
+          "share_of_fraud": 0.2861
+        },
+        "STEP_UP": {
+          "share_all": 0.0274,
+          "share_of_legit": 0.024,
+          "share_of_fraud": 0.3988
+        },
+        "DECLINE": {
+          "share_all": 0.0039,
+          "share_of_legit": 0.001,
+          "share_of_fraud": 0.315
+        }
+      },
+      "fraud_declined": 0.315,
+      "fraud_to_friction": 0.7139,
+      "legit_auto_approved": 0.975,
+      "legit_hard_declined": 0.001
+    },
+    "disclaimer": "Volumes are derived by applying measured rates to the declared synthetic scenario. They illustrate what a false-positive rate costs operationally; they are not a forecast for any real portfolio."
+  },
+  "adaptive_ml": {
+    "label": "adaptive_ml",
+    "per_1000": {
+      "false_positives_per_1000_legit": 2.13,
+      "fraud_caught_per_1000_fraud": 410.4,
+      "flagged_per_1000_all": 5.89
+    },
+    "action_distribution": {
+      "approve": 0.9935,
+      "step_up": 0.0027,
+      "decline": 0.0038,
+      "genuine_customers_stepped_up": 0.0018,
+      "genuine_customers_declined": 0.0008
+    },
+    "scenario": {
+      "label": "synthetic illustrative scenario \u2014 not production economics",
+      "monthly_authorizations": 10000000,
+      "monthly_step_up_challenges": 26667,
+      "monthly_review_hours_if_all_manually_reviewed": 1067,
+      "estimated_genuine_customers_abandoning_after_step_up": 1421
+    },
+    "policy": {
+      "thresholds": {
+        "decline": 0.6,
+        "step_up": 0.15671641791044777
+      },
+      "tiers": {
+        "APPROVE": {
+          "share_all": 0.9935,
+          "share_of_legit": 0.9975,
+          "share_of_fraud": 0.5723
+        },
+        "STEP_UP": {
+          "share_all": 0.0027,
+          "share_of_legit": 0.0018,
+          "share_of_fraud": 0.0983
+        },
+        "DECLINE": {
+          "share_all": 0.0038,
+          "share_of_legit": 0.0008,
+          "share_of_fraud": 0.3295
+        }
+      },
+      "fraud_declined": 0.3295,
+      "fraud_to_friction": 0.4277,
+      "legit_auto_approved": 0.9975,
+      "legit_hard_declined": 0.0008
+    },
+    "disclaimer": "Volumes are derived by applying measured rates to the declared synthetic scenario. They illustrate what a false-positive rate costs operationally; they are not a forecast for any real portfolio."
+  }
+}

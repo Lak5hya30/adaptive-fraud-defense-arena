@@ -1,0 +1,81 @@
+{
+  "calibrated": true,
+  "brier_raw": 0.029237,
+  "brier_calibrated": 0.006288,
+  "brier_improvement": 0.022949,
+  "reliability_raw": [
+    {
+      "predicted": 0.0306,
+      "observed": 0.0,
+      "n": 3750
+    },
+    {
+      "predicted": 0.04622,
+      "observed": 0.0,
+      "n": 3750
+    },
+    {
+      "predicted": 0.05696,
+      "observed": 0.00053,
+      "n": 3750
+    },
+    {
+      "predicted": 0.06683,
+      "observed": 0.00053,
+      "n": 3750
+    },
+    {
+      "predicted": 0.07683,
+      "observed": 0.0008,
+      "n": 3750
+    },
+    {
+      "predicted": 0.08861,
+      "observed": 0.0008,
+      "n": 3750
+    },
+    {
+      "predicted": 0.10482,
+      "observed": 0.00107,
+      "n": 3750
+    },
+    {
+      "predicted": 0.13146,
+      "observed": 0.0032,
+      "n": 3750
+    },
+    {
+      "predicted": 0.18849,
+      "observed": 0.0048,
+      "n": 3750
+    },
+    {
+      "predicted": 0.44284,
+      "observed": 0.08053,
+      "n": 3750
+    }
+  ],
+  "reliability_calibrated": [
+    {
+      "predicted": 0.0,
+      "observed": 0.00034,
+      "n": 17823
+    },
+    {
+      "predicted": 0.00138,
+      "observed": 0.00149,
+      "n": 12064
+    },
+    {
+      "predicted": 0.00315,
+      "observed": 0.00518,
+      "n": 3087
+    },
+    {
+      "predicted": 0.07168,
+      "observed": 0.06761,
+      "n": 4526
+    }
+  ],
+  "note": "Isotonic calibration is fitted on the held-out validation slice. It is monotone, so it cannot change the model's ranking: ROC-AUC and PR-AUC are identical either way, and only the meaning of the displayed number changes. Detection still thresholds the raw fused score, because a calibrated score is a step function and cannot hit a false-positive budget precisely. At a ~1% base rate a low Brier score is easy to obtain by predicting near zero everywhere, so the reliability curve matters more than the scalar."
+}

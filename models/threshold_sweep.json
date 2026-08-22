@@ -1,0 +1,494 @@
+{
+  "points": [
+    {
+      "threshold": 0.00751,
+      "recall": 1.0,
+      "precision": 0.0092,
+      "false_positive_rate": 1.0,
+      "false_positives_per_1000_legit": 1000.0,
+      "flagged_share": 1.0
+    },
+    {
+      "threshold": 0.02395,
+      "recall": 1.0,
+      "precision": 0.0094,
+      "false_positive_rate": 0.98288,
+      "false_positives_per_1000_legit": 982.88,
+      "flagged_share": 0.98304
+    },
+    {
+      "threshold": 0.02838,
+      "recall": 1.0,
+      "precision": 0.0096,
+      "false_positive_rate": 0.96576,
+      "false_positives_per_1000_legit": 965.76,
+      "flagged_share": 0.96608
+    },
+    {
+      "threshold": 0.03184,
+      "recall": 1.0,
+      "precision": 0.0097,
+      "false_positive_rate": 0.94867,
+      "false_positives_per_1000_legit": 948.67,
+      "flagged_share": 0.94915
+    },
+    {
+      "threshold": 0.03475,
+      "recall": 1.0,
+      "precision": 0.0099,
+      "false_positive_rate": 0.93156,
+      "false_positives_per_1000_legit": 931.56,
+      "flagged_share": 0.93219
+    },
+    {
+      "threshold": 0.03753,
+      "recall": 1.0,
+      "precision": 0.0101,
+      "false_positive_rate": 0.91446,
+      "false_positives_per_1000_legit": 914.46,
+      "flagged_share": 0.91525
+    },
+    {
+      "threshold": 0.04005,
+      "recall": 1.0,
+      "precision": 0.0103,
+      "false_positive_rate": 0.89735,
+      "false_positives_per_1000_legit": 897.35,
+      "flagged_share": 0.89829
+    },
+    {
+      "threshold": 0.04248,
+      "recall": 1.0,
+      "precision": 0.0105,
+      "false_positive_rate": 0.88023,
+      "false_positives_per_1000_legit": 880.23,
+      "flagged_share": 0.88133
+    },
+    {
+      "threshold": 0.04457,
+      "recall": 1.0,
+      "precision": 0.0107,
+      "false_positive_rate": 0.86314,
+      "false_positives_per_1000_legit": 863.14,
+      "flagged_share": 0.8644
+    },
+    {
+      "threshold": 0.04668,
+      "recall": 1.0,
+      "precision": 0.0109,
+      "false_positive_rate": 0.84602,
+      "false_positives_per_1000_legit": 846.02,
+      "flagged_share": 0.84744
+    },
+    {
+      "threshold": 0.04865,
+      "recall": 1.0,
+      "precision": 0.0111,
+      "false_positive_rate": 0.82893,
+      "false_positives_per_1000_legit": 828.93,
+      "flagged_share": 0.83051
+    },
+    {
+      "threshold": 0.05053,
+      "recall": 1.0,
+      "precision": 0.0113,
+      "false_positive_rate": 0.81181,
+      "false_positives_per_1000_legit": 811.81,
+      "flagged_share": 0.81355
+    },
+    {
+      "threshold": 0.05228,
+      "recall": 1.0,
+      "precision": 0.0116,
+      "false_positive_rate": 0.79472,
+      "false_positives_per_1000_legit": 794.72,
+      "flagged_share": 0.79661
+    },
+    {
+      "threshold": 0.05393,
+      "recall": 1.0,
+      "precision": 0.0118,
+      "false_positive_rate": 0.7776,
+      "false_positives_per_1000_legit": 777.6,
+      "flagged_share": 0.77965
+    },
+    {
+      "threshold": 0.05564,
+      "recall": 0.9971,
+      "precision": 0.0121,
+      "false_positive_rate": 0.76051,
+      "false_positives_per_1000_legit": 760.51,
+      "flagged_share": 0.76269
+    },
+    {
+      "threshold": 0.0573,
+      "recall": 0.9971,
+      "precision": 0.0123,
+      "false_positive_rate": 0.74342,
+      "false_positives_per_1000_legit": 743.42,
+      "flagged_share": 0.74576
+    },
+    {
+      "threshold": 0.05912,
+      "recall": 0.9942,
+      "precision": 0.0126,
+      "false_positive_rate": 0.72633,
+      "false_positives_per_1000_legit": 726.33,
+      "flagged_share": 0.7288
+    },
+    {
+      "threshold": 0.06085,
+      "recall": 0.9942,
+      "precision": 0.0129,
+      "false_positive_rate": 0.70924,
+      "false_positives_per_1000_legit": 709.24,
+      "flagged_share": 0.71187
+    },
+    {
+      "threshold": 0.06265,
+      "recall": 0.9942,
+      "precision": 0.0132,
+      "false_positive_rate": 0.69212,
+      "false_positives_per_1000_legit": 692.12,
+      "flagged_share": 0.69491
+    },
+    {
+      "threshold": 0.06423,
+      "recall": 0.9942,
+      "precision": 0.0135,
+      "false_positive_rate": 0.67503,
+      "false_positives_per_1000_legit": 675.03,
+      "flagged_share": 0.67797
+    },
+    {
+      "threshold": 0.06574,
+      "recall": 0.9942,
+      "precision": 0.0139,
+      "false_positive_rate": 0.65791,
+      "false_positives_per_1000_legit": 657.91,
+      "flagged_share": 0.66101
+    },
+    {
+      "threshold": 0.06734,
+      "recall": 0.9942,
+      "precision": 0.0142,
+      "false_positive_rate": 0.64079,
+      "false_positives_per_1000_legit": 640.79,
+      "flagged_share": 0.64405
+    },
+    {
+      "threshold": 0.06893,
+      "recall": 0.9913,
+      "precision": 0.0146,
+      "false_positive_rate": 0.62373,
+      "false_positives_per_1000_legit": 623.73,
+      "flagged_share": 0.62712
+    },
+    {
+      "threshold": 0.07061,
+      "recall": 0.9913,
+      "precision": 0.015,
+      "false_positive_rate": 0.60661,
+      "false_positives_per_1000_legit": 606.61,
+      "flagged_share": 0.61016
+    },
+    {
+      "threshold": 0.07223,
+      "recall": 0.9884,
+      "precision": 0.0154,
+      "false_positive_rate": 0.58955,
+      "false_positives_per_1000_legit": 589.55,
+      "flagged_share": 0.59323
+    },
+    {
+      "threshold": 0.07396,
+      "recall": 0.9884,
+      "precision": 0.0158,
+      "false_positive_rate": 0.57243,
+      "false_positives_per_1000_legit": 572.43,
+      "flagged_share": 0.57627
+    },
+    {
+      "threshold": 0.07569,
+      "recall": 0.9827,
+      "precision": 0.0162,
+      "false_positive_rate": 0.55539,
+      "false_positives_per_1000_legit": 555.39,
+      "flagged_share": 0.55933
+    },
+    {
+      "threshold": 0.07764,
+      "recall": 0.9827,
+      "precision": 0.0167,
+      "false_positive_rate": 0.53827,
+      "false_positives_per_1000_legit": 538.27,
+      "flagged_share": 0.54237
+    },
+    {
+      "threshold": 0.07946,
+      "recall": 0.9827,
+      "precision": 0.0173,
+      "false_positive_rate": 0.52116,
+      "false_positives_per_1000_legit": 521.16,
+      "flagged_share": 0.52541
+    },
+    {
+      "threshold": 0.08147,
+      "recall": 0.9827,
+      "precision": 0.0178,
+      "false_positive_rate": 0.50406,
+      "false_positives_per_1000_legit": 504.06,
+      "flagged_share": 0.50848
+    },
+    {
+      "threshold": 0.0834,
+      "recall": 0.9798,
+      "precision": 0.0184,
+      "false_positive_rate": 0.48697,
+      "false_positives_per_1000_legit": 486.97,
+      "flagged_share": 0.49152
+    },
+    {
+      "threshold": 0.08534,
+      "recall": 0.9769,
+      "precision": 0.019,
+      "false_positive_rate": 0.46991,
+      "false_positives_per_1000_legit": 469.91,
+      "flagged_share": 0.47459
+    },
+    {
+      "threshold": 0.08741,
+      "recall": 0.9769,
+      "precision": 0.0197,
+      "false_positive_rate": 0.45279,
+      "false_positives_per_1000_legit": 452.79,
+      "flagged_share": 0.45763
+    },
+    {
+      "threshold": 0.08968,
+      "recall": 0.974,
+      "precision": 0.0204,
+      "false_positive_rate": 0.4357,
+      "false_positives_per_1000_legit": 435.7,
+      "flagged_share": 0.44067
+    },
+    {
+      "threshold": 0.092,
+      "recall": 0.974,
+      "precision": 0.0212,
+      "false_positive_rate": 0.41861,
+      "false_positives_per_1000_legit": 418.61,
+      "flagged_share": 0.42373
+    },
+    {
+      "threshold": 0.0946,
+      "recall": 0.9711,
+      "precision": 0.022,
+      "false_positive_rate": 0.40152,
+      "false_positives_per_1000_legit": 401.52,
+      "flagged_share": 0.40677
+    },
+    {
+      "threshold": 0.09731,
+      "recall": 0.9682,
+      "precision": 0.0229,
+      "false_positive_rate": 0.38445,
+      "false_positives_per_1000_legit": 384.45,
+      "flagged_share": 0.38984
+    },
+    {
+      "threshold": 0.10032,
+      "recall": 0.9682,
+      "precision": 0.024,
+      "false_positive_rate": 0.36734,
+      "false_positives_per_1000_legit": 367.34,
+      "flagged_share": 0.37288
+    },
+    {
+      "threshold": 0.10345,
+      "recall": 0.9653,
+      "precision": 0.025,
+      "false_positive_rate": 0.35027,
+      "false_positives_per_1000_legit": 350.27,
+      "flagged_share": 0.35595
+    },
+    {
+      "threshold": 0.10667,
+      "recall": 0.9624,
+      "precision": 0.0262,
+      "false_positive_rate": 0.33318,
+      "false_positives_per_1000_legit": 333.18,
+      "flagged_share": 0.33899
+    },
+    {
+      "threshold": 0.11014,
+      "recall": 0.9595,
+      "precision": 0.0275,
+      "false_positive_rate": 0.31609,
+      "false_positives_per_1000_legit": 316.09,
+      "flagged_share": 0.32203
+    },
+    {
+      "threshold": 0.11412,
+      "recall": 0.9595,
+      "precision": 0.029,
+      "false_positive_rate": 0.299,
+      "false_positives_per_1000_legit": 299.0,
+      "flagged_share": 0.30509
+    },
+    {
+      "threshold": 0.1184,
+      "recall": 0.9595,
+      "precision": 0.0307,
+      "false_positive_rate": 0.28188,
+      "false_positives_per_1000_legit": 281.88,
+      "flagged_share": 0.28813
+    },
+    {
+      "threshold": 0.12337,
+      "recall": 0.9566,
+      "precision": 0.0325,
+      "false_positive_rate": 0.26482,
+      "false_positives_per_1000_legit": 264.82,
+      "flagged_share": 0.2712
+    },
+    {
+      "threshold": 0.12895,
+      "recall": 0.9451,
+      "precision": 0.0343,
+      "false_positive_rate": 0.24781,
+      "false_positives_per_1000_legit": 247.81,
+      "flagged_share": 0.25424
+    },
+    {
+      "threshold": 0.1353,
+      "recall": 0.9422,
+      "precision": 0.0366,
+      "false_positive_rate": 0.23074,
+      "false_positives_per_1000_legit": 230.74,
+      "flagged_share": 0.23731
+    },
+    {
+      "threshold": 0.14224,
+      "recall": 0.9364,
+      "precision": 0.0392,
+      "false_positive_rate": 0.21368,
+      "false_positives_per_1000_legit": 213.68,
+      "flagged_share": 0.22035
+    },
+    {
+      "threshold": 0.15013,
+      "recall": 0.9306,
+      "precision": 0.0422,
+      "false_positive_rate": 0.19661,
+      "false_positives_per_1000_legit": 196.61,
+      "flagged_share": 0.20339
+    },
+    {
+      "threshold": 0.15932,
+      "recall": 0.922,
+      "precision": 0.0456,
+      "false_positive_rate": 0.1796,
+      "false_positives_per_1000_legit": 179.6,
+      "flagged_share": 0.18645
+    },
+    {
+      "threshold": 0.17059,
+      "recall": 0.9162,
+      "precision": 0.0499,
+      "false_positive_rate": 0.16254,
+      "false_positives_per_1000_legit": 162.54,
+      "flagged_share": 0.16949
+    },
+    {
+      "threshold": 0.1828,
+      "recall": 0.9075,
+      "precision": 0.0549,
+      "false_positive_rate": 0.14553,
+      "false_positives_per_1000_legit": 145.53,
+      "flagged_share": 0.15256
+    },
+    {
+      "threshold": 0.19678,
+      "recall": 0.8988,
+      "precision": 0.0612,
+      "false_positive_rate": 0.12849,
+      "false_positives_per_1000_legit": 128.49,
+      "flagged_share": 0.1356
+    },
+    {
+      "threshold": 0.21555,
+      "recall": 0.8844,
+      "precision": 0.0688,
+      "false_positive_rate": 0.11154,
+      "false_positives_per_1000_legit": 111.54,
+      "flagged_share": 0.11867
+    },
+    {
+      "threshold": 0.2408,
+      "recall": 0.8757,
+      "precision": 0.0794,
+      "false_positive_rate": 0.0945,
+      "false_positives_per_1000_legit": 94.5,
+      "flagged_share": 0.10171
+    },
+    {
+      "threshold": 0.27063,
+      "recall": 0.8526,
+      "precision": 0.0928,
+      "false_positive_rate": 0.0776,
+      "false_positives_per_1000_legit": 77.6,
+      "flagged_share": 0.08475
+    },
+    {
+      "threshold": 0.3119,
+      "recall": 0.8208,
+      "precision": 0.1117,
+      "false_positive_rate": 0.0608,
+      "false_positives_per_1000_legit": 60.8,
+      "flagged_share": 0.06781
+    },
+    {
+      "threshold": 0.3727,
+      "recall": 0.7832,
+      "precision": 0.1421,
+      "false_positive_rate": 0.04403,
+      "false_positives_per_1000_legit": 44.03,
+      "flagged_share": 0.05085
+    },
+    {
+      "threshold": 0.46456,
+      "recall": 0.7225,
+      "precision": 0.1965,
+      "false_positive_rate": 0.02751,
+      "false_positives_per_1000_legit": 27.51,
+      "flagged_share": 0.03392
+    },
+    {
+      "threshold": 0.64673,
+      "recall": 0.6156,
+      "precision": 0.3349,
+      "false_positive_rate": 0.01139,
+      "false_positives_per_1000_legit": 11.39,
+      "flagged_share": 0.01696
+    },
+    {
+      "threshold": 0.9629,
+      "recall": 0.0029,
+      "precision": 1.0,
+      "false_positive_rate": 0.0,
+      "false_positives_per_1000_legit": 0.0,
+      "flagged_share": 3e-05
+    }
+  ],
+  "operating_point": 0.54181,
+  "operating_point_probability": 0.04118,
+  "decision_thresholds": {
+    "decline": 0.6,
+    "step_up": 0.041176470588235294
+  },
+  "fpr_budget": 0.02,
+  "n_legit": 37154,
+  "n_fraud": 346,
+  "note": "The operating point is chosen as the lowest threshold whose false-positive rate on genuine traffic stays inside the configured budget, tuned on a held-out validation slice rather than on the test set."
+}

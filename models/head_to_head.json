@@ -1,0 +1,298 @@
+{
+  "frame": {
+    "n_transactions": 90000,
+    "n_fraud": 2703,
+    "seed": 606102,
+    "generation": 3
+  },
+  "focus": [
+    "scam_transfer",
+    "wallet_provisioning",
+    "otp_relay"
+  ],
+  "specs": {
+    "scam_transfer": {
+      "attack_family": "scam_transfer",
+      "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+      "intensity": 0.512,
+      "amount_profile": "moderate",
+      "velocity_profile": "single",
+      "device_behavior": "trusted_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "cash_like",
+      "timing_profile": "customer_normal",
+      "targets_signal": "residual velocity signal",
+      "rationale": "The defense catches 77% of scam_transfer and its ranking of this family depends most on residual velocity signal. Moving velocity_profile to single removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+      "confidence": 0.6,
+      "source": "heuristic",
+      "generation": 3,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          1,
+          1
+        ],
+        "velocity_window_hours": 0.0,
+        "device_trust": 1.0,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    },
+    "wallet_provisioning": {
+      "attack_family": "wallet_provisioning",
+      "strategy": "bring the ticket down into the cardholder's ordinary range (defeats: log_amount)",
+      "intensity": 0.576,
+      "amount_profile": "moderate",
+      "velocity_profile": "moderate",
+      "device_behavior": "new_device",
+      "geo_behavior": "plausible",
+      "merchant_behavior": "known_merchant",
+      "timing_profile": "customer_normal",
+      "targets_signal": "log_amount",
+      "rationale": "The defense catches 46% of wallet_provisioning and its ranking of this family depends most on log_amount. Moving amount_profile to moderate removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+      "confidence": 0.6,
+      "source": "heuristic",
+      "generation": 3,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          2,
+          4
+        ],
+        "velocity_window_hours": 24.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          5.0,
+          60.0
+        ]
+      }
+    },
+    "otp_relay": {
+      "attack_family": "otp_relay",
+      "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+      "intensity": 0.576,
+      "amount_profile": "moderate",
+      "velocity_profile": "single",
+      "device_behavior": "new_device",
+      "geo_behavior": "home",
+      "merchant_behavior": "new_low_risk_merchant",
+      "timing_profile": "customer_normal",
+      "targets_signal": "residual velocity signal",
+      "rationale": "The defense catches 46% of otp_relay and its ranking of this family depends most on residual velocity signal. Moving velocity_profile to single removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+      "confidence": 0.6,
+      "source": "heuristic",
+      "generation": 3,
+      "derived": {
+        "amount_scale": 1.0,
+        "txns_per_card": [
+          1,
+          1
+        ],
+        "velocity_window_hours": 0.0,
+        "device_trust": 0.0,
+        "geo_km_range": [
+          0.0,
+          12.0
+        ]
+      }
+    }
+  },
+  "matched_false_positive_rate": 0.02,
+  "note": "The static defense is the model trained before the loop ran \u2014 it has never seen these evolved variants. The adaptive defense is the same architecture trained through the loop on cumulative adversarial replay. Both are scored on the same unseen frame of the FINAL evolved generation, and both are additionally re-thresholded to spend the same false-positive budget, with that threshold chosen on a separate generation-0 frame. The matched numbers are the comparable ones.",
+  "models": {
+    "static_defense": {
+      "threshold": 0.683255,
+      "evolved_family_recall": {
+        "scam_transfer": {
+          "recall": 0.7371,
+          "n": 483,
+          "ci95": [
+            0.696,
+            0.7743
+          ]
+        },
+        "wallet_provisioning": {
+          "recall": 0.4172,
+          "n": 290,
+          "ci95": [
+            0.3619,
+            0.4747
+          ]
+        },
+        "otp_relay": {
+          "recall": 0.3296,
+          "n": 531,
+          "ci95": [
+            0.2909,
+            0.3706
+          ]
+        }
+      },
+      "mean_evolved_recall": 0.4946,
+      "overall_recall": 0.5712,
+      "false_positive_rate": 0.01965,
+      "native_operating_point": {
+        "threshold": 0.698055,
+        "evolved_family_recall": {
+          "scam_transfer": {
+            "recall": 0.7164,
+            "n": 483,
+            "ci95": [
+              0.6746,
+              0.7547
+            ]
+          },
+          "wallet_provisioning": {
+            "recall": 0.4103,
+            "n": 290,
+            "ci95": [
+              0.3553,
+              0.4678
+            ]
+          },
+          "otp_relay": {
+            "recall": 0.3145,
+            "n": 531,
+            "ci95": [
+              0.2765,
+              0.3552
+            ]
+          }
+        },
+        "mean_evolved_recall": 0.4804,
+        "overall_recall": 0.5572,
+        "false_positive_rate": 0.01773
+      }
+    },
+    "adaptive_defense": {
+      "threshold": 0.798149,
+      "evolved_family_recall": {
+        "scam_transfer": {
+          "recall": 0.381,
+          "n": 483,
+          "ci95": [
+            0.3387,
+            0.425
+          ]
+        },
+        "wallet_provisioning": {
+          "recall": 0.3931,
+          "n": 290,
+          "ci95": [
+            0.3386,
+            0.4504
+          ]
+        },
+        "otp_relay": {
+          "recall": 0.678,
+          "n": 531,
+          "ci95": [
+            0.6371,
+            0.7163
+          ]
+        }
+      },
+      "mean_evolved_recall": 0.484,
+      "overall_recall": 0.579,
+      "false_positive_rate": 0.00971,
+      "native_operating_point": {
+        "threshold": 0.836349,
+        "evolved_family_recall": {
+          "scam_transfer": {
+            "recall": 0.2774,
+            "n": 483,
+            "ci95": [
+              0.2394,
+              0.319
+            ]
+          },
+          "wallet_provisioning": {
+            "recall": 0.3345,
+            "n": 290,
+            "ci95": [
+              0.2827,
+              0.3906
+            ]
+          },
+          "otp_relay": {
+            "recall": 0.5122,
+            "n": 531,
+            "ci95": [
+              0.4698,
+              0.5545
+            ]
+          }
+        },
+        "mean_evolved_recall": 0.3747,
+        "overall_recall": 0.5031,
+        "false_positive_rate": 0.00496
+      }
+    },
+    "promoted_champion": {
+      "threshold": 0.756311,
+      "evolved_family_recall": {
+        "scam_transfer": {
+          "recall": 0.5631,
+          "n": 483,
+          "ci95": [
+            0.5186,
+            0.6067
+          ]
+        },
+        "wallet_provisioning": {
+          "recall": 0.4172,
+          "n": 290,
+          "ci95": [
+            0.3619,
+            0.4747
+          ]
+        },
+        "otp_relay": {
+          "recall": 0.5537,
+          "n": 531,
+          "ci95": [
+            0.5112,
+            0.5954
+          ]
+        }
+      },
+      "mean_evolved_recall": 0.5113,
+      "overall_recall": 0.5805,
+      "false_positive_rate": 0.01252,
+      "native_operating_point": {
+        "threshold": 0.793064,
+        "evolved_family_recall": {
+          "scam_transfer": {
+            "recall": 0.4389,
+            "n": 483,
+            "ci95": [
+              0.3953,
+              0.4835
+            ]
+          },
+          "wallet_provisioning": {
+            "recall": 0.3552,
+            "n": 290,
+            "ci95": [
+              0.3023,
+              0.4118
+            ]
+          },
+          "otp_relay": {
+            "recall": 0.4614,
+            "n": 531,
+            "ci95": [
+              0.4194,
+              0.5039
+            ]
+          }
+        },
+        "mean_evolved_recall": 0.4185,
+        "overall_recall": 0.5194,
+        "false_positive_rate": 0.0079
+      }
+    }
+  }
+}

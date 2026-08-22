@@ -1,0 +1,23 @@
+# Core
+numpy>=1.26,<3
+pandas>=2.1
+scikit-learn>=1.4
+pyarrow>=15.0
+python-dotenv>=1.0
+
+# Web prototype (pinned for a stable stage demo; width='stretch' API available)
+streamlit>=1.49,<1.70
+plotly>=5.20,<7
+
+# GenAI attacker agent (optional at run time — everything degrades to the
+# offline weakness-driven heuristic when no key is present)
+anthropic>=0.39
+
+# Documentation generation: `python -m docs.build_docs` renders README.md, the
+# figures and the .docx walkthrough directly from the committed artifacts, so no
+# reported number is ever typed by hand.
+matplotlib>=3.8
+python-docx>=1.1
+
+# Explainability (optional — code degrades gracefully if absent)
+shap>=0.45 ; python_version < "3.14"

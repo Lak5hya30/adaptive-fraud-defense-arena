@@ -1,0 +1,291 @@
+{
+  "schema_version": "2.0",
+  "seed": 42,
+  "dataset": {
+    "schema_version": "2.0",
+    "n_transactions": 150000,
+    "n_fraud": 1800,
+    "fraud_rate": 0.012,
+    "n_cover_transactions": 667,
+    "n_cardholders": 6000,
+    "n_merchants": 1200,
+    "customer_archetypes": {
+      "digital_first": 1067,
+      "business_user": 712,
+      "low_frequency_retail": 1455,
+      "frequent_urban": 1315,
+      "traveller": 621,
+      "thin_file_new": 527,
+      "high_value": 303
+    },
+    "attack_type_counts": {
+      "legit": 148200,
+      "card_testing": 324,
+      "account_takeover": 234,
+      "otp_relay": 198,
+      "adversarial_mimicry": 180,
+      "scam_transfer": 180,
+      "merchant_laundering": 144,
+      "velocity_smurfing": 144,
+      "friendly_fraud": 108,
+      "bust_out": 108,
+      "wallet_provisioning": 108,
+      "geo_anomaly": 72
+    },
+    "date_range": [
+      "2026-05-01 00:16:53.872999",
+      "2026-07-30 01:14:28.926531"
+    ],
+    "n_text_artifacts": 240,
+    "n_fraud_artifacts": 100
+  },
+  "fidelity": {
+    "max_single_feature_auc": 0.7217,
+    "n_fail": 0,
+    "n_warn": 0
+  },
+  "metrics": {
+    "recall": 0.6763005780346821,
+    "precision": 0.24248704663212436,
+    "f1": 0.35697940503432496,
+    "roc_auc": 0.9529326617755002,
+    "pr_auc": 0.5001400919804214,
+    "false_positive_rate": 0.01967486677073801
+  },
+  "loao": {
+    "card_testing": {
+      "n_test": 78,
+      "sufficient_n": true,
+      "recall_unseen": 0.8077,
+      "recall_unseen_ci95": [
+        0.7066,
+        0.8798
+      ],
+      "recall_after_learning": 0.9744,
+      "recall_after_learning_ci95": [
+        0.9112,
+        0.9929
+      ],
+      "gain": 0.1667
+    },
+    "account_takeover": {
+      "n_test": 88,
+      "sufficient_n": true,
+      "recall_unseen": 0.3182,
+      "recall_unseen_ci95": [
+        0.2302,
+        0.4213
+      ],
+      "recall_after_learning": 0.75,
+      "recall_after_learning_ci95": [
+        0.6504,
+        0.8287
+      ],
+      "gain": 0.4318
+    },
+    "otp_relay": {
+      "n_test": 85,
+      "sufficient_n": true,
+      "recall_unseen": 0.7294,
+      "recall_unseen_ci95": [
+        0.6266,
+        0.8124
+      ],
+      "recall_after_learning": 0.8353,
+      "recall_after_learning_ci95": [
+        0.7423,
+        0.8993
+      ],
+      "gain": 0.1059
+    },
+    "scam_transfer": {
+      "n_test": 69,
+      "sufficient_n": true,
+      "recall_unseen": 0.3478,
+      "recall_unseen_ci95": [
+        0.2462,
+        0.4655
+      ],
+      "recall_after_learning": 0.8261,
+      "recall_after_learning_ci95": [
+        0.7202,
+        0.8976
+      ],
+      "gain": 0.4783
+    },
+    "adversarial_mimicry": {
+      "n_test": 68,
+      "sufficient_n": true,
+      "recall_unseen": 0.1765,
+      "recall_unseen_ci95": [
+        0.1039,
+        0.2836
+      ],
+      "recall_after_learning": 0.3971,
+      "recall_after_learning_ci95": [
+        0.2893,
+        0.5158
+      ],
+      "gain": 0.2206
+    },
+    "merchant_laundering": {
+      "n_test": 56,
+      "sufficient_n": true,
+      "recall_unseen": 0.3929,
+      "recall_unseen_ci95": [
+        0.2758,
+        0.5237
+      ],
+      "recall_after_learning": 0.9107,
+      "recall_after_learning_ci95": [
+        0.8074,
+        0.9613
+      ],
+      "gain": 0.5179
+    },
+    "velocity_smurfing": {
+      "n_test": 46,
+      "sufficient_n": true,
+      "recall_unseen": 0.6957,
+      "recall_unseen_ci95": [
+        0.5519,
+        0.8092
+      ],
+      "recall_after_learning": 0.9783,
+      "recall_after_learning_ci95": [
+        0.8866,
+        0.9962
+      ],
+      "gain": 0.2826
+    },
+    "bust_out": {
+      "n_test": 44,
+      "sufficient_n": true,
+      "recall_unseen": 0.1591,
+      "recall_unseen_ci95": [
+        0.0793,
+        0.2937
+      ],
+      "recall_after_learning": 0.8636,
+      "recall_after_learning_ci95": [
+        0.7329,
+        0.936
+      ],
+      "gain": 0.7045
+    },
+    "wallet_provisioning": {
+      "n_test": 45,
+      "sufficient_n": true,
+      "recall_unseen": 0.4444,
+      "recall_unseen_ci95": [
+        0.3094,
+        0.5882
+      ],
+      "recall_after_learning": 0.6667,
+      "recall_after_learning_ci95": [
+        0.5207,
+        0.7864
+      ],
+      "gain": 0.2222
+    },
+    "geo_anomaly": {
+      "n_test": 16,
+      "sufficient_n": false,
+      "recall_unseen": 0.0,
+      "recall_unseen_ci95": [
+        0.0,
+        0.1936
+      ],
+      "recall_after_learning": 0.9375,
+      "recall_after_learning_ci95": [
+        0.7167,
+        0.9889
+      ],
+      "gain": 0.9375
+    }
+  },
+  "loop_rounds": 3,
+  "loop_focus": [
+    "scam_transfer",
+    "wallet_provisioning",
+    "otp_relay"
+  ],
+  "loop_families_attacked": [
+    "scam_transfer",
+    "wallet_provisioning",
+    "otp_relay"
+  ],
+  "loop_retired": [],
+  "loop_promotions": [
+    1
+  ],
+  "baseline": {
+    "rules_baseline": {
+      "recall": 0.42485549132947975,
+      "fpr": 0.10766000968940087
+    },
+    "static_ml": {
+      "recall": 0.6763005780346821,
+      "fpr": 0.01967486677073801
+    },
+    "adaptive_ml": {
+      "recall": 0.5086705202312138,
+      "fpr": 0.005006190450557141
+    },
+    "adaptive_candidate_unpromoted": {
+      "recall": 0.41040462427745666,
+      "fpr": 0.002126285191365667
+    }
+  },
+  "baseline_fpr_matched": {
+    "rules_baseline": {
+      "recall": 0.10115606936416185,
+      "precision": 0.0682261208576998,
+      "fpr": 0.012865371157883405
+    },
+    "static_ml": {
+      "recall": 0.6763005780346821,
+      "precision": 0.24248704663212436,
+      "fpr": 0.01967486677073801
+    },
+    "adaptive_ml": {
+      "recall": 0.638728323699422,
+      "precision": 0.2328767123287671,
+      "fpr": 0.01959412176347096
+    },
+    "adaptive_candidate_unpromoted": {
+      "recall": 0.6907514450867052,
+      "precision": 0.22697056030389365,
+      "fpr": 0.021908811971793077
+    }
+  },
+  "calibration": {
+    "brier_raw": 0.029237,
+    "brier_calibrated": 0.006288
+  },
+  "operational": {
+    "static_ml": {
+      "false_positives_per_1000_legit": 19.67,
+      "fraud_caught_per_1000_fraud": 676.3,
+      "flagged_per_1000_all": 25.73
+    },
+    "adaptive_ml": {
+      "false_positives_per_1000_legit": 2.13,
+      "fraud_caught_per_1000_fraud": 410.4,
+      "flagged_per_1000_all": 5.89
+    }
+  },
+  "blind_spots": [
+    "friendly_fraud",
+    "adversarial_mimicry",
+    "wallet_provisioning",
+    "otp_relay"
+  ],
+  "text_sanity_check_not_detection_evidence": {
+    "roc_auc": 1.0,
+    "roc_auc_cv5": 1.0,
+    "n_corpus": 240,
+    "trivially_separable": true,
+    "honest_reading": "This corpus is composed from a fixed slot vocabulary, so the two classes are almost perfectly separable by vocabulary alone. The near-perfect score measures the CORPUS, not the detector: it would not survive contact with real scam messages. The text arm is included to show where content signals attach to the architecture, and its score is reported here precisely so it is never mistaken for a headline result."
+  }
+}

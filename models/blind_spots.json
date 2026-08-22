@@ -1,0 +1,253 @@
+{
+  "ranked_families": [
+    {
+      "family": "friendly_fraud",
+      "recall": 0.1333,
+      "n": 15
+    },
+    {
+      "family": "adversarial_mimicry",
+      "recall": 0.3333,
+      "n": 54
+    },
+    {
+      "family": "wallet_provisioning",
+      "recall": 0.619,
+      "n": 21
+    },
+    {
+      "family": "otp_relay",
+      "recall": 0.6571,
+      "n": 35
+    },
+    {
+      "family": "geo_anomaly",
+      "recall": 0.697,
+      "n": 33
+    },
+    {
+      "family": "merchant_laundering",
+      "recall": 0.7143,
+      "n": 35
+    },
+    {
+      "family": "account_takeover",
+      "recall": 0.7391,
+      "n": 46
+    },
+    {
+      "family": "scam_transfer",
+      "recall": 0.7561,
+      "n": 41
+    },
+    {
+      "family": "card_testing",
+      "recall": 0.975,
+      "n": 40
+    },
+    {
+      "family": "bust_out",
+      "recall": 1.0,
+      "n": 26
+    }
+  ],
+  "hardest": [
+    {
+      "family": "friendly_fraud",
+      "recall": 0.1333,
+      "n": 15,
+      "n_escaped": 13,
+      "relied_signals": [
+        {
+          "feature": "is_3ds",
+          "auc_drop": 0.21638
+        },
+        {
+          "feature": "time_since_last_hours",
+          "auc_drop": 0.03864
+        },
+        {
+          "feature": "is_upi",
+          "auc_drop": 0.03274
+        },
+        {
+          "feature": "log_distance",
+          "auc_drop": 0.03052
+        }
+      ],
+      "escape_profile": []
+    },
+    {
+      "family": "adversarial_mimicry",
+      "recall": 0.3333,
+      "n": 54,
+      "n_escaped": 36,
+      "relied_signals": [
+        {
+          "feature": "is_3ds",
+          "auc_drop": 0.20902
+        },
+        {
+          "feature": "card_history_depth",
+          "auc_drop": 0.04814
+        },
+        {
+          "feature": "time_since_last_hours",
+          "auc_drop": 0.04305
+        },
+        {
+          "feature": "is_cnp",
+          "auc_drop": 0.03652
+        }
+      ],
+      "escape_profile": [
+        {
+          "feature": "amount_zscore",
+          "escaped_mean": -0.1614,
+          "caught_mean": 0.5204,
+          "legit_mean": 0.339,
+          "relative_gap": 1.0
+        },
+        {
+          "feature": "merchant_amount_zscore",
+          "escaped_mean": -0.291,
+          "caught_mean": -0.0301,
+          "legit_mean": 0.0219,
+          "relative_gap": 0.8124
+        },
+        {
+          "feature": "device_card_count_prior",
+          "escaped_mean": 0.5776,
+          "caught_mean": 0.077,
+          "legit_mean": 0.6742,
+          "relative_gap": 0.7647
+        },
+        {
+          "feature": "card_prior_dispute_rate",
+          "escaped_mean": 0.0084,
+          "caught_mean": 0.0585,
+          "legit_mean": 0.009,
+          "relative_gap": 0.7495
+        }
+      ]
+    },
+    {
+      "family": "wallet_provisioning",
+      "recall": 0.619,
+      "n": 21,
+      "n_escaped": 8,
+      "relied_signals": [
+        {
+          "feature": "is_3ds",
+          "auc_drop": 0.05129
+        },
+        {
+          "feature": "is_new_payee",
+          "auc_drop": 0.02002
+        },
+        {
+          "feature": "card_history_depth",
+          "auc_drop": 0.01873
+        },
+        {
+          "feature": "log_distance",
+          "auc_drop": 0.01871
+        }
+      ],
+      "escape_profile": [
+        {
+          "feature": "near_threshold",
+          "escaped_mean": 0.125,
+          "caught_mean": 0.0,
+          "legit_mean": 0.0329,
+          "relative_gap": 1.0
+        },
+        {
+          "feature": "is_cash_like",
+          "escaped_mean": 0.0,
+          "caught_mean": 0.4615,
+          "legit_mean": 0.0914,
+          "relative_gap": 1.0
+        },
+        {
+          "feature": "amount_zscore",
+          "escaped_mean": 0.2973,
+          "caught_mean": 6.3472,
+          "legit_mean": 0.339,
+          "relative_gap": 0.9105
+        },
+        {
+          "feature": "mcc_novel",
+          "escaped_mean": 0.125,
+          "caught_mean": 0.5385,
+          "legit_mean": 0.0544,
+          "relative_gap": 0.6232
+        }
+      ]
+    },
+    {
+      "family": "otp_relay",
+      "recall": 0.6571,
+      "n": 35,
+      "n_escaped": 12,
+      "relied_signals": [
+        {
+          "feature": "is_3ds",
+          "auc_drop": 0.03053
+        },
+        {
+          "feature": "mcc_risk",
+          "auc_drop": 0.02645
+        },
+        {
+          "feature": "time_since_last_hours",
+          "auc_drop": 0.0208
+        },
+        {
+          "feature": "card_history_depth",
+          "auc_drop": 0.00798
+        }
+      ],
+      "escape_profile": [
+        {
+          "feature": "near_threshold",
+          "escaped_mean": 0.0,
+          "caught_mean": 0.0435,
+          "legit_mean": 0.0329,
+          "relative_gap": 1.0
+        },
+        {
+          "feature": "is_cash_like",
+          "escaped_mean": 0.0,
+          "caught_mean": 0.2609,
+          "legit_mean": 0.0914,
+          "relative_gap": 1.0
+        },
+        {
+          "feature": "merchant_amount_zscore",
+          "escaped_mean": -0.1312,
+          "caught_mean": 1.2718,
+          "legit_mean": 0.0219,
+          "relative_gap": 1.0
+        },
+        {
+          "feature": "amount_zscore",
+          "escaped_mean": 0.0688,
+          "caught_mean": 5.0973,
+          "legit_mean": 0.339,
+          "relative_gap": 0.9734
+        }
+      ]
+    }
+  ],
+  "next_red_team_target": {
+    "family": "friendly_fraud",
+    "proposed_change": {
+      "timing_profile": "customer_normal",
+      "intensity": 0.9
+    },
+    "targets_signal": "residual timing signal",
+    "strategy": "match the cardholder's ordinary rhythm exactly (defeats: residual timing signal)"
+  },
+  "note": "Recall is measured at the model's operating threshold on held-out synthetic traffic. Families whose fraud is authorized by the genuine customer are expected to sit near the bottom: that is a property of authorization-time observability, not a bug to be tuned away."
+}

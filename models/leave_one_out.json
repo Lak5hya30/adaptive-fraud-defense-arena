@@ -1,0 +1,159 @@
+{
+  "n_transactions": 90000,
+  "seed": 42,
+  "schema_version": "2.0",
+  "families": {
+    "card_testing": {
+      "n_test": 78,
+      "sufficient_n": true,
+      "recall_unseen": 0.8077,
+      "recall_unseen_ci95": [
+        0.7066,
+        0.8798
+      ],
+      "recall_after_learning": 0.9744,
+      "recall_after_learning_ci95": [
+        0.9112,
+        0.9929
+      ],
+      "gain": 0.1667
+    },
+    "account_takeover": {
+      "n_test": 88,
+      "sufficient_n": true,
+      "recall_unseen": 0.3182,
+      "recall_unseen_ci95": [
+        0.2302,
+        0.4213
+      ],
+      "recall_after_learning": 0.75,
+      "recall_after_learning_ci95": [
+        0.6504,
+        0.8287
+      ],
+      "gain": 0.4318
+    },
+    "otp_relay": {
+      "n_test": 85,
+      "sufficient_n": true,
+      "recall_unseen": 0.7294,
+      "recall_unseen_ci95": [
+        0.6266,
+        0.8124
+      ],
+      "recall_after_learning": 0.8353,
+      "recall_after_learning_ci95": [
+        0.7423,
+        0.8993
+      ],
+      "gain": 0.1059
+    },
+    "scam_transfer": {
+      "n_test": 69,
+      "sufficient_n": true,
+      "recall_unseen": 0.3478,
+      "recall_unseen_ci95": [
+        0.2462,
+        0.4655
+      ],
+      "recall_after_learning": 0.8261,
+      "recall_after_learning_ci95": [
+        0.7202,
+        0.8976
+      ],
+      "gain": 0.4783
+    },
+    "adversarial_mimicry": {
+      "n_test": 68,
+      "sufficient_n": true,
+      "recall_unseen": 0.1765,
+      "recall_unseen_ci95": [
+        0.1039,
+        0.2836
+      ],
+      "recall_after_learning": 0.3971,
+      "recall_after_learning_ci95": [
+        0.2893,
+        0.5158
+      ],
+      "gain": 0.2206
+    },
+    "merchant_laundering": {
+      "n_test": 56,
+      "sufficient_n": true,
+      "recall_unseen": 0.3929,
+      "recall_unseen_ci95": [
+        0.2758,
+        0.5237
+      ],
+      "recall_after_learning": 0.9107,
+      "recall_after_learning_ci95": [
+        0.8074,
+        0.9613
+      ],
+      "gain": 0.5179
+    },
+    "velocity_smurfing": {
+      "n_test": 46,
+      "sufficient_n": true,
+      "recall_unseen": 0.6957,
+      "recall_unseen_ci95": [
+        0.5519,
+        0.8092
+      ],
+      "recall_after_learning": 0.9783,
+      "recall_after_learning_ci95": [
+        0.8866,
+        0.9962
+      ],
+      "gain": 0.2826
+    },
+    "bust_out": {
+      "n_test": 44,
+      "sufficient_n": true,
+      "recall_unseen": 0.1591,
+      "recall_unseen_ci95": [
+        0.0793,
+        0.2937
+      ],
+      "recall_after_learning": 0.8636,
+      "recall_after_learning_ci95": [
+        0.7329,
+        0.936
+      ],
+      "gain": 0.7045
+    },
+    "wallet_provisioning": {
+      "n_test": 45,
+      "sufficient_n": true,
+      "recall_unseen": 0.4444,
+      "recall_unseen_ci95": [
+        0.3094,
+        0.5882
+      ],
+      "recall_after_learning": 0.6667,
+      "recall_after_learning_ci95": [
+        0.5207,
+        0.7864
+      ],
+      "gain": 0.2222
+    },
+    "geo_anomaly": {
+      "n_test": 16,
+      "sufficient_n": false,
+      "recall_unseen": 0.0,
+      "recall_unseen_ci95": [
+        0.0,
+        0.1936
+      ],
+      "recall_after_learning": 0.9375,
+      "recall_after_learning_ci95": [
+        0.7167,
+        0.9889
+      ],
+      "gain": 0.9375
+    }
+  },
+  "interpretation": "recall_unseen = static model that never saw the family; recall_after_learning = same pipeline once the family is in training. Large gain => unseen-hard but learnable => motivates the adaptive replay loop.",
+  "what_this_does_not_show": "This measures UNSEEN -> LEARNED on synthetic data, not zero-shot detection and not production performance. recall_after_learning is an upper bound obtained by putting the family into training directly; the closed loop has to reach it by generating the family itself. Families with a small n_test carry wide uncertainty and are reported with their sample size for that reason."
+}

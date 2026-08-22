@@ -1,0 +1,807 @@
+{
+  "schema_version": "2.0",
+  "note": "Each node records the specification that produced a generation, the measured weakness that motivated it, what the payment-domain constraint layer changed, and what it cost the defense.",
+  "lineage": {
+    "scam_transfer": [
+      {
+        "family": "scam_transfer",
+        "from_generation": 0,
+        "to_generation": 1,
+        "changes": {
+          "intensity": {
+            "from": 1.0,
+            "to": 0.8
+          }
+        },
+        "n_changed_dials": 1,
+        "targets_signal": "mcc_risk",
+        "strategy": "move the spend into a low-risk merchant category (defeats: mcc_risk)",
+        "generation": 1,
+        "spec": {
+          "attack_family": "scam_transfer",
+          "strategy": "move the spend into a low-risk merchant category (defeats: mcc_risk)",
+          "intensity": 0.8,
+          "amount_profile": "high",
+          "velocity_profile": "low_and_slow",
+          "device_behavior": "trusted_device",
+          "geo_behavior": "home",
+          "merchant_behavior": "cash_like",
+          "timing_profile": "customer_normal",
+          "targets_signal": "mcc_risk",
+          "rationale": "The defense catches 76% of scam_transfer and its ranking of this family depends most on mcc_risk. Moving merchant_behavior to new_low_risk_merchant removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 1,
+          "derived": {
+            "amount_scale": 1.9,
+            "txns_per_card": [
+              1,
+              2
+            ],
+            "velocity_window_hours": 72.0,
+            "device_trust": 1.0,
+            "geo_km_range": [
+              0.0,
+              12.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.7556,
+          "n_escaped_before": 22,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.13074
+            },
+            {
+              "feature": "mcc_risk",
+              "auc_drop": 0.05453
+            },
+            {
+              "feature": "is_cash_like",
+              "auc_drop": 0.04569
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.03546
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.0278
+            },
+            {
+              "feature": "ip_card_count_prior",
+              "auc_drop": 0.01382
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "scam_transfer",
+          "accepted": true,
+          "corrections": [
+            {
+              "field": "merchant_behavior",
+              "from": "new_low_risk_merchant",
+              "to": "cash_like",
+              "reason": "scam_transfer cannot be executed with merchant_behavior='new_low_risk_merchant' on a real rail"
+            }
+          ],
+          "rejections": []
+        },
+        "stale_recall": 0.7364341085271318,
+        "adapted_recall": 0.6821705426356589,
+        "spec_source": "heuristic"
+      },
+      {
+        "family": "scam_transfer",
+        "from_generation": 1,
+        "to_generation": 2,
+        "changes": {
+          "intensity": {
+            "from": 0.8,
+            "to": 0.64
+          },
+          "amount_profile": {
+            "from": "high",
+            "to": "moderate"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "residual amount signal",
+        "strategy": "shrink the remaining amount deviation further toward the cardholder's norm (defeats: residual amount signal)",
+        "generation": 2,
+        "spec": {
+          "attack_family": "scam_transfer",
+          "strategy": "shrink the remaining amount deviation further toward the cardholder's norm (defeats: residual amount signal)",
+          "intensity": 0.64,
+          "amount_profile": "moderate",
+          "velocity_profile": "low_and_slow",
+          "device_behavior": "trusted_device",
+          "geo_behavior": "home",
+          "merchant_behavior": "cash_like",
+          "timing_profile": "customer_normal",
+          "targets_signal": "residual amount signal",
+          "rationale": "The defense catches 78% of scam_transfer and its ranking of this family depends most on residual amount signal. Moving amount_profile to moderate removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 2,
+          "derived": {
+            "amount_scale": 1.0,
+            "txns_per_card": [
+              1,
+              2
+            ],
+            "velocity_window_hours": 72.0,
+            "device_trust": 1.0,
+            "geo_km_range": [
+              0.0,
+              12.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.7778,
+          "n_escaped_before": 20,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.10622
+            },
+            {
+              "feature": "is_cash_like",
+              "auc_drop": 0.10391
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.05995
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.02211
+            },
+            {
+              "feature": "card_history_depth",
+              "auc_drop": 0.0077
+            },
+            {
+              "feature": "ip_card_count_prior",
+              "auc_drop": 0.00723
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "scam_transfer",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.6821705426356589,
+        "adapted_recall": 0.6589147286821705,
+        "spec_source": "heuristic"
+      },
+      {
+        "family": "scam_transfer",
+        "from_generation": 2,
+        "to_generation": 3,
+        "changes": {
+          "intensity": {
+            "from": 0.64,
+            "to": 0.512
+          },
+          "velocity_profile": {
+            "from": "low_and_slow",
+            "to": "single"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "residual velocity signal",
+        "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+        "generation": 3,
+        "spec": {
+          "attack_family": "scam_transfer",
+          "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+          "intensity": 0.512,
+          "amount_profile": "moderate",
+          "velocity_profile": "single",
+          "device_behavior": "trusted_device",
+          "geo_behavior": "home",
+          "merchant_behavior": "cash_like",
+          "timing_profile": "customer_normal",
+          "targets_signal": "residual velocity signal",
+          "rationale": "The defense catches 77% of scam_transfer and its ranking of this family depends most on residual velocity signal. Moving velocity_profile to single removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 3,
+          "derived": {
+            "amount_scale": 1.0,
+            "txns_per_card": [
+              1,
+              1
+            ],
+            "velocity_window_hours": 0.0,
+            "device_trust": 1.0,
+            "geo_km_range": [
+              0.0,
+              12.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.7667,
+          "n_escaped_before": 21,
+          "top_relied_signal": "is_cash_like",
+          "relied_signals": [
+            {
+              "feature": "is_cash_like",
+              "auc_drop": 0.10595
+            },
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.0907
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.05706
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.03449
+            },
+            {
+              "feature": "card_history_depth",
+              "auc_drop": 0.0073
+            },
+            {
+              "feature": "account_age_days",
+              "auc_drop": 0.00357
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "scam_transfer",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.5581395348837209,
+        "adapted_recall": 0.4883720930232558,
+        "spec_source": "heuristic"
+      }
+    ],
+    "wallet_provisioning": [
+      {
+        "family": "wallet_provisioning",
+        "from_generation": 0,
+        "to_generation": 1,
+        "changes": {
+          "intensity": {
+            "from": 1.0,
+            "to": 0.8
+          },
+          "merchant_behavior": {
+            "from": "new_high_risk_merchant",
+            "to": "new_low_risk_merchant"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "mcc_risk",
+        "strategy": "move the spend into a low-risk merchant category (defeats: mcc_risk)",
+        "generation": 1,
+        "spec": {
+          "attack_family": "wallet_provisioning",
+          "strategy": "move the spend into a low-risk merchant category (defeats: mcc_risk)",
+          "intensity": 0.8,
+          "amount_profile": "high",
+          "velocity_profile": "moderate",
+          "device_behavior": "new_device",
+          "geo_behavior": "plausible",
+          "merchant_behavior": "new_low_risk_merchant",
+          "timing_profile": "customer_normal",
+          "targets_signal": "mcc_risk",
+          "rationale": "The defense catches 64% of wallet_provisioning and its ranking of this family depends most on mcc_risk. Moving merchant_behavior to new_low_risk_merchant removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 1,
+          "derived": {
+            "amount_scale": 1.9,
+            "txns_per_card": [
+              2,
+              4
+            ],
+            "velocity_window_hours": 24.0,
+            "device_trust": 0.0,
+            "geo_km_range": [
+              5.0,
+              60.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.6393,
+          "n_escaped_before": 22,
+          "top_relied_signal": "time_since_last_hours",
+          "relied_signals": [
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.06327
+            },
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.04868
+            },
+            {
+              "feature": "mcc_risk",
+              "auc_drop": 0.04104
+            },
+            {
+              "feature": "account_age_days",
+              "auc_drop": 0.032
+            },
+            {
+              "feature": "log_amount",
+              "auc_drop": 0.02616
+            },
+            {
+              "feature": "ip_card_count_prior",
+              "auc_drop": 0.01902
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "wallet_provisioning",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.16883116883116883,
+        "adapted_recall": 0.4155844155844156,
+        "spec_source": "heuristic"
+      },
+      {
+        "family": "wallet_provisioning",
+        "from_generation": 1,
+        "to_generation": 2,
+        "changes": {
+          "intensity": {
+            "from": 0.8,
+            "to": 0.64
+          },
+          "merchant_behavior": {
+            "from": "new_low_risk_merchant",
+            "to": "known_merchant"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "is_cnp",
+        "strategy": "present the transaction through a channel the card ordinarily uses (defeats: is_cnp)",
+        "generation": 2,
+        "spec": {
+          "attack_family": "wallet_provisioning",
+          "strategy": "present the transaction through a channel the card ordinarily uses (defeats: is_cnp)",
+          "intensity": 0.64,
+          "amount_profile": "high",
+          "velocity_profile": "moderate",
+          "device_behavior": "new_device",
+          "geo_behavior": "plausible",
+          "merchant_behavior": "known_merchant",
+          "timing_profile": "customer_normal",
+          "targets_signal": "is_cnp",
+          "rationale": "The defense catches 52% of wallet_provisioning and its ranking of this family depends most on is_cnp. Moving merchant_behavior to known_merchant removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 2,
+          "derived": {
+            "amount_scale": 1.9,
+            "txns_per_card": [
+              2,
+              4
+            ],
+            "velocity_window_hours": 24.0,
+            "device_trust": 0.0,
+            "geo_km_range": [
+              5.0,
+              60.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.5246,
+          "n_escaped_before": 29,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.14301
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.05303
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.02851
+            },
+            {
+              "feature": "mcc_risk",
+              "auc_drop": 0.02655
+            },
+            {
+              "feature": "card_history_depth",
+              "auc_drop": 0.02485
+            },
+            {
+              "feature": "is_cnp",
+              "auc_drop": 0.02446
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "wallet_provisioning",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.3246753246753247,
+        "adapted_recall": 0.37662337662337664,
+        "spec_source": "heuristic"
+      },
+      {
+        "family": "wallet_provisioning",
+        "from_generation": 2,
+        "to_generation": 3,
+        "changes": {
+          "intensity": {
+            "from": 0.64,
+            "to": 0.576
+          },
+          "amount_profile": {
+            "from": "high",
+            "to": "moderate"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "log_amount",
+        "strategy": "bring the ticket down into the cardholder's ordinary range (defeats: log_amount)",
+        "generation": 3,
+        "spec": {
+          "attack_family": "wallet_provisioning",
+          "strategy": "bring the ticket down into the cardholder's ordinary range (defeats: log_amount)",
+          "intensity": 0.576,
+          "amount_profile": "moderate",
+          "velocity_profile": "moderate",
+          "device_behavior": "new_device",
+          "geo_behavior": "plausible",
+          "merchant_behavior": "known_merchant",
+          "timing_profile": "customer_normal",
+          "targets_signal": "log_amount",
+          "rationale": "The defense catches 46% of wallet_provisioning and its ranking of this family depends most on log_amount. Moving amount_profile to moderate removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 3,
+          "derived": {
+            "amount_scale": 1.0,
+            "txns_per_card": [
+              2,
+              4
+            ],
+            "velocity_window_hours": 24.0,
+            "device_trust": 0.0,
+            "geo_km_range": [
+              5.0,
+              60.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.459,
+          "n_escaped_before": 33,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.10601
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.0819
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.02901
+            },
+            {
+              "feature": "log_amount",
+              "auc_drop": 0.02824
+            },
+            {
+              "feature": "is_cnp",
+              "auc_drop": 0.02627
+            },
+            {
+              "feature": "card_history_depth",
+              "auc_drop": 0.02592
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "wallet_provisioning",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.4935064935064935,
+        "adapted_recall": 0.4675324675324675,
+        "spec_source": "heuristic"
+      }
+    ],
+    "otp_relay": [
+      {
+        "family": "otp_relay",
+        "from_generation": 0,
+        "to_generation": 1,
+        "changes": {
+          "intensity": {
+            "from": 1.0,
+            "to": 0.8
+          },
+          "merchant_behavior": {
+            "from": "new_high_risk_merchant",
+            "to": "new_low_risk_merchant"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "mcc_risk",
+        "strategy": "move the spend into a low-risk merchant category (defeats: mcc_risk)",
+        "generation": 1,
+        "spec": {
+          "attack_family": "otp_relay",
+          "strategy": "move the spend into a low-risk merchant category (defeats: mcc_risk)",
+          "intensity": 0.8,
+          "amount_profile": "high",
+          "velocity_profile": "low_and_slow",
+          "device_behavior": "new_device",
+          "geo_behavior": "home",
+          "merchant_behavior": "new_low_risk_merchant",
+          "timing_profile": "customer_normal",
+          "targets_signal": "mcc_risk",
+          "rationale": "The defense catches 61% of otp_relay and its ranking of this family depends most on mcc_risk. Moving merchant_behavior to new_low_risk_merchant removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 1,
+          "derived": {
+            "amount_scale": 1.9,
+            "txns_per_card": [
+              1,
+              2
+            ],
+            "velocity_window_hours": 72.0,
+            "device_trust": 0.0,
+            "geo_km_range": [
+              0.0,
+              12.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.6082,
+          "n_escaped_before": 38,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.08169
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.04899
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.04855
+            },
+            {
+              "feature": "ip_card_count_prior",
+              "auc_drop": 0.04597
+            },
+            {
+              "feature": "mcc_risk",
+              "auc_drop": 0.04014
+            },
+            {
+              "feature": "card_history_depth",
+              "auc_drop": 0.00628
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "otp_relay",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.1619718309859155,
+        "adapted_recall": 0.5140845070422535,
+        "spec_source": "heuristic"
+      },
+      {
+        "family": "otp_relay",
+        "from_generation": 1,
+        "to_generation": 2,
+        "changes": {
+          "intensity": {
+            "from": 0.8,
+            "to": 0.64
+          },
+          "amount_profile": {
+            "from": "high",
+            "to": "moderate"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "residual amount signal",
+        "strategy": "shrink the remaining amount deviation further toward the cardholder's norm (defeats: residual amount signal)",
+        "generation": 2,
+        "spec": {
+          "attack_family": "otp_relay",
+          "strategy": "shrink the remaining amount deviation further toward the cardholder's norm (defeats: residual amount signal)",
+          "intensity": 0.64,
+          "amount_profile": "moderate",
+          "velocity_profile": "low_and_slow",
+          "device_behavior": "new_device",
+          "geo_behavior": "home",
+          "merchant_behavior": "new_low_risk_merchant",
+          "timing_profile": "customer_normal",
+          "targets_signal": "residual amount signal",
+          "rationale": "The defense catches 60% of otp_relay and its ranking of this family depends most on residual amount signal. Moving amount_profile to moderate removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 2,
+          "derived": {
+            "amount_scale": 1.0,
+            "txns_per_card": [
+              1,
+              2
+            ],
+            "velocity_window_hours": 72.0,
+            "device_trust": 0.0,
+            "geo_km_range": [
+              0.0,
+              12.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.5979,
+          "n_escaped_before": 39,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.16236
+            },
+            {
+              "feature": "ip_card_count_prior",
+              "auc_drop": 0.07642
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.02766
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.02718
+            },
+            {
+              "feature": "mcc_risk",
+              "auc_drop": 0.02072
+            },
+            {
+              "feature": "hour",
+              "auc_drop": 0.0101
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "otp_relay",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.4295774647887324,
+        "adapted_recall": 0.4225352112676056,
+        "spec_source": "heuristic"
+      },
+      {
+        "family": "otp_relay",
+        "from_generation": 2,
+        "to_generation": 3,
+        "changes": {
+          "intensity": {
+            "from": 0.64,
+            "to": 0.576
+          },
+          "velocity_profile": {
+            "from": "low_and_slow",
+            "to": "single"
+          }
+        },
+        "n_changed_dials": 2,
+        "targets_signal": "residual velocity signal",
+        "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+        "generation": 3,
+        "spec": {
+          "attack_family": "otp_relay",
+          "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+          "intensity": 0.576,
+          "amount_profile": "moderate",
+          "velocity_profile": "single",
+          "device_behavior": "new_device",
+          "geo_behavior": "home",
+          "merchant_behavior": "new_low_risk_merchant",
+          "timing_profile": "customer_normal",
+          "targets_signal": "residual velocity signal",
+          "rationale": "The defense catches 46% of otp_relay and its ranking of this family depends most on residual velocity signal. Moving velocity_profile to single removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+          "confidence": 0.6,
+          "source": "heuristic",
+          "generation": 3,
+          "derived": {
+            "amount_scale": 1.0,
+            "txns_per_card": [
+              1,
+              1
+            ],
+            "velocity_window_hours": 0.0,
+            "device_trust": 0.0,
+            "geo_km_range": [
+              0.0,
+              12.0
+            ]
+          }
+        },
+        "driven_by": {
+          "measured_recall_before": 0.4639,
+          "n_escaped_before": 52,
+          "top_relied_signal": "is_3ds",
+          "relied_signals": [
+            {
+              "feature": "is_3ds",
+              "auc_drop": 0.16101
+            },
+            {
+              "feature": "log_distance",
+              "auc_drop": 0.05689
+            },
+            {
+              "feature": "ip_card_count_prior",
+              "auc_drop": 0.0526
+            },
+            {
+              "feature": "time_since_last_hours",
+              "auc_drop": 0.04195
+            },
+            {
+              "feature": "mcc_risk",
+              "auc_drop": 0.01953
+            },
+            {
+              "feature": "card_history_depth",
+              "auc_drop": 0.00853
+            }
+          ]
+        },
+        "constraint_layer": {
+          "family": "otp_relay",
+          "accepted": true,
+          "corrections": [],
+          "rejections": []
+        },
+        "stale_recall": 0.6830985915492958,
+        "adapted_recall": 0.6901408450704225,
+        "spec_source": "heuristic"
+      }
+    ]
+  }
+}

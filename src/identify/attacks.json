@@ -1,0 +1,2177 @@
+{
+  "schema_version": "2.0",
+  "focus": "cards-first (Mastercard card-present and card-not-present) with UPI, account-to-account, wallet and token coverage for breadth",
+  "injectors": [
+    "card_testing",
+    "bust_out",
+    "account_takeover",
+    "adversarial_mimicry",
+    "velocity_smurfing",
+    "merchant_laundering",
+    "friendly_fraud",
+    "otp_relay",
+    "geo_anomaly",
+    "scam_transfer",
+    "wallet_provisioning"
+  ],
+  "status_definitions": {
+    "IMPLEMENTED": "A dedicated transaction-level injector reproduces this attack's authorization footprint, and it is part of the default simulated mix.",
+    "PARAMETERIZED": "Reachable today as a configuration of an existing injector through the attack-specification dials (amount, velocity, device, geography, merchant, timing) without new code, but not part of the default mix.",
+    "RESEARCH_ONLY": "Catalogued and characterized — objective, GenAI role, kill chain, transaction and behavioural signature, authorization-time observability — but NOT simulated. Listed so the research surface is visible and not overstated.",
+    "FUTURE": "Named as planned simulator work. Not simulated today."
+  },
+  "honesty_note": "This catalog deliberately describes far more attacks than the simulator implements. Every entry carries its simulator status, so breadth of research is never presented as breadth of simulation. Entries describe defender-observable consequences and signals only — no operational guidance, tooling, or bypass technique appears anywhere in this file.",
+  "provenance": {
+    "authored_entries": 56,
+    "merged_as_duplicates": 11,
+    "distinct_entries": 45
+  },
+  "attacks": [
+    {
+      "id": "ai_personalized_cardholder_spear_phishing",
+      "name": "Hyper-Personalized Cardholder Spear Phishing With Live OTP Relay",
+      "category": "Social Engineering",
+      "subcategory": "Targeted phishing / credential and AFA harvesting",
+      "rails": [
+        "card_cnp",
+        "token"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Obtain full card credentials plus the live additional-factor (OTP/3DS) response from a specific cardholder so a card-not-present purchase or card tokenization can be completed in real time.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Language models turn thin public and leaked context — employer, city, recent merchant relationships, language preference — into individually tailored lures that read like genuine issuer or merchant correspondence, with none of the grammar and formatting tells that legacy phishing filters and user training relied on. The same models generate matching landing-page copy and support-chat replies, so the pretext stays consistent when the victim asks questions. The effect for defenders is that per-victim content uniqueness rises sharply, collapsing the value of content-hash and template-similarity detection.",
+      "kill_chain": [
+        "target enrichment from breached and public data",
+        "tailored lure delivery",
+        "credential and AFA capture on lookalike page",
+        "real-time relay to a live CNP authorization",
+        "goods or digital-value liquidation"
+      ],
+      "transaction_signature": "The payment-stream footprint is weak: authorization arrives as an ordinary 3DS-attempted or successful CNP purchase with genuine PAN, correct CVV and a correct OTP, so most issuer rules see a well-authenticated transaction. The only texture is downstream of the phish — a small probe amount followed within minutes by a larger purchase, often at digital-goods, gift-card, gaming or travel MCCs, sometimes split across two or three merchants to stay under per-transaction limits. Ship-to and IP geography diverge from the cardholder's normal footprint, but the authentication result argues against declining.",
+      "behavioral_signature": "A previously stable card suddenly transacts from a device and browser fingerprint never seen on the account, with no prior merchant relationship; the cardholder's own session activity (mobile banking, merchant app) is absent during the purchase window. Where card-on-file tokenization is attempted, a provisioning event appears on an unfamiliar device shortly after an OTP delivery that the customer later says they entered on a webpage rather than an app.",
+      "observable_signals": [
+        "OTP-to-authorization latency under a few tens of seconds on a first-time merchant/device pair",
+        "brand-new device fingerprint with correct PAN, CVV and expiry on first attempt (no fumbling)",
+        "small probe authorization followed by a materially larger one at a different merchant within minutes",
+        "newly registered or recently reputation-flipped merchant domain in the acquirer referrer chain",
+        "cardholder's own app session absent or on a different IP during the OTP window",
+        "token provisioning request on an unrecognized wallet device following a web OTP delivery"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "cardholder-reported fraud dispute despite a successful 3DS authentication, forcing liability argument",
+        "clustered chargebacks against one or two merchants sharing a recently onboarded payment aggregator sub-merchant ID",
+        "rapid refund-to-different-instrument requests at the receiving merchant",
+        "phishing-site takedown reports naming the same brand within the same week"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.5,
+      "real_world_grounding": "Phishing with real-time OTP relay is a long-documented pattern across Indian issuers and globally; what is new and well evidenced since 2023 is the collapse in cost of per-victim personalization and fluent local-language copy, which measurably raises click-through and completion rates.",
+      "ethical_notes": "Describes only the defender-visible consequences — authentication and authorization telemetry, dispute patterns — and contains no lure content, infrastructure detail, or relay technique.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "otp_relay",
+      "simulatable": true
+    },
+    {
+      "id": "generative_smishing_fleet_at_scale",
+      "name": "Generative Smishing Fleets With Continuous Variant Churn",
+      "category": "Social Engineering",
+      "subcategory": "Mass messaging fraud",
+      "rails": [
+        "upi",
+        "card_cnp"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Drive very large volumes of recipients into a payment or credential-capture flow — a UPI collect approval, a small 'verification' payment, an autopay mandate, or a card entry page — at whatever conversion rate volume allows.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Generative models produce effectively unlimited semantically equivalent message variants and matching landing-page text, so every recipient can receive a lexically distinct message. That removes the repetition that telecom-grade SMS filters, WhatsApp spam heuristics and DLT template controls were built to catch, and lets campaigns rotate themes — KYC expiry, electricity disconnection, parcel redelivery, reward redemption — as fast as each theme is publicised as a scam. Defenders see the same intent expressed thousands of ways rather than one template repeated.",
+      "kill_chain": [
+        "bulk recipient list assembly",
+        "high-variance message blast across SMS/OTT",
+        "lookalike landing or collect-request delivery",
+        "victim-authorized payment or credential entry",
+        "layered mule cash-out"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak at the individual level and only visible in aggregate: many unrelated payers, each making one small-to-moderate payment (typically low hundreds to a few thousand rupees, sized under mandate and per-transaction friction thresholds) into a shrinking set of receiving VPAs, wallet handles or PA sub-merchant accounts. Card variants show low-value CNP charges at newly onboarded digital-goods merchants. Nothing about any single authorization is anomalous; the anomaly lives in the beneficiary-side fan-in and in the payer population's lack of any prior relationship with the payee.",
+      "behavioral_signature": "Receiving accounts show a sharp inbound fan-in from geographically dispersed, never-before-seen payers within hours of creation or reactivation, immediately followed by outbound fan-out to further accounts. On the payer side, the account behaves normally before and after; the only account-level trace is a single first-ever payment to a payee with no contact history, frequently approved from a notification rather than initiated in-app.",
+      "observable_signals": [
+        "beneficiary fan-in ratio spike: many distinct first-time payers per receiving handle within a short window",
+        "collect-request approval rate anomalies on accounts that normally only push payments",
+        "payer-to-payee first-contact-to-payment latency under a minute",
+        "cluster of payers who all received an inbound message from the same shortcode or OTT sender class",
+        "receiving VPAs or sub-merchant IDs less than 72 hours old at time of first credit",
+        "same-day outbound sweep leaving near-zero balance on the receiving account"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "concentrated cybercrime-helpline and chargeback complaints naming a common receiving handle days later",
+        "recall or hold requests arriving after funds have already been layered two hops out",
+        "mule account closure requests and KYC-fraud flags on the receiving side",
+        "merchant-side refund abuse or unusually high dispute ratio on a young sub-merchant"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.4,
+      "real_world_grounding": "Smishing is among the highest-volume reported fraud vectors in India and is well documented by law-enforcement and NPCI-side beneficiary analysis; generative text is a scaling and filter-evasion multiplier on an established pattern rather than a new attack class.",
+      "ethical_notes": "Confines itself to aggregate beneficiary-side and messaging-volume signals that defenders already monitor, with no message content, sender infrastructure, or filter-evasion methodology.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "voice_cloned_issuer_impersonation_vishing",
+      "name": "Voice-Cloned Issuer And Regulator Impersonation Vishing",
+      "category": "Social Engineering",
+      "subcategory": "Vishing / synthetic voice impersonation",
+      "rails": [
+        "upi",
+        "card_cnp",
+        "a2a"
+      ],
+      "channel": "VOICE",
+      "attacker_objective": "Persuade the cardholder or account holder to disclose an authentication factor, approve a payment, or move funds to an attacker-controlled 'safe' account while believing they are speaking to their bank, card issuer, or a regulator.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "Short public audio samples are enough to synthesize a convincing voice, including of a named relative or a specific bank officer the victim has previously spoken to, and streaming synthesis makes the cloned voice usable in an interactive call rather than a recording. Combined with synthetic call-centre ambience and locally accurate accent and register, this removes the auditory cues — foreign accent, stilted delivery, obvious script — that consumers were taught to treat as red flags. For defenders, the consequence is that voice familiarity, historically a strong trust signal, is no longer evidence of identity.",
+      "kill_chain": [
+        "voice sample acquisition and cloning",
+        "pretext call with spoofed or plausible caller identity",
+        "authentication-factor or approval extraction under urgency",
+        "victim-authorized or attacker-executed payment",
+        "immediate onward layering"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak because the transaction is usually genuinely authorized by the customer on their own device: a correctly PIN-authenticated UPI push, a correctly OTP-authenticated card payment, or an IMPS/NEFT transfer to a newly added beneficiary. The distinguishing texture is temporal and structural, not authentication-based — a first-ever payment to a brand-new beneficiary, often at or just under a per-transaction cap, followed by repeat transfers in quick succession as the caller escalates the story, sometimes after a limit-increase or beneficiary-cooling-period change made minutes earlier.",
+      "behavioral_signature": "The customer's session shows an unusually long continuous foreground presence in the banking app with long pauses between steps, indicative of being talked through the flow. Security-relevant settings changes (transaction limit raised, new beneficiary added, alerts contact changed) cluster in the same session as the first transfer. Concurrent live telephony to the customer's registered mobile is a strong contextual signal where the bank has visibility into it.",
+      "observable_signals": [
+        "beneficiary added and paid within the same session with no cooling-off interval",
+        "transaction or per-day limit increased minutes before a large transfer",
+        "abnormally long dwell time between screens versus the customer's own historical pacing",
+        "multiple sequential transfers of escalating value to the same or related new beneficiaries",
+        "step-up challenges answered correctly but slowly and on the first attempt each time",
+        "customer on an active inbound call during the payment window where telco or app signal is available"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "customer repudiation within hours despite valid PIN/OTP authentication, opening an authorized-push-payment dispute",
+        "recall attempt failing because funds were withdrawn or layered within minutes",
+        "receiving account showing the same-day inbound pattern from several unrelated victims",
+        "helpline complaint narrative citing a named bank officer or regulator identity"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "critical",
+      "severity": "critical",
+      "novelty_score": 0.7,
+      "real_world_grounding": "Bank-impersonation vishing and 'safe account' transfers are long documented in India and the UK; voice cloning in live calls is now credibly evidenced in family-emergency and executive-impersonation cases, and its migration into routine issuer impersonation is a near-term extrapolation already reported anecdotally by banks.",
+      "ethical_notes": "Describes only the account-behaviour and dispute consequences a fraud team can act on; it names no cloning tools, sample sources, caller-ID techniques, or scripts.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "seeded_fake_support_desk_ai_agents",
+      "name": "Search- And Ad-Seeded Fake Support Desks With Always-On AI Agents",
+      "category": "Social Engineering",
+      "subcategory": "Inbound-trust inversion / fake customer support",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Get the victim to make contact voluntarily and then extract card or account credentials, a 'verification' payment, or device access under the guise of resolving the victim's own support issue.",
+      "genai_role": "identity_synthesis",
+      "genai_mechanism": "Generative models let a fake support presence be stood up wholesale — brand-consistent help-centre pages, plausible policy text, and a chat agent that answers arbitrary customer questions convincingly in the victim's language, around the clock and in parallel across many victims. Because the operation no longer needs staffed human agents to seem real, it can be seeded broadly across search results, marketplace listings, app-store clones, and social replies to public complaints. The critical defender consequence is trust inversion: the victim initiated contact, so every 'never trust an inbound caller' heuristic and every inbound-call detection signal is inert.",
+      "kill_chain": [
+        "poisoned discovery surfaces and complaint-reply seeding",
+        "victim-initiated contact",
+        "AI agent triage and trust building",
+        "credential, payment, or device-access extraction",
+        "cash-out or CNP use"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak and often benign-looking: either a small 'refundable verification' or 'service charge' payment that the victim genuinely authorizes to an unrelated payee, or an ordinary CNP authorization on a card whose details were just re-entered. Where remote access is involved, the transactions originate from the victim's own device and IP, so device-reputation and geolocation checks pass cleanly. Amounts are typically modest at first, escalating only if the interaction continues; MCC is unremarkable or maps to generic services and digital goods.",
+      "behavioral_signature": "Sessions show hallmarks of guided or remote-controlled operation — screen-sharing or remote-access applications running concurrently, unnatural input timing, navigation that goes directly to transfer or card-management screens without the customer's usual browsing. The account frequently shows a recent genuine problem (failed delivery, declined transaction, wallet balance issue) that plausibly motivated the search for support.",
+      "observable_signals": [
+        "remote-access or screen-share application detected alongside an active banking or checkout session",
+        "input cadence inconsistent with the customer's historical behavioural biometric profile",
+        "payment or card re-entry occurring shortly after a failed transaction or logged support-worthy incident",
+        "navigation straight to sensitive screens with zero exploratory browsing",
+        "victim device and IP normal while payee is entirely new and unrelated to the brand in question",
+        "brand-abuse telemetry: lookalike support domains, cloned apps, or ad placements surfacing for support queries"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "customer complaint stating they contacted support found via search or an app store",
+        "chargebacks or disputes referencing a 'refund' or 'verification charge' that was never reversed",
+        "subsequent unauthorized activity from the same session where device access persisted",
+        "takedown volume for lookalike support pages and cloned apps of the same brand"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.6,
+      "real_world_grounding": "Fake customer-care numbers seeded into search results and business listings are a heavily reported Indian fraud pattern, and brand-cloned support chat plus fraudulent ad placement are documented globally; the always-on AI agent layer removes the staffing constraint that previously limited scale.",
+      "ethical_notes": "Restricted to session, device and brand-abuse signals available to defenders; it does not explain how discovery surfaces are manipulated or how support personas are constructed.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "romance_investment_grooming_pipeline",
+      "name": "Persona-Driven Romance And Investment Grooming Pipelines",
+      "category": "Social Engineering",
+      "subcategory": "Long-cycle relationship and investment fraud",
+      "rails": [
+        "a2a",
+        "upi",
+        "wallet",
+        "card_cnp"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Build sustained emotional or financial trust over weeks so the victim voluntarily and repeatedly funds an attacker-controlled 'investment', 'trading account', or personal emergency, with escalating amounts.",
+      "genai_role": "identity_synthesis",
+      "genai_mechanism": "Generative models sustain a consistent synthetic persona — coherent backstory, matching imagery, on-demand video or voice proof-of-life, and daily conversational continuity — across many victims simultaneously, removing the human-hours ceiling that previously limited how many long-cycle relationships one operation could maintain. They also generate the supporting fiction: dashboards showing paper gains, statements, and confident answers to financial questions. Defenders therefore see far more victims per operator, and grooming quality that no longer degrades with scale.",
+      "kill_chain": [
+        "persona seeding on social and dating surfaces",
+        "extended rapport and credibility building",
+        "small successful test withdrawal to prove legitimacy",
+        "escalating deposit cycle",
+        "withdrawal blocked behind fees and taxes"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak per transaction and only meaningful as a trajectory: a slowly escalating series of victim-authorized outbound payments over weeks or months, starting small and growing by multiples, with one early small inbound credit that mimics a successful withdrawal. Destinations drift over time — first an individual account or wallet, later money-transfer, quasi-cash or crypto-adjacent merchant categories, and often a card-funded purchase of crypto or vouchers late in the cycle. Each individual payment is well within the victim's capacity; the aggregate frequently is not, ending in loan or credit-line drawdown.",
+      "behavioral_signature": "The account's payment profile changes character over weeks: new recurring outbound relationships, rising ticket sizes, fixed deposits liquidated, gold or mutual-fund holdings redeemed, and personal or top-up loans taken shortly before a large transfer. Login and messaging activity concentrates in unusual hours. Victims frequently deny or minimise the relationship when contacted, which is itself a recognised indicator.",
+      "observable_signals": [
+        "escalating outbound payment ladder to a rotating set of new payees over weeks",
+        "one small inbound credit early in the sequence followed by much larger outbound flows",
+        "liquidation of savings instruments or new unsecured credit immediately preceding a transfer",
+        "shift in destination mix toward money-transfer, quasi-cash and crypto-adjacent categories",
+        "customer overrides or dismisses in-app scam warnings repeatedly within the same session",
+        "denial or evasive answers during a bank intervention call about the payment purpose"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "victim reports total loss only after a withdrawal is refused behind fee and tax demands",
+        "beneficiary network resolves to layered mule accounts and off-ramp services on investigation",
+        "recall impossible because funds exited to crypto or cross-border corridors within hours",
+        "clustered complaints naming the same fake trading platform brand"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "critical",
+      "severity": "critical",
+      "novelty_score": 0.65,
+      "real_world_grounding": "So-called pig-butchering fraud is extensively documented by Indian law enforcement, INTERPOL and US agencies, including industrialised operations in Southeast Asia; generative personas and content are a documented force multiplier on an established and already enormous loss category.",
+      "ethical_notes": "Describes the longitudinal account trajectory and intervention failure modes banks must detect, with no persona-building, platform, or grooming methodology.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "hinglish_code_mixed_vernacular_persuasion",
+      "name": "Code-Mixed Hinglish And Vernacular Persuasion At Population Scale",
+      "category": "Social Engineering",
+      "subcategory": "Language-barrier collapse / vernacular targeting",
+      "rails": [
+        "upi",
+        "a2a",
+        "wallet"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Reach and convert victim segments previously insulated by language — regional-language, code-mixing and low-English-literacy users — into authorizing UPI payments, approving collect requests, or granting mandates.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Models now produce fluent Hinglish and Indic-language content, including Roman-script code-mixing, regionally correct honorifics, and the register of a genuine government or bank notification, and can do so in twenty-plus languages without a native-speaking operator. Voice synthesis extends the same fluency to calls in regional accents. The defensive consequence is asymmetric: fraud content quality in vernacular languages has jumped, while most content-classification, keyword-blocking and consumer-awareness material remains English-centric and script-normalised, so detection coverage is weakest exactly where the new volume lands.",
+      "kill_chain": [
+        "vernacular segment targeting",
+        "code-mixed lure or call in the victim's language",
+        "trust via institutional register and local framing",
+        "victim-authorized UPI payment or mandate approval",
+        "mule cash-out through regional accounts"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak and structurally identical to ordinary low-value UPI activity: correctly PIN-authorized push payments or approved collect requests of a few hundred to a few thousand rupees, plus autopay mandate approvals that later debit recurrently. Nothing in amount, MCC or channel is distinctive. The only aggregate texture is a beneficiary-side concentration of payers sharing a regional and demographic profile, and a higher-than-normal rate of pull-request approvals among customers whose accounts otherwise show only push behaviour.",
+      "behavioral_signature": "Affected accounts skew toward newer digital-payment users, older customers, and tier-2/3 and rural geographies, often with recent first-time app onboarding. Interaction shows low navigational confidence — repeated screen backtracking, help-screen visits, long dwell on the PIN prompt — and warning banners rendered in English being dismissed without dwell time, indicating they were not read.",
+      "observable_signals": [
+        "collect-request approvals on accounts with a history of push-only behaviour",
+        "scam-warning screens dismissed with dwell time too short to have been read, especially in English-only locales",
+        "first-ever autopay mandate approved within minutes of an inbound message or call",
+        "beneficiary fan-in concentrated within one linguistic or regional payer cohort",
+        "recently onboarded or low-tenure digital-payment users over-represented among payers to one handle",
+        "complaint narratives and helpline transcripts arriving predominantly in one regional language"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "regional clustering of authorized-payment complaints against a common beneficiary",
+        "recurring mandate debits disputed weeks later once the victim notices the standing instruction",
+        "mule accounts opened in the same district as the victim cohort, complicating cross-border assumptions",
+        "low recall success because the victim reports late relative to sweep timing"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.6,
+      "real_world_grounding": "India's payment growth is overwhelmingly in vernacular-first, newly digital cohorts, and regional-language fraud is a recognised enforcement concern; the credible new element is that fluent multilingual generation removes the operator-language constraint that previously bounded such campaigns.",
+      "ethical_notes": "Reports only demographic, warning-interaction and beneficiary-concentration signals a defender can measure, without any lure text, translation guidance, or targeting methodology.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "realtime_adaptive_objection_handling_call",
+      "name": "Real-Time Adaptive Objection Handling During Live Social-Engineering Calls",
+      "category": "Social Engineering",
+      "subcategory": "Live conversational manipulation",
+      "rails": [
+        "upi",
+        "a2a",
+        "card_cnp"
+      ],
+      "channel": "VOICE",
+      "attacker_objective": "Keep a hesitant victim inside the payment flow by defeating each doubt as it is raised — including the bank's own warnings and interdiction call — until the transfer completes.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Live transcription plus a language model turns an unscripted call into a guided one: the caller receives continuously updated framing tuned to the specific objection the victim just voiced, including how to reinterpret the exact scam-warning text the victim is reading aloud from their screen. This converts what used to be a scripted call that collapsed on the first unanticipated question into an adaptive conversation, and it directly attacks the bank's last line of defence — in-app warnings and human interdiction — by pre-arming the victim to answer branch or call-centre questions in a way that clears the check.",
+      "kill_chain": [
+        "live call with adaptive framing",
+        "victim objection surfaced and neutralised",
+        "bank warning or interdiction pre-empted",
+        "payment completed after visible hesitation",
+        "immediate onward layering"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak: the completed transaction is fully authenticated and customer-initiated, indistinguishable in the auth message from any legitimate transfer. Its distinguishing shape is the run-up rather than the record — repeated abandoned or failed attempts at the same or descending amounts, a value later split into tranches after a threshold warning fired, and completion only after several minutes of stalled interaction. Where a first attempt is declined, the retry often arrives at a slightly lower amount or via a different rail (card to UPI, or UPI to IMPS) within the same session.",
+      "behavioral_signature": "Session telemetry shows a distinctive struggle-then-succeed pattern: warning screens dwelt on for a long time and then dismissed, payment flow entered and exited two or three times, help content opened, and typing cadence that alternates between long pauses and rapid bursts as the victim is coached. If an interdiction call occurs, the customer's answers are unusually rehearsed, consistent, and rushed toward ending the call.",
+      "observable_signals": [
+        "multiple abandoned payment attempts followed by a successful one within a single session",
+        "long dwell on a scam-warning screen followed by dismissal and immediate completion",
+        "amount split into tranches just below the threshold that triggered a warning or step-up",
+        "rail switching after a decline within minutes for the same effective beneficiary",
+        "behavioural-biometric drift from the customer's baseline (pause structure, correction rate)",
+        "interdiction call where the customer resists questions or gives an implausibly tidy payment reason"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "customer repudiation despite documented warning acknowledgement, escalating liability disputes",
+        "interdiction-effectiveness metrics degrading: warned-then-proceeded rate rising for a beneficiary cohort",
+        "recall failure due to sub-minute sweep at the beneficiary",
+        "post-incident interview revealing the victim was coached on how to answer the bank"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "critical",
+      "severity": "critical",
+      "novelty_score": 0.8,
+      "real_world_grounding": "Coached victims defeating bank interdiction is a documented and rising problem in UK and Indian authorized-payment fraud; real-time model-assisted objection handling is a credible near-term extrapolation already visible in the quality and adaptability of reported call transcripts.",
+      "ethical_notes": "Safe to publish because it is framed entirely around warning-interaction and retry telemetry that defenders should instrument, and deliberately contains no persuasion content, objection responses, or interdiction-defeating language.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "otp_relay",
+      "simulatable": true
+    },
+    {
+      "id": "breach_matched_pretext_targeting",
+      "name": "Breach-Matched Pretexting With Verifiably Accurate Personal Details",
+      "category": "Social Engineering",
+      "subcategory": "Data-driven pretext construction and victim selection",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Establish immediate credibility by opening with details only a legitimate institution should know, and use that credibility to obtain an authentication factor, a payment, or a beneficiary change.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Models make it cheap to fuse messy leaked datasets — merchant order histories, loan and insurance records, delivery manifests, telecom and utility data — into per-person dossiers and to choose the right pretext, product, language and moment for each target, such as approaching someone in the narrow window after a real cash-on-delivery order or a filed claim. The persuasion value comes from accuracy rather than volume: the opening line contains a genuine order ID, correct card last four, or real policy number. For defenders this shifts the problem upstream — the decisive variable is third-party data exposure, which the bank neither controls nor sees.",
+      "kill_chain": [
+        "breached-dataset fusion and victim selection",
+        "timing-aligned approach citing accurate details",
+        "credibility converted to authority",
+        "factor disclosure or authorized payment",
+        "cash-out or CNP use"
+      ],
+      "transaction_signature": "Payment-stream footprint is weak, and weaker than comparable untargeted scams because the victim complies quickly and without hesitation, removing the abandon-and-retry texture that hesitation normally produces. Outcomes vary by pretext: a correctly OTP-authenticated CNP charge, a small 'confirmation' UPI payment, or a first-ever transfer to a new beneficiary. Values are often deliberately matched to a real pending order or refund amount, so they look contextually reasonable and evade amount-anomaly rules.",
+      "behavioral_signature": "Compliance is fast and clean — short session, no help-screen visits, minimal warning dwell — which paradoxically makes the session look more legitimate than a genuine hesitant customer's. Across a portfolio, victims cluster by a shared third party: the same merchant, insurer, lender, delivery network or app, with the incident timing tracking that third party's customer events rather than any bank-side event.",
+      "observable_signals": [
+        "victim cohort sharing a common recent merchant, insurer, lender or logistics relationship",
+        "fraud reports where the complainant confirms the caller knew accurate order, policy or card-last-four details",
+        "payment amount closely matching a real pending order, refund or premium value",
+        "abnormally low hesitation metrics: short session, no warning dwell, first-attempt success",
+        "temporal clustering of incidents shortly after a third party's known or suspected data exposure",
+        "beneficiary or card-detail entry with no exploratory navigation whatsoever"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "dispute narratives converging on one third party, supporting a breach-attribution investigation",
+        "issuer-level cohort analysis linking compromised cardholders to a common merchant or aggregator",
+        "elevated and sustained fraud rate on one BIN-merchant pairing after a data-exposure event",
+        "mule accounts receiving amounts that mirror legitimate order values across unrelated victims"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.5,
+      "real_world_grounding": "Pretexting from leaked merchant and delivery data is a well-documented Indian pattern, notably in cash-on-delivery and loan-app contexts, and cohort-based breach attribution is standard issuer practice; the genuinely newer element is cheap fusion of heterogeneous leaked datasets into targeting and timing decisions.",
+      "ethical_notes": "Publishes only the cohort-attribution and low-hesitation telemetry that fraud teams use to find a common point of exposure, with no reference to data sources, enrichment methods, or pretext content.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "ai_orchestrated_credential_stuffing_ato",
+      "name": "Agentically Orchestrated Credential Stuffing Into Card-On-File Cash-Out",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Credential-Based Account Takeover",
+      "rails": [
+        "card_cnp",
+        "wallet",
+        "token"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Gain authenticated control of merchant, wallet and issuer-portal accounts holding stored card credentials, then monetise the stored instrument without ever possessing the physical card.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Generative models act as an orchestration layer over breach corpora: they cluster credential material by likely mutation family per user cohort, prioritise which pairs to try against which merchant, and re-plan the attempt schedule from response semantics rather than following a fixed script. The same models produce heterogeneous session pacing and form-interaction timing profiles so attempts resemble a diverse human population instead of one tool. Defender consequence: the classic high-volume, low-variance stuffing burst fragments into many low-rate, high-diversity streams with a materially higher hit rate per attempt.",
+      "kill_chain": [
+        "credential corpus enrichment",
+        "distributed low-rate validation",
+        "session establishment on valid pair",
+        "stored-instrument abuse",
+        "goods or balance liquidation"
+      ],
+      "transaction_signature": "Post-takeover authorisations use a legitimately stored PAN or network token, so the credential itself is clean. Typical footprint is card-on-file CNP with no CVV, a first small probe auth under INR 200 followed within minutes by higher-value spend, MCC drift toward digital goods, gift cards, gaming top-ups and travel (5815/5816/5732/4722), shipping or delivery address changed in the same session, and clustering of many unrelated accounts hitting the same small merchant set inside one window.",
+      "behavioral_signature": "Account shows a hard dormant-to-active jump: login from an unrecognised device and ASN, immediate navigation straight to payment or address settings with no browse behaviour, notification-preference or e-mail change, and session length far below that account's historical median. Across the portfolio, thousands of accounts show near-identical settings-change sequences with individually plausible but collectively identical page-transition graphs.",
+      "observable_signals": [
+        "login success rate per ASN deviating sharply from that ASN's historical baseline",
+        "new device fingerprint plus new ASN plus zero prior cookie history on a mature account",
+        "time-from-login to payment-settings edit far below account median",
+        "contact-channel change (email, phone, notification opt-out) preceding first auth",
+        "reuse of one device or canvas fingerprint hash across unrelated customer IDs",
+        "first post-login auth is a low-value probe followed by escalation in the same session"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "fraud chargebacks under card-absent liability once the true cardholder notices",
+        "victim complaint that account e-mail was silently changed",
+        "concentration of disputes against a narrow merchant set fed by many issuers",
+        "digital-goods resale or gift-card redemption traced to a shared redemption pool"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Credential stuffing against Indian e-commerce, OTT and wallet accounts is routinely reported and underpins a large share of card-on-file CNP fraud; the AI contribution is throughput, per-target prioritisation and behavioural diversity rather than a new mechanism.",
+      "ethical_notes": "Describes only portfolio-level detection surfaces and post-takeover consequences; contains no credential sources, tooling, proxy strategy or evasion configuration.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "account_takeover",
+      "simulatable": true
+    },
+    {
+      "id": "ondevice_malware_session_hijack_trusted_device",
+      "name": "On-Device Malware Session Hijack Preserving The Victim's Trusted Device Fingerprint",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Device-Resident Takeover",
+      "rails": [
+        "upi",
+        "a2a",
+        "card_cnp",
+        "wallet"
+      ],
+      "channel": "IN_APP",
+      "attacker_objective": "Transact from inside the victim's own authenticated banking or UPI session on the victim's own handset, so every device-binding, SIM-binding and fingerprint check passes truthfully.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Generative models are used upstream to mass-produce convincing localised lures and app clones, and downstream to parse the victim's on-screen financial state and select the highest-yield action and timing per victim rather than draining uniformly. This turns a blunt overlay trojan into a per-victim decision agent that picks amounts, beneficiaries and hours consistent with that account's own history. Defensive consequence: fraud arrives with a genuine device fingerprint, genuine device binding and per-victim-tuned amounts, stripping away the anomaly features most ATO models depend on.",
+      "kill_chain": [
+        "lure delivery and sideload",
+        "accessibility or overlay privilege grant",
+        "session and on-device credential capture",
+        "in-session transfer or card provisioning",
+        "layered mule cash-out"
+      ],
+      "transaction_signature": "Authorisations originate from the correctly bound device with valid app attestation and the registered SIM, so device and geo features look normal. The tell is transaction shape: a sequence of transfers just under the customer's own step-up threshold, UPI P2P or A2A pushes to first-seen VPAs and newly added beneficiaries, execution concentrated in low-attention hours (roughly 01:00-05:00 IST), and total drain approaching available balance or full card limit within one to three hours.",
+      "behavioral_signature": "Screen-interaction telemetry diverges from the enrolled human even though hardware identifiers do not: accessibility-driven input with no touch pressure or gyroscope variance, near-zero typing entropy, impossible navigation speed between screens, no natural idle gaps. Beneficiary additions and limit increases occur inside the same session as the transfers, and SMS or notification permissions were altered shortly before.",
+      "observable_signals": [
+        "input events without corresponding accelerometer or touch-pressure variance",
+        "accessibility service or screen-overlay flag newly enabled on a long-lived device",
+        "app-session navigation timings orders of magnitude faster than the account baseline",
+        "multiple first-seen beneficiaries or VPAs added minutes before first debit",
+        "cluster of unrelated customers pushing funds to the same beneficiary in one window",
+        "SMS-read or notification-access permission change immediately preceding activity"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "victim disputes filed hours later after they regain phone attention",
+        "beneficiary account emptied through layered UPI hops or ATM withdrawal within minutes",
+        "recall requests failing because funds already moved through two or more mule layers",
+        "multiple victim reports converging on one sideloaded application name"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "critical",
+      "severity": "critical",
+      "novelty_score": 0.55,
+      "real_world_grounding": "Accessibility-abusing Android banking trojans targeting Indian UPI and net-banking apps are extensively documented by CERT-In and mobile-security vendors; the generative element is lure quality at scale and per-victim amount selection, not the malware capability itself.",
+      "ethical_notes": "Frames the attack purely as behavioural-telemetry divergence on a trusted device; no malware technique, permission-abuse method or distribution channel is described.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "account_takeover",
+      "simulatable": true
+    },
+    {
+      "id": "mfa_fatigue_push_bombing_social_script",
+      "name": "MFA Fatigue Push-Bombing With A Synchronised Support Pretext",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Authentication Interception",
+      "rails": [
+        "a2a",
+        "upi",
+        "card_cnp",
+        "wallet"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Convert a stolen password or partially compromised account into a fully approved authentication by inducing the victim to approve a push prompt they believe is a routine security action.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Language models generate the accompanying support pretext in the victim's language and register, timed to arrive alongside the push storm and referencing plausible account specifics so the approval feels like the resolution to the annoyance rather than its cause. The same models tune prompt cadence and follow-up wording per victim segment and produce a fallback narrative after a decline. The defender-visible result is that approval-after-decline-burst, previously a strong fraud indicator, now co-occurs with a legitimate-looking supporting contact and a shorter, less obviously abusive prompt series.",
+      "kill_chain": [
+        "credential validation on target account",
+        "paced push prompt series",
+        "synchronised pretext contact",
+        "victim approval captured",
+        "device enrolment and asset movement"
+      ],
+      "transaction_signature": "Transactions carry a fully approved strong-authentication result, so the authorisation stream looks compliant. The distinguishing footprint is what follows enrolment: a new trusted device added, then near-immediate outbound A2A or UPI transfers to new beneficiaries or high-value CNP spend, typically within the same hour and often exhausting a large share of the daily transfer limit.",
+      "behavioral_signature": "A burst of authentication challenges with several denials or timeouts, then a single approval, followed by device enrolment from an ASN and geography the account has never used. The victim's legitimate device continues normal usage in parallel, producing two concurrently active trusted sessions. Historically the victim rarely denies prompts, making the denial burst itself anomalous relative to their own baseline.",
+      "observable_signals": [
+        "three or more denied or expired push challenges preceding one approval",
+        "approval originating from a session whose IP or ASN differs from the approving handset's network",
+        "new trusted-device enrolment within minutes of the approval",
+        "concurrent active sessions from geographically inconsistent locations",
+        "inbound support-channel contact recorded in the same window as the prompt series",
+        "beneficiary addition immediately after enrolment on an account with a stable beneficiary list"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "victim reports never intending to authorise the transfer",
+        "funds layered through mule accounts before the victim's first complaint",
+        "dispute resolution complicated by a compliant strong-authentication record",
+        "repeat targeting of the same victim after the first successful approval"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.4,
+      "real_world_grounding": "Push-bombing combined with a helpdesk pretext is a documented technique behind several large enterprise and consumer account compromises; generative language models mainly lower the cost of producing fluent, localised pretexts at volume.",
+      "ethical_notes": "Limits itself to the challenge-response pattern defenders can monitor; no pretext wording, cadence parameters or targeting method is supplied.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "otp_relay",
+      "simulatable": true
+    },
+    {
+      "id": "sim_swap_assisted_takeover",
+      "name": "SIM-Swap-Assisted Takeover Of SMS-Bound Financial Identity",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Channel Control Seizure",
+      "rails": [
+        "upi",
+        "a2a",
+        "card_cnp",
+        "wallet"
+      ],
+      "channel": "VOICE",
+      "attacker_objective": "Seize control of the victim's mobile number so that all SMS-delivered codes, UPI device-binding SMS and recovery flows resolve to attacker-held hardware.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "Generative tooling supports the telecom-side impersonation: synthesised voice consistent with the subscriber profile, and identity artefacts consistent with aggregated open-source data about that subscriber. Language models assemble a coherent per-victim dossier from scattered public and breached fragments so the interaction survives challenge questions. The defender-relevant consequence is a higher success rate per porting attempt and a compressed window between reconnaissance and port.",
+      "kill_chain": [
+        "victim profiling from open and breached data",
+        "carrier-side impersonation and port or replacement",
+        "control of SMS and device-binding channel",
+        "financial account recovery and re-binding",
+        "rapid multi-account drain"
+      ],
+      "transaction_signature": "Once re-bound, transactions are technically well-formed and pass SMS-based checks: UPI re-registration from a new handset followed by transfers to new VPAs, card re-issue or token provisioning, and high-value A2A pushes. Amounts frequently sit at or just below per-transaction caps and repeat until daily limits are exhausted; activity is compressed into a short window because the attacker expects the victim to notice loss of signal.",
+      "behavioral_signature": "The account exhibits a hard identity discontinuity: SIM or IMSI change event, new device binding, multiple password and recovery-channel resets across banking, wallet and e-mail within a compressed window, and every subsequent action from a device with zero history. The victim's prior device stops appearing entirely rather than continuing in parallel.",
+      "observable_signals": [
+        "SIM change or IMSI change flag within the issuer's cooling-off window",
+        "UPI device re-binding on a handset with no prior relationship to the customer",
+        "credential and recovery-channel resets across multiple institutions in the same hour",
+        "complete disappearance of the previously dominant device fingerprint",
+        "high-value transfers immediately after re-binding on an account with a low-value baseline",
+        "port-out or replacement request geography inconsistent with the customer's usual circle"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "victim reports loss of mobile network preceding the fraud",
+        "cross-institution reports converging on one customer identity",
+        "mule beneficiary accounts drained through layered hops within minutes",
+        "carrier-side port record contradicting the customer's own account of events"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "critical",
+      "novelty_score": 0.3,
+      "real_world_grounding": "SIM swap is a long-established and heavily litigated fraud vector in India and globally, which is why regulators mandate cooling-off periods on SIM change before certain transactions; voice cloning and AI-assembled dossiers are an incremental, credible accelerant to the impersonation step.",
+      "ethical_notes": "Describes only the cross-institution discontinuity signals defenders already correlate; contains no carrier-process detail, impersonation script or porting method.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "otp_relay",
+      "simulatable": true
+    },
+    {
+      "id": "synthetic_identity_footprint_cultivation",
+      "name": "Synthetic Identity Cultivation With Machine-Generated Digital Footprints",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Manufactured Identity",
+      "rails": [
+        "card_cnp",
+        "card_cp",
+        "a2a",
+        "upi"
+      ],
+      "channel": "ONBOARDING",
+      "attacker_objective": "Establish a durable non-existent customer with a credible history, mature it through normal-looking behaviour, and convert accumulated credit and transfer limits into an uncollectable loss.",
+      "genai_role": "identity_synthesis",
+      "genai_mechanism": "Generative models manufacture the connective tissue that bureau and KYC checks implicitly test for: internally consistent biographies, plausible employment and address chronology, portrait imagery with no prior existence on the open web, and a thin but coherent social and e-commerce trail cultivated over months. Agentic tooling maintains hundreds of such personas in parallel, each with distinct behavioural cadence, so they do not correlate with one another. The consequence is that the sparse-file heuristics defenders rely on to flag synthetics are satisfied by genuine, if manufactured, activity.",
+      "kill_chain": [
+        "persona construction and document assembly",
+        "thin-file onboarding at a tolerant institution",
+        "footprint and credit maturation",
+        "limit escalation across institutions",
+        "coordinated bust-out and abandonment"
+      ],
+      "transaction_signature": "For most of its life the identity generates deliberately unremarkable authorisations: small recurring MCCs, utility and telecom payments, on-time repayments, gradual ticket-size growth. The bust-out phase inverts this abruptly with near-simultaneous maximum-utilisation spend across every open line, cash-equivalent and quasi-cash MCCs, gift-card and jewellery purchases, and large outbound A2A transfers, followed by total silence and no repayment.",
+      "behavioral_signature": "Identity has no pre-onboarding history anywhere and no relatives, co-applicants or shared-address links to established identities. Contact details are digital-only and recently created. Over time subtle infrastructure sharing emerges across supposedly unrelated identities: overlapping device attributes, address-normalisation collisions, near-identical session cadence, and coordinated application timing across institutions.",
+      "observable_signals": [
+        "portrait image with no reverse-image or prior-web presence and near-perfect framing consistency",
+        "identity attributes whose earliest observable date postdates the claimed age by decades",
+        "many first-time applicants sharing device, ASN or address-normalisation clusters",
+        "credit-line utilisation trajectory that is smooth then abruptly maximal",
+        "application velocity across multiple institutions inside a narrow window",
+        "behavioural cadence across supposedly unrelated customers with abnormally low variance"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "first-party or never-pay default with no traceable person behind the account",
+        "collections contact failing entirely across every supplied channel",
+        "bureau reconstruction revealing a cluster of identities that matured in lockstep",
+        "losses booked as credit charge-off rather than fraud, hiding true attribution"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "critical",
+      "severity": "critical",
+      "novelty_score": 0.8,
+      "real_world_grounding": "Synthetic identity fraud is the fastest-growing loss category in several mature credit markets and is well documented in bust-out form; generative imagery and agentic footprint cultivation materially raise the realism and parallelism of what was previously a slow, manual craft.",
+      "ethical_notes": "Presents only lifecycle and portfolio-correlation signals used by credit and fraud teams; supplies no synthesis method, document specification or onboarding-evasion guidance.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "bust_out",
+      "simulatable": true
+    },
+    {
+      "id": "generated_supporting_document_kyc_manipulation",
+      "name": "Generated Supporting Documents And Manipulated Identity Artefacts At Verification",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Manufactured Identity",
+      "rails": [
+        "card_cnp",
+        "a2a",
+        "upi",
+        "wallet"
+      ],
+      "channel": "ONBOARDING",
+      "attacker_objective": "Pass document-based identity, address and income verification using artefacts that are internally coherent and visually clean but correspond to no genuine issued record.",
+      "genai_role": "identity_synthesis",
+      "genai_mechanism": "Image and layout models produce or alter identity and supporting artefacts (statements, payslips, utility bills, address proofs) that are typographically consistent, arithmetically self-consistent and free of the crude splice artefacts earlier forgery detection targeted. Language models generate the accompanying narrative so the applicant's stated history matches every field across a multi-document bundle. The defender-visible shift is that inconsistency-based document checks lose signal while provenance-based checks (issuer validation, metadata, capture forensics) become the only reliable discriminator.",
+      "kill_chain": [
+        "artefact generation and bundle assembly",
+        "submission through remote onboarding",
+        "manual or automated review clearance",
+        "account funding and limit accrual",
+        "monetisation or mule use"
+      ],
+      "transaction_signature": "No distinctive authorisation footprint exists at onboarding — the fraud completes before any transaction. Downstream the account behaves either as a bust-out credit line or, more commonly in India, as a funnel account receiving many small inbound UPI and A2A credits from unrelated remitters and pushing them onward within minutes, with almost no genuine consumption spend.",
+      "behavioral_signature": "The documented persona and the operational behaviour never converge: a stated salaried professional whose account shows no salary credit, an address that never receives a card delivery, a customer who never uses any non-payment feature. Verification imagery shows unnatural capture uniformity across documents that should have different physical provenance.",
+      "observable_signals": [
+        "absent or synthetic capture metadata and recompression traces inconsistent with a phone camera",
+        "identical lighting, crop geometry or noise profile across documents of different claimed origin",
+        "document fields arithmetically perfect in a way real statements rarely are",
+        "issuer or registry validation failing or unavailable while the artefact itself looks clean",
+        "the same address or employer string recurring across unrelated applicants after normalisation",
+        "no salary or income credit appearing in an account onboarded on income documents"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "account rapidly reclassified as a mule after inbound victim complaints",
+        "card or welcome kit undeliverable at the verified address",
+        "charge-off with no traceable person and no enforceable contact",
+        "law-enforcement notice tying the account to unrelated victim losses"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.7,
+      "real_world_grounding": "Forged KYC and income documentation is long established in Indian lending and mule-account creation; generative image and layout models have demonstrably raised artefact quality, shifting practical detection from visual inconsistency toward issuer-side and forensic provenance validation.",
+      "ethical_notes": "Discusses only forensic and provenance signals used by verification teams; omits any description of how artefacts are produced or which checks are weakest.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "bust_out",
+      "simulatable": true
+    },
+    {
+      "id": "deepfake_liveness_video_kyc_defeat",
+      "name": "Deepfake Liveness And Video-KYC Defeat At Remote Onboarding",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Biometric Verification Defeat",
+      "rails": [
+        "a2a",
+        "upi",
+        "wallet",
+        "card_cnp"
+      ],
+      "channel": "ONBOARDING",
+      "attacker_objective": "Clear a live biometric or video-KYC check with a synthetic or puppeteered face so a fabricated or stolen identity is bound to an account under a regulator-recognised verification.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "Real-time face synthesis and reenactment can sustain a responsive human likeness through an interactive session, including head turns, expression changes and lip-synced speech in the expected language, presented through a virtual capture path rather than held to a screen. Audio synthesis keeps voice and face consistent under questioning. The defender consequence is that challenge-response liveness, which assumed a synthetic could not react in real time, degrades into a passable test, pushing detection toward stream-provenance and hardware-attestation signals.",
+      "kill_chain": [
+        "persona and likeness preparation",
+        "virtual capture-path insertion",
+        "interactive liveness session cleared",
+        "regulator-recognised account opening",
+        "mule operation or credit bust-out"
+      ],
+      "transaction_signature": "Produces no authorisation footprint at the moment of attack. The onboarded account subsequently shows one of two shapes: a mule funnel with rapid inbound-then-outbound UPI and A2A churn across many unrelated counterparties, or a credit line matured briefly then maximised across cash-equivalent MCCs and abandoned.",
+      "behavioral_signature": "Session-layer telemetry contradicts the apparent human: virtual or non-attested camera device, frame timing too regular for handheld capture, absent sensor fusion (no gyroscope or accelerometer motion correlated with visible head movement), and challenge-reaction latency that is implausibly uniform or slightly lagged. The same underlying likeness or capture environment recurs across nominally different applicants.",
+      "observable_signals": [
+        "virtual camera or non-attested capture path detected during the session",
+        "frame-rate and inter-frame timing regularity inconsistent with handheld video",
+        "no correlation between visible head motion and device motion sensors",
+        "face embedding matching a prior enrolment under a different identity",
+        "challenge-response latency variance abnormally low across the session",
+        "facial-region rendering artefacts at occlusion boundaries under motion"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "account flagged as mule after downstream victim complaints",
+        "biometric duplicate detected against later enrolments in the same portfolio",
+        "enrolled person unreachable or denies ever holding the account",
+        "regulatory audit finding a verified-KYC account with no real customer behind it"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.9,
+      "real_world_grounding": "Injection attacks against remote biometric onboarding are documented by biometric-testing bodies and have driven multiple financial-sector advisories, including Asian cases where video-KYC was cleared with synthetic likenesses; this is genuinely enabled by recent real-time generative models.",
+      "ethical_notes": "Written entirely from the verifier's telemetry perspective — capture provenance, sensor correlation, rendering artefacts — with no injection technique, tooling or weakest-check guidance.",
+      "simulator_status": "FUTURE",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "ai_aggregated_kba_defeat_account_recovery",
+      "name": "Aggregated-Data Knowledge-Based Authentication Defeat In Account Recovery",
+      "category": "Account & Identity Compromise",
+      "subcategory": "Recovery-Channel Compromise",
+      "rails": [
+        "card_cnp",
+        "a2a",
+        "wallet",
+        "upi"
+      ],
+      "channel": "VOICE",
+      "attacker_objective": "Pass issuer or merchant identity-verification questions and human-agent recovery checks well enough to have credentials, contact details or delivery instructions reset in the attacker's favour.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Language models fuse breach corpora, public registries and social and e-commerce residue into a single per-victim dossier that anticipates the specific verification questions a given institution asks, ranking candidate answers by confidence. In a live agent call the model supplies real-time suggestions and a recovery narrative when a question is missed, so the caller never stalls. The consequence for defenders is that static and dynamic KBA both lose discriminative power, because the attacker's answer distribution now closely matches the genuine customer's.",
+      "kill_chain": [
+        "cross-source dossier assembly",
+        "institution-specific question anticipation",
+        "agent-assisted verification pass",
+        "contact or credential reset",
+        "asset movement or reissued instrument abuse"
+      ],
+      "transaction_signature": "The compromise itself is invisible in the authorisation stream. Downstream authorisations look ordinary but the instrument or delivery has been redirected: card reissued to a changed address, token provisioned to an unfamiliar wallet, or transfers to newly added beneficiaries. Ticket sizes often deliberately match the account's baseline, defeating amount-anomaly rules.",
+      "behavioral_signature": "A back-office or voice-channel identity verification succeeds on an account that then immediately changes its contact channels. The customer's own digital session activity is absent throughout, and the historically dominant device continues normal behaviour afterward, unaware. Repeat verification attempts across several institutions for the same identity cluster in a short window.",
+      "observable_signals": [
+        "successful KBA on a call from a number never associated with the customer",
+        "contact-detail or address change within minutes of verification passing",
+        "one or more failed verification attempts on the same identity shortly beforehand",
+        "recovery attempt occurring with no corresponding digital session from the customer's device",
+        "cross-institution verification attempts for one identity inside a narrow time window",
+        "card reissue or token provisioning immediately following the reset"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "customer reports never receiving a reissued card or never requesting the reset",
+        "dispute arising weeks later once statements reach the old address",
+        "call-recording review revealing answer patterns inconsistent with the genuine customer",
+        "fraud reported concurrently at multiple institutions for the same identity"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.6,
+      "real_world_grounding": "KBA has been treated as structurally weak by regulators and industry for over a decade because of breach saturation; large-scale aggregation and live answer assistance is a documented and credible extension that further collapses its residual value.",
+      "ethical_notes": "Focuses on verification-channel and reset-sequence signals available to fraud operations; names no data sources, question sets or impersonation method.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "distributed_bin_enumeration_card_testing",
+      "name": "Low-And-Slow Distributed BIN Enumeration Across Merchant Long-Tail",
+      "category": "Payment Instrument Attacks",
+      "subcategory": "Card testing / enumeration",
+      "rails": [
+        "card_cnp"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Discover which PAN/expiry/CVV combinations within a known issuer BIN range are live and authorizable, producing a validated card inventory for later monetisation.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Agentic orchestration lets a single operator drive checkout attempts across hundreds of unrelated small merchants simultaneously, adapting to each site's flow without hand-written per-merchant scripts, so per-merchant velocity stays under any single acquirer's threshold while aggregate throughput is very high. Generative models also produce plausible, internally consistent synthetic billing identities per attempt (name, address, email, phone in matching Indian pincode/state combinations), which defeats naive duplicate-value detection because no two attempts share fields. The effect defenders see is enumeration whose statistical fingerprint is only visible at network level, not merchant level.",
+      "kill_chain": [
+        "BIN range selection",
+        "Merchant surface discovery",
+        "Distributed probe fan-out",
+        "Live-card list assembly",
+        "Handoff to monetisation"
+      ],
+      "transaction_signature": "Very high decline-to-approve ratio concentrated in contiguous or algorithmically-adjacent PAN ranges within one or a few issuer BINs; small ticket sizes (often INR 1-50 or the merchant minimum) or zero-amount account verification messages; heavy skew toward low-risk MCCs such as 5815/5816 digital goods, 8398 donations, and 5968 subscription/direct marketing; wide merchant spread with only 1-3 attempts per merchant per hour; response-code mix dominated by 'do not honour', 'invalid CVV2/expiry' rather than 'insufficient funds'.",
+      "behavioral_signature": "No account tenure anywhere — each attempt originates from a session with zero history, no returning-device cookie, and no post-approval behaviour. Approved cards are immediately abandoned rather than used, producing a distinctive 'approve then silence' pattern. Attempt timing shows machine-regular inter-arrival distributions at network level even where each individual merchant sees only sporadic traffic.",
+      "observable_signals": [
+        "Issuer-level decline rate spike confined to narrow PAN neighbourhoods",
+        "Same-BIN attempts fanned across many unrelated acquirers within minutes",
+        "Zero-amount / account-verification messages with no follow-on purchase",
+        "Approved low-value auth with no subsequent activity on that PAN",
+        "CVV2/expiry mismatch codes clustered by PAN prefix",
+        "Session fingerprints with no cookie age and no prior merchant history"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Validated PANs surface days later in unrelated high-value CNP fraud",
+        "Merchant misuse-of-authorisation-system fees and network enumeration-programme notices",
+        "Cardholder disputes on the tiny test charges that were never reversed",
+        "Cluster of first-fraud dates traceable to a common enumeration window"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.5,
+      "real_world_grounding": "Card testing and BIN enumeration are long-documented; card networks run dedicated enumeration-monitoring programmes and issuers routinely observe attack waves against small merchants. What is newer is the ease of orchestrating heterogeneous merchant checkouts and generating unique synthetic billing data per attempt at scale.",
+      "ethical_notes": "Describes the aggregate authorization-stream and behavioural footprint a defender can measure; contains no merchant targeting criteria, no evasion thresholds, and no tooling.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "card_testing",
+      "simulatable": true
+    },
+    {
+      "id": "cnp_monetisation_on_validated_cards",
+      "name": "Post-Validation CNP Monetisation Through Resale-Liquid Digital Goods",
+      "category": "Payment Instrument Attacks",
+      "subcategory": "Card-not-present cash-out",
+      "rails": [
+        "card_cnp"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Convert an already-validated stolen card into resaleable value before the cardholder or issuer notices, maximising extraction per card in a short window.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Generative models let an operator produce coherent, per-card purchase personas — shipping identity, contact details, and a purchase narrative consistent with the card's issuing geography — so that address-verification and identity-consistency checks see plausible rather than templated data. Agentic browsing sustains parallel checkout sessions across many merchants at once, compressing the exploitation window between validation and issuer block. The novelty is throughput and per-attempt uniqueness, not any new payment mechanic.",
+      "kill_chain": [
+        "Validated card acquisition",
+        "Merchant selection for liquidity",
+        "Rapid parallel checkout",
+        "Digital value extraction",
+        "Resale / laundering"
+      ],
+      "transaction_signature": "Burst of medium-value CNP authorisations (typically INR 2,000-25,000) within a compressed window across several merchants; strong bias toward instantly-fulfilled or resale-liquid categories — gift-card and stored-value MCC 6540/5815, gaming top-ups, digital subscriptions, travel MCC 4722 — with no shipping delay to interrupt cash-out. Billing and delivery geography frequently diverges from the card's historic authorisation footprint; currency or acquirer country may differ from issuer country. AVS/CVV2 results are often full-match because the data was validated earlier, so the classic mismatch signal is absent.",
+      "behavioral_signature": "Guest checkout or brand-new merchant accounts created minutes before purchase; no browsing depth, no cart abandonment, no wishlist history — straight to checkout. Device and IP reused across multiple distinct cardholder identities within hours, which is the strongest cross-merchant tell. Spend velocity is wholly discontinuous with the card's own history.",
+      "observable_signals": [
+        "Multi-merchant authorisation burst on one PAN inside a short window",
+        "One device or IP associated with many unrelated cardholder names",
+        "Merchant account age measured in minutes at time of high-value purchase",
+        "Shipping/billing mismatch or delivery to freight-forwarder and locker addresses",
+        "Sharp shift into stored-value and instantly-fulfilled MCCs",
+        "Full AVS/CVV2 match combined with zero device or account history"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Cardholder-not-authorised chargebacks (reason 10.4 / 4837 class) clustered by purchase date",
+        "Gift-card codes redeemed from geographies unrelated to purchase",
+        "Merchant fraud-to-sales ratio breach on affected MIDs",
+        "Common-point-of-purchase analysis linking many disputed PANs to one earlier breach"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.35,
+      "real_world_grounding": "Classic CNP cash-out through resale-liquid digital goods is one of the best-documented fraud patterns in card networks and underpins most CNP chargeback volume. GenAI changes the speed and per-attempt data uniqueness, not the underlying economics.",
+      "ethical_notes": "Frames the attack purely as authorization-stream and dispute-stream consequences that a detector can score; no merchant lists, no data-preparation guidance.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "account_takeover",
+      "simulatable": true
+    },
+    {
+      "id": "wallet_provisioning_takeover",
+      "name": "Digital-Wallet Provisioning Takeover Via Yellow-Path Identity Defeat",
+      "category": "Payment Instrument Attacks",
+      "subcategory": "Wallet provisioning abuse",
+      "rails": [
+        "wallet",
+        "token",
+        "card_cp",
+        "card_cnp"
+      ],
+      "channel": "IN_APP",
+      "attacker_objective": "Push a stolen card into a wallet on an attacker-controlled device so that subsequent spend carries device-bound token credentials and contactless/in-app trust rather than raw PAN risk.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "Provisioning that fails the automatic (green) path is routed to an identification-and-verification step — a one-time passcode to the cardholder's registered channel, or a call/chat with the issuer's service desk. Generative AI attacks both branches: synthesised voice and real-time conversational coaching let an attacker sustain a convincing cardholder persona through an issuer verification call, while personalised, contextually-timed phishing content harvests the provisioning passcode by presenting it as a routine card-security confirmation. Where document upload is used, image-generation models produce plausible identity artefacts. The result for the network is a provisioning decision that looks legitimately approved.",
+      "kill_chain": [
+        "Card credential acquisition",
+        "Provisioning request from attacker device",
+        "ID&V challenge interception or social defeat",
+        "Token activation on attacker wallet",
+        "Contactless / in-app spend"
+      ],
+      "transaction_signature": "The provisioning event itself is the primary artefact, not a purchase: a token-provisioning request whose device attestation, device model, wallet-account age, and geography are all new to the cardholder, frequently reaching the issuer within minutes of a card-data compromise or a customer-service contact. Subsequent spend arrives as device-token transactions with high assurance-level indicators — contactless CP entry mode, cryptogram present, DPAN not PAN — which historically score as LOW risk. Early spend skews to fast, resale-liquid, contactless-accepted retail and stored value.",
+      "behavioral_signature": "The victim's genuine device continues normal usage while a second, previously unseen device holds an active token on the same PAN. Provisioning often follows a cluster of failed logins, a password/contact-detail change, or an inbound service-desk contact within the preceding hour. The attacker device typically provisions several unrelated cardholders' cards over time — a one-device-many-cardholders shape that is invisible to any single issuer view but stark at network level.",
+      "observable_signals": [
+        "Provisioning request from device with no prior relationship to the cardholder",
+        "Token activation within minutes of an ID&V call, OTP delivery, or contact-detail change",
+        "Wallet account age far younger than cardholder tenure",
+        "Same wallet/device attestation provisioning cards for multiple unrelated cardholders",
+        "Provisioning geography inconsistent with recent genuine card-present activity",
+        "First token spend clustered in stored-value or fast-fulfilment merchants"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Cardholder disputes contactless transactions from a city or device they never used",
+        "Issuer token-lifecycle review showing an unrecognised device binding",
+        "Chargebacks on transactions carrying strong CP authentication indicators, which is itself anomalous",
+        "Service-desk recording review confirming an impersonated verification call"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.65,
+      "real_world_grounding": "Wallet provisioning fraud via ID&V defeat is a well-documented and materially costly pattern for issuers, and networks publish provisioning-risk scoring specifically because of it. Voice synthesis and real-time conversational assistance are a credible and already-emerging escalation of the service-desk branch.",
+      "ethical_notes": "Explains the provisioning-decision and token-spend signals available to issuers and networks; it does not describe how any verification step is structured, worded, or defeated.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "wallet_provisioning",
+      "simulatable": true
+    },
+    {
+      "id": "token_lifecycle_trust_inheritance",
+      "name": "Token Lifecycle Abuse And Laundering Of Assurance Through Trusted Tokens",
+      "category": "Payment Instrument Attacks",
+      "subcategory": "Token lifecycle abuse",
+      "rails": [
+        "token",
+        "wallet",
+        "card_cnp"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Obtain or retain a network/merchant token that carries elevated authentication assurance, and exploit the fact that the token keeps accruing trust signals independently of the compromise that created it.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Reasoning models make it cheap to map where token trust is conferred and where it is inherited — which token requestors carry which assurance levels, how token-assurance and cryptogram indicators flow into issuer scoring, and how a token survives events like card reissue via lifecycle updates. That mapping lets an operator prioritise obtaining tokens over raw PANs and choose spend patterns that let a young token 'season' into a trusted one. Generative tooling also sustains the low-friction, plausible early activity that builds a token's own transaction history.",
+      "kill_chain": [
+        "Token acquisition or inherited provisioning",
+        "Assurance-level seasoning",
+        "Trust inheritance across merchants",
+        "Persistence through card lifecycle events",
+        "Escalated-value extraction"
+      ],
+      "transaction_signature": "A DPAN whose own transaction history looks progressively better than the underlying PAN's risk warrants: rising token-assurance indicators, high proportion of authenticated (3DS/cryptogram-bearing) transactions, low decline rate, and steadily increasing ticket sizes. Critically, a token provisioned during compromise can outlive PAN reissue through automatic lifecycle update, so a card the issuer believes it has replaced continues to authorise. Escalation shows as a step-change in ticket size after weeks of small, clean, well-authenticated activity — and card-on-file tokens spreading to new merchants without a corresponding new-card-entry event.",
+      "behavioral_signature": "Token usage stays anchored to one device or requestor while the genuine cardholder's own activity pattern shows no awareness of it. Merchant-token proliferation happens through account-based flows (adding the wallet as a payment method) rather than PAN entry, so it leaves no card-entry footprint. Over weeks the token accumulates repeat-merchant relationships that make it look like an established instrument.",
+      "observable_signals": [
+        "Token assurance level rising without any re-verification event",
+        "Token surviving PAN reissue and immediately resuming spend on a device never seen pre-reissue",
+        "Ticket-size step-change after a sustained low-value seasoning period",
+        "One token requestor / device propagating card-on-file tokens to many merchants",
+        "High authenticated-transaction ratio on a token whose underlying PAN sits in a breached cohort",
+        "Token-to-PAN risk divergence: token scores clean, PAN cohort scores dirty"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "Disputes on fully authenticated token transactions where liability has shifted to the issuer",
+        "Token lifecycle audit revealing a binding the cardholder never recognised",
+        "Post-reissue fraud on a PAN the issuer considered closed",
+        "Merchant card-on-file cleanup surfacing tokens tied to a single fraudulent requestor"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.65,
+      "real_world_grounding": "Token assurance levels, lifecycle updates surviving reissue, and the liability shift on authenticated token transactions are documented properties of network tokenisation, and issuers have observed fraud persisting through reissue. The systematic 'prefer tokens over PANs and season them' strategy is a credible near-term extrapolation rather than a fully catalogued campaign type.",
+      "ethical_notes": "Discusses trust-inheritance as a detection gap for issuers and networks to close; contains no information about obtaining, requesting, or manipulating tokens.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "wallet_provisioning",
+      "simulatable": true
+    },
+    {
+      "id": "checkout_endpoint_merchant_enumeration",
+      "name": "Weak-Checkout Endpoint Harvesting For Merchant And Instrument Enumeration",
+      "category": "Payment Instrument Attacks",
+      "subcategory": "Infrastructure / endpoint abuse",
+      "rails": [
+        "card_cnp",
+        "upi"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Locate merchant checkout and payment-page integrations with weak server-side controls and use them as durable, low-cost validation surfaces for card and VPA credentials.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Code-capable models can read a merchant's public payment integration surface and characterise its control posture at a glance, letting an operator triage thousands of candidate merchants for weak configurations far faster than manual review. Agentic execution then adapts to each site's distinct checkout structure without bespoke engineering. For UPI, the equivalent target is a collect-request or VPA-validation surface that confirms whether an address resolves to a real account holder.",
+      "kill_chain": [
+        "Integration surface discovery",
+        "Control-posture triage",
+        "Enumeration against weak endpoints",
+        "Validated-credential harvest",
+        "Merchant surface rotation"
+      ],
+      "transaction_signature": "Extreme attempt-to-approval asymmetry concentrated on a small number of merchant IDs, often on merchants whose legitimate volume is negligible — a low-traffic MID suddenly carrying thousands of authorisation or verification messages. Amounts are minimal or zero; many attempts never reach a purchase message at all, appearing instead as account-verification, pre-auth, or name-lookup traffic. On UPI rails the analogue is a burst of VPA-resolution or unaccepted collect requests with near-zero acceptance rate, often from a single PSP handle cohort.",
+      "behavioral_signature": "Traffic to the merchant lacks the whole pre-purchase funnel — no catalogue browsing, no cart events, no session depth — arriving directly at the payment step. Requests come from rotating infrastructure with fresh fingerprints, and the same merchant surface is revisited in waves separated by quiet periods. Once a merchant hardens its controls, the pattern reappears on a structurally similar merchant within days.",
+      "observable_signals": [
+        "Authorisation volume on a MID wildly disproportionate to its historic baseline",
+        "Payment-step traffic with no preceding funnel events",
+        "Near-zero approval rate sustained over thousands of attempts",
+        "Distinct PANs per attempt, distinct BINs, but common request infrastructure",
+        "Wave-and-pause timing with migration to similar merchants after remediation",
+        "UPI: high-volume VPA resolution or collect requests with negligible acceptance"
+      ],
+      "auth_time_observability": "high",
+      "post_transaction_signals": [
+        "Acquirer enumeration-programme notices and network fines against the abused MID",
+        "Merchant processing-cost spike from decline volume with no revenue",
+        "Credentials validated here appearing in fraud at unrelated merchants weeks later",
+        "Cardholder complaints about unexplained verification notifications"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Abuse of weakly-protected checkout and payment endpoints as free card-validation infrastructure is well documented, and both networks and acquirers run programmes that penalise merchants whose endpoints are used this way. Automated triage of integration posture at scale is the GenAI-accelerated component.",
+      "ethical_notes": "Deliberately describes only the volumetric and funnel-shape signals an acquirer or network sees; it names no weakness class, no endpoint behaviour, and no discovery technique.",
+      "simulator_status": "FUTURE",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "recurring_mandate_subscription_abuse",
+      "name": "Recurring Mandate And Subscription Abuse On A Compromised Instrument",
+      "category": "Payment Instrument Attacks",
+      "subcategory": "Mandate / credential-on-file abuse",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a",
+        "token"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Establish durable recurring debits on a compromised card, UPI autopay mandate, or bank mandate so that value extraction continues quietly long after the initial compromise.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Generative models mass-produce the connective tissue that makes a recurring debit look legitimate: distinct merchant-facing subscriber identities, plausible service branding and descriptors, and mandate-consent notifications that read like ordinary subscription confirmations rather than alarms. The same capability produces the low-friction customer-support and cancellation-deflection correspondence that keeps a victim from escalating quickly. Individually these were always possible; at scale they let one operator run many parallel recurring streams across many victims.",
+      "kill_chain": [
+        "Instrument compromise",
+        "Mandate or credential-on-file establishment",
+        "Consent-notification suppression or normalisation",
+        "Sustained low-value recurring debit",
+        "Escalation or mandate migration"
+      ],
+      "transaction_signature": "Repeating, calendar-regular debits at modest amounts (commonly INR 99-999 in the Indian market, deliberately near the psychological ignore-threshold and, for cards, historically near or below step-up-authentication thresholds), flagged as recurring/MIT with stored-credential indicators, so per-transaction risk scoring treats them as established relationships. The first transaction in the series is the only one carrying full authentication context; every subsequent one inherits it. On UPI this appears as an autopay mandate with a modest per-debit cap and a long validity window; on A2A as a standing instruction. Merchant descriptors are often generic or rotate slightly between cycles.",
+      "behavioral_signature": "Mandate creation typically coincides with an account-takeover window or a phishing/support-impersonation contact, and is frequently accompanied by contact-detail changes or notification-channel suppression so the victim's mandate-confirmation and pre-debit notifications never land. Once running, there is no session activity at all — the fraud is entirely server-side and generates zero device signal, which is precisely why it survives so long. Cancellation attempts by the victim are met with attrition rather than refusal.",
+      "observable_signals": [
+        "New mandate or card-on-file registration within hours of a contact-detail or credential change",
+        "Recurring debits at an amount just under common alert or step-up thresholds",
+        "Mandate-confirmation notification bounce, suppression, or redirect to a new address",
+        "Many unrelated payers holding mandates to the same or near-identical merchant descriptor",
+        "Recurring series whose first transaction is authenticated and all others are not",
+        "Long mandate validity with high cumulative cap versus small per-debit amount"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "Late bulk disputes covering many cycles once the victim finally reviews statements",
+        "Mandate revocation and recall requests clustering on one merchant within days",
+        "Elevated cancellation-complaint and grievance volume against a single descriptor",
+        "Merchant refund-to-sales ratio and dispute-latency profile far outside category norms"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Subscription and mandate abuse on compromised instruments is a documented and persistent pattern; India's e-mandate framework and UPI Autopay pre-debit notification rules were introduced specifically because low-value recurring debits evade victim attention. GenAI's contribution is the cheap production of convincing merchant identities and deflection correspondence at scale.",
+      "ethical_notes": "Describes the recurring-transaction and notification-suppression signals that issuers, PSPs, and mandate registries can monitor; it prescribes no mandate-setup method, threshold, or victim-handling script.",
+      "simulator_status": "FUTURE",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "vendor_invoice_redirection_thread_aware",
+      "name": "Thread-Aware Vendor Invoice Redirection Against SME Payables",
+      "category": "Authorized Push Payment Scams",
+      "subcategory": "invoice_redirection",
+      "rails": [
+        "a2a",
+        "upi"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Redirect a small business's genuine, expected supplier payment to attacker-controlled bank details by altering the banking coordinates on an otherwise legitimate invoice relationship.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Where an attacker has visibility into a real supplier thread, a language model reproduces the vendor's established tone, invoice numbering conventions, and correspondence cadence closely enough that the linguistic tells SME staff are trained to spot largely disappear. Document synthesis regenerates the invoice PDF with consistent formatting, logo placement, GSTIN and PO references intact and only the beneficiary block changed. The attack is timed to a genuinely pending payable, so the request arrives when the recipient is already expecting it.",
+      "kill_chain": [
+        "supplier correspondence visibility obtained upstream",
+        "bank-detail change notice matched to a pending payable",
+        "payables clerk updates vendor master",
+        "payment released on normal cycle",
+        "onward layering before reconciliation"
+      ],
+      "transaction_signature": "The amount, timing, and payment cycle are entirely normal for the business — this is the defining difficulty. The only anomaly is a changed beneficiary for a payee the business has paid repeatedly. Frequently visible as: a long-standing vendor name paired with a newly-registered account number or a beneficiary account whose name is a near-miss of the vendor's (transliteration variant, dropped suffix, 'Enterprises' vs 'Enterprise'). Often a first payment at partial value to test, then the full payable.",
+      "behavioral_signature": "Vendor master record edited from a corporate banking session shortly before the payment run, sometimes outside normal hours or by a user who does not usually edit master data. No corresponding change request through the procurement system. The genuine vendor continues to chase the invoice as unpaid in a parallel channel.",
+      "observable_signals": [
+        "beneficiary account changed for a payee with 6+ months of stable payment history",
+        "beneficiary name-match score below threshold against the vendor master name",
+        "vendor master edit and payment release within the same or adjacent session",
+        "new beneficiary account opened within 60 days receiving a large first credit",
+        "payment amount exactly matches a known recurring payable but to a new destination",
+        "duplicate chase for the same invoice number arriving on a different channel"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "genuine supplier raises non-receipt at the next ageing cycle",
+        "recall request against a beneficiary account already emptied",
+        "receiving bank reports the account as newly onboarded with atypical credit profile",
+        "second victim business identified paying the same beneficiary account"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Invoice redirection is one of the best-documented business payment frauds globally and a leading SME loss driver in India, the UK, and the EU. Confirmation-of-payee style name checking measurably reduces it, which is why beneficiary-name mismatch is the load-bearing signal here; GenAI's role is to erode the language-quality tell, not to create the pattern.",
+      "ethical_notes": "Describes the payables-side control failure and the beneficiary-change signals defenders monitor, without any detail on obtaining supplier correspondence or forging documents.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "scam_transfer",
+      "simulatable": true
+    },
+    {
+      "id": "bec_executive_urgent_payment_request",
+      "name": "Executive-Voice Business Email Compromise Payment Instruction",
+      "category": "Authorized Push Payment Scams",
+      "subcategory": "business_email_compromise",
+      "rails": [
+        "a2a"
+      ],
+      "channel": "BACKOFFICE",
+      "attacker_objective": "Obtain a single high-value out-of-cycle corporate transfer by impersonating an executive or an executive's authority to a finance staff member.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "The decisive change is that the corroboration step now fails. Finance staff are trained to verify an unusual written instruction by voice or video call-back; synthetic voice and video make that call-back a confirmation of the fraud rather than a defence against it, and there are documented multi-participant video-call cases. A language model additionally sustains the executive's register and knowledge of internal context across a back-and-forth exchange, so a hesitant employee's questions get plausible answers instead of stonewalling.",
+      "kill_chain": [
+        "target selection of payment-authorised staff",
+        "impersonated instruction citing confidential urgency",
+        "synthetic voice or video defeats the call-back check",
+        "out-of-cycle transfer released",
+        "same-day onward dispersal"
+      ],
+      "transaction_signature": "A single large outbound transfer, materially above the entity's typical per-payment value, to a brand-new beneficiary, released outside the normal payment run — frequently late in the day, before a weekend or a public holiday to maximise the recall gap. Often cross-border, or domestic into a current account whose name resembles a legal or advisory firm. Dual-authorisation is either bypassed by seniority pressure or satisfied by a second employee subjected to the same impersonation.",
+      "behavioral_signature": "Payment initiated by a user who rarely initiates, or approved by an approver acting outside their usual counterparty set. Instruction thread lives outside the ERP/procurement system. Compressed decision window: instruction to release in well under the organisation's median. No purchase order, no contract reference, and secrecy framing that suppresses internal checking.",
+      "observable_signals": [
+        "single payment exceeding the entity's 99th-percentile transfer value",
+        "new beneficiary with zero prior relationship and no PO linkage",
+        "release timed outside the standard payment run or into a holiday window",
+        "initiator/approver pair with no prior co-approval history",
+        "cross-border destination inconsistent with the entity's trade corridor",
+        "call-back verification recorded as completed but to a number supplied in the instruction"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "entity-initiated recall within hours once the real executive is reached",
+        "beneficiary bank confirms same-day onward transfer or withdrawal",
+        "correspondent bank freeze request under cross-border fraud protocols",
+        "insurance claim under crime/social-engineering cover"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "critical",
+      "severity": "critical",
+      "novelty_score": 0.85,
+      "real_world_grounding": "BEC is long-established and among the highest-value reported fraud categories by the FBI IC3. The specific escalation — deepfaked video and voice defeating the human call-back control, including publicly reported multi-million-dollar multi-participant video-call incidents — is documented and recent, which is why this scores well above the classic BEC baseline.",
+      "ethical_notes": "Frames the attack around the failure of the call-back control and the transfer-level anomalies defenders can monitor, deliberately omitting any pretext content or impersonation methodology.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "scam_transfer",
+      "simulatable": true
+    },
+    {
+      "id": "marketplace_listing_collect_request_inversion",
+      "name": "Marketplace Listing Scam Exploiting Collect-Request Direction Confusion",
+      "category": "Authorized Push Payment Scams",
+      "subcategory": "marketplace_and_classifieds",
+      "rails": [
+        "upi",
+        "a2a",
+        "wallet"
+      ],
+      "channel": "IN_APP",
+      "attacker_objective": "Extract payment from a marketplace counterparty for goods that do not exist, or invert a sale so the seller pays the buyer while believing they are receiving funds.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Listing generation at scale — original-looking photographs, varied item descriptions, and coherent seller personas with plausible histories — defeats the duplicate-image and template-matching heuristics marketplaces rely on to bulk-remove scam inventory. Conversational automation lets one operator hold many simultaneous negotiation threads in the buyer's language and adapt when the counterparty pushes back. Persona and listing sets are regenerated immediately after enforcement, so account-level bans have short half-life.",
+      "kill_chain": [
+        "mass listing or buyer-persona generation",
+        "off-platform conversation move",
+        "payment direction confusion or advance-payment demand",
+        "victim authorises push or approves collect request",
+        "persona regeneration post-enforcement"
+      ],
+      "transaction_signature": "Small-to-mid ticket, high-frequency, many-to-one fan-in: dozens of unrelated payers crediting one VPA or account within a short window, with no matching goods-delivery or merchant settlement footprint. The seller-side variant is distinctive: the victim approves a collect/pull request believing it credits them, producing a debit from an account that has just listed an item — a debit whose direction contradicts the customer's stated intent. Amounts frequently cluster around common resale price points (electronics, furniture, two-wheelers) and around token 'booking advances'.",
+      "behavioral_signature": "Beneficiary account is young, has near-zero outbound diversity, and shows fan-in from geographically dispersed, mutually unconnected payers. Payer side shows a first-ever payee, a preceding marketplace app session, and often a chat handoff to an external messaging app. Repeat victims sometimes make a second payment after a fabricated 'transaction failed' claim.",
+      "observable_signals": [
+        "many-to-one credit fan-in to a payee under 60 days old",
+        "collect/pull request approved by a customer who is the stated seller",
+        "payment to a first-ever payee within minutes of a marketplace app session",
+        "duplicate near-identical amounts from unconnected payers same day",
+        "second payment to same payee after a claimed failure of the first",
+        "military/relocation/urgent-transfer style listing metadata correlated with the payee"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "clustered complaints naming one VPA or account handle",
+        "beneficiary account restricted for mule indicators after fan-in threshold",
+        "marketplace trust-and-safety takedown correlating to the same payee",
+        "non-delivery disputes filed 3-10 days post-payment"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Classified-listing fraud and UPI collect-request direction confusion are both heavily documented in India, prompting NPCI and bank-level restrictions on collect requests from unverified entities. Generative listing and persona content is a documented scaling factor for marketplace abuse rather than a new mechanism.",
+      "ethical_notes": "Covers the fan-in and payment-direction anomalies that detection systems key on; it does not explain how to construct listings, personas, or requests.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "scam_transfer",
+      "simulatable": true
+    },
+    {
+      "id": "cloned_voice_family_emergency_extortion",
+      "name": "Cloned-Relative Emergency Payment Under Manufactured Duress",
+      "category": "Authorized Push Payment Scams",
+      "subcategory": "emergency_and_family_impersonation",
+      "rails": [
+        "upi",
+        "a2a",
+        "wallet"
+      ],
+      "channel": "VOICE",
+      "attacker_objective": "Extract an immediate emotionally-coerced transfer by impersonating a family member in crisis, or an authority figure detaining them.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "Short samples of a relative's voice, widely available from social video, are sufficient for a distressed-sounding clone — and distress conveniently masks the residual artefacts that would otherwise expose synthesis. Real-time conversion allows the 'relative' to respond briefly before being handed to an authority persona, which is what converts a suspicious call into a compelling one. In the Indian 'digital arrest' variant, video synthesis and generated official-looking documents extend the coercion across many hours, keeping the victim isolated from anyone who could break the spell.",
+      "kill_chain": [
+        "relationship and voice-sample harvesting from open sources",
+        "crisis call with cloned relative voice",
+        "handoff to authority or medical persona",
+        "isolation and sustained duress",
+        "immediate transfer then rapid layering"
+      ],
+      "transaction_signature": "Urgent, often round-number transfers to a first-time payee, sometimes framed as bail, hospital admission, or a compliance deposit. Frequently multiple tranches over hours as the demand escalates. In the digital-arrest variant, transfers may go to accounts styled to look institutional. Genuine device, genuine credentials, no velocity anomaly beyond the payee being new — the authorization stream is essentially clean, which is the core defensive problem.",
+      "behavioral_signature": "Atypical hour-of-day for the customer. Session opens with balance checks and limit inquiries. Elderly or low-digital-tenure customers over-represented. Customer is on a continuous call for hours and unreachable by the bank on the same number. Multi-hour, multi-tranche pattern in the coerced-detention variant with the customer refusing to disengage when contacted.",
+      "observable_signals": [
+        "first-ever payee funded within minutes of session start at an atypical hour",
+        "customer unreachable on registered mobile during the transaction window",
+        "repeated tranches to the same new payee over a multi-hour window",
+        "high-value payment from a customer whose historical maximum is far lower",
+        "beneficiary account receiving fan-in from multiple elderly-profile payers",
+        "warning interstitials dismissed without the usual reading dwell time"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "family-reported fraud claim, often 12-48 hours late due to shame or isolation",
+        "beneficiary drained within minutes of credit",
+        "cyber-crime helpline complaint under coercive-detention typology",
+        "mule account correlation across several unrelated elderly victims"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "high",
+      "severity": "critical",
+      "novelty_score": 0.8,
+      "real_world_grounding": "Voice-cloned relative-in-distress calls and the India-specific 'digital arrest' coercion pattern are both documented by law enforcement, with RBI and Indian police issuing public advisories on the latter. Cheap high-quality voice cloning is what converted a formerly niche scam into a volume one.",
+      "ethical_notes": "Restricted to victim-cohort, session-timing, and beneficiary-drain signals used for detection and intervention; contains no cloning method, script, or coercion technique.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "scam_transfer",
+      "simulatable": true
+    },
+    {
+      "id": "refund_overpayment_remote_session_reversal",
+      "name": "Fake Refund And Deliberate Overpayment Reversal Scam",
+      "category": "Authorized Push Payment Scams",
+      "subcategory": "refund_and_overpayment",
+      "rails": [
+        "a2a",
+        "upi",
+        "card_cnp"
+      ],
+      "channel": "VOICE",
+      "attacker_objective": "Convince the victim that they have been mistakenly overpaid or over-refunded, so they voluntarily 'return' funds that were never genuinely credited or that were credited from another victim.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Generative tooling supplies the two credibility props this scam depends on: convincing refund and credit-confirmation artefacts (transaction advices, support-portal views, SMS-styled confirmations) and a support persona fluent enough to sustain a long walkthrough call. Because the persuasion rests on the victim mis-reading a balance or a document, high-fidelity synthetic artefacts materially raise conversion. Multilingual support personas extend the same operation across regional customer bases at negligible marginal cost.",
+      "kill_chain": [
+        "support-desk pretext over a claimed refund or subscription",
+        "fabricated or genuine-but-victim-funded credit displayed",
+        "victim persuaded of an overpayment",
+        "victim-initiated 'return' transfer",
+        "layering, sometimes chaining a second victim"
+      ],
+      "transaction_signature": "The strongest tell is a debit that references or approximately matches a recent inbound credit, but goes to a payee unrelated to the original crediting party. Amounts are often odd rather than round (mirroring a fabricated 'excess'). In the chained variant, the inbound credit is real money stolen from a second victim, so the receiving account shows an unusual inbound from an unrelated third party followed by a near-equal outbound — a classic unwitting-mule shape. Card variant appears as a CNP payment to a merchant descriptor unrelated to the original purchase.",
+      "behavioral_signature": "Session frequently coincides with a remote-support connection or an inbound call. Customer navigates to transaction history immediately before initiating the outbound. New payee created with a name loosely resembling a known merchant or a payments brand. Customer may repeat the pattern if told the first return 'failed'.",
+      "observable_signals": [
+        "outbound near-equal to a recent unrelated inbound credit",
+        "remote-access or screen-share process active during a banking session",
+        "inbound credit from a third party with no prior relationship to either side",
+        "new payee name approximating a merchant or payment-brand string",
+        "transaction-history view immediately preceding a new-payee transfer",
+        "repeat transfer after a claimed failure of the first"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "the crediting party (second victim) raises their own APP claim, exposing the chain",
+        "recall request arriving at the intermediate victim's bank",
+        "intermediate account restricted pending mule investigation",
+        "card dispute filed against an unrelated merchant descriptor"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.4,
+      "real_world_grounding": "Refund and overpayment scams, including the remote-support-assisted variant and the chained pattern that turns the first victim into an unwitting mule, are long-documented in UK, US, and Indian consumer fraud reporting. GenAI improves the fake-artefact quality and multilingual reach rather than changing the mechanism.",
+      "ethical_notes": "Documents the inbound-credit-to-outbound-debit correlation defenders use to unwind chained victim scams, and deliberately excludes any artefact-forgery or pretext detail.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "scam_transfer",
+      "simulatable": true
+    },
+    {
+      "id": "task_scam_deposit_ladder_to_mule_recruitment",
+      "name": "Task-Based Job Scam Escalating Into Unwitting Mule Recruitment",
+      "category": "Authorized Push Payment Scams",
+      "subcategory": "job_and_task_scams",
+      "rails": [
+        "upi",
+        "a2a",
+        "wallet",
+        "card_cnp"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Extract escalating 'deposits' from a job seeker while simultaneously converting their bank account into a laundering hop for other victims' funds.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "The scam requires a high-touch, many-hours relationship per victim — onboarding chat, task coaching, encouragement after each deposit — which used to cap operator throughput. Conversational automation runs hundreds of these relationships concurrently in local languages, with generated recruiter identities, offer documents, and portal dashboards showing individualised fake earnings. Agentic orchestration can time the escalation prompts to each victim's payment behaviour, which is what makes the deposit ladder tractable at scale.",
+      "kill_chain": [
+        "mass recruitment outreach with generated employer identity",
+        "small genuine payouts establish trust",
+        "task deposits required to 'unlock' higher tiers",
+        "account repurposed as a pass-through hop",
+        "victim exposed to mule enforcement while still believing they are employed"
+      ],
+      "transaction_signature": "Two superimposed patterns in the same account, which is the diagnostic feature. Outbound: an escalating deposit ladder to a rotating set of young payees, small early credits back to the victim, then increasingly large one-way payments. Inbound: unrelated third-party credits followed within minutes by near-equal outbound transfers to further new payees — pass-through with negligible residual and no economic rationale. Card rail appears where deposits are funded by CNP wallet top-ups or credit-line drawdowns.",
+      "behavioral_signature": "New payee creation rate far above the customer's baseline, sustained over weeks. Account turnover rises by orders of magnitude with no change in declared income or salary credit. Frequently a young or low-tenure customer. Victim defends the activity as employment when questioned and may hold multiple accounts across banks showing the same shape.",
+      "observable_signals": [
+        "escalating one-way deposit ladder to rotating young beneficiaries",
+        "inbound third-party credit and near-equal outbound within minutes, repeatedly",
+        "monthly turnover far exceeding declared income with near-zero retained balance",
+        "new-payee creation rate well above the customer's historical baseline",
+        "credit-line drawdown or wallet top-up funding outbound deposits",
+        "customer asserts employment relationship when contacted about the flows"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "victim's account named in another victim's APP recall request",
+        "mule-account restriction or lien applied by the bank or on police reference",
+        "victim files their own fraud claim only after withdrawal is refused",
+        "cross-institution correlation showing the same customer as a hop in several fraud chains"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.6,
+      "real_world_grounding": "Task and part-time-job scams are among the fastest-growing reported frauds in India and Southeast Asia, and the dual role of the victim as both payer and money-mule is documented in bank mule-account enforcement and police advisories. Conversational automation is a credible and partly-observed scaling factor for the high-touch relationship the scam requires.",
+      "ethical_notes": "Describes the account-turnover and pass-through signatures that let institutions identify and protect unwitting mules, without any recruitment, laundering, or persona-construction detail.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "scam_transfer",
+      "simulatable": true
+    },
+    {
+      "id": "synthetic_merchant_onboarding_document_package",
+      "name": "Synthetic Merchant Onboarding With Generated Business Document Packages",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Fraudulent merchant acquisition",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a"
+      ],
+      "channel": "ONBOARDING",
+      "attacker_objective": "Obtain a live merchant ID and settlement account under a shell or non-existent business so that fraud proceeds can be acquired and settled through legitimate payment infrastructure.",
+      "genai_role": "identity_synthesis",
+      "genai_mechanism": "Generative models let an applicant produce an internally consistent corporate identity package at near-zero marginal cost: a plausible trade name and business narrative, a coherent website with product catalogue and policy pages, matching invoices and statement layouts, and synthetic director portrait imagery that survives casual visual review. The consistency is the differentiator — pre-GenAI shell applications tended to fail cross-field coherence checks (address vs tax registration vs website vs bank narration), whereas generated packages align these fields, so underwriting must rely on independent external verification rather than internal plausibility. Model-assisted variation also makes each application in a batch look unrelated, weakening duplicate-text and template-reuse detection at the acquirer.",
+      "kill_chain": [
+        "Shell entity assembly",
+        "Underwriting submission",
+        "MID activation and test volume",
+        "Fraud volume ramp",
+        "Settlement extraction before hold"
+      ],
+      "transaction_signature": "After activation, a near-vertical volume curve from zero to policy limits within days; ticket sizes clustered tightly just under the acquirer's manual-review threshold; the MCC assigned at onboarding (often low-risk retail or professional services) is inconsistent with the actual basket mix; cardholder BIN geography broadly dispersed with no local catchment consistent with the claimed physical address.",
+      "behavioral_signature": "Merchant portal is accessed from a small set of devices and IP ranges shared with other recently onboarded merchant accounts; no customer-service traffic, no partial refunds, no seasonality; the settlement bank account is newly opened and immediately swept in full after each payout cycle; the claimed storefront shows no organic traffic history or crawl age matching the stated incorporation date.",
+      "observable_signals": [
+        "Merchant age under 90 days with volume ramp exceeding underwriting projection by a large multiple",
+        "Device, browser fingerprint, or portal login IP shared across multiple distinct legal entities",
+        "Settlement bank account opened within days of the merchant application",
+        "Website domain registration age inconsistent with claimed business tenure; thin or templated policy pages",
+        "Director identity documents that pass format checks but fail independent registry or liveness cross-verification",
+        "Full sweep of settlement credits to third-party accounts within hours of payout"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "Chargeback ratio crossing network monitoring thresholds within the first two to three settlement cycles",
+        "Acquirer unable to contact the merchant for retrieval requests or compelling-evidence responses",
+        "Settlement account frozen or reported by the sponsor bank as a mule after payout",
+        "Cardholder disputes citing an unrecognised descriptor that maps to the shell trade name"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.8,
+      "real_world_grounding": "Fraudulent merchant onboarding is a long-standing acquiring risk addressed by card-network integrity programs and, in India, by RBI payment-aggregator due-diligence obligations for sub-merchant onboarding. The generative element is a documented and rapidly growing extension: synthetic document and identity packages have been reported by KYC vendors at materially rising rates since 2023.",
+      "ethical_notes": "The entry describes underwriting and settlement-side consequences an acquirer can measure; it contains no document-forgery method, verification-bypass technique, or onboarding script.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "merchant_laundering",
+      "simulatable": true
+    },
+    {
+      "id": "collusive_merchant_bustout_settlement",
+      "name": "Collusive Merchant Settlement Bust-Out With Fraudster-Supplied Card Data",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Merchant collusion",
+      "rails": [
+        "card_cnp",
+        "card_cp"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Convert stolen or compromised card credentials into bank-settled funds by running them through a real, established merchant whose operator knowingly participates and shares the proceeds.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Unlike a shell merchant, the entity here is genuine and has trading history, so the attacker's problem is pacing rather than plausibility. Language models are used to reason over the merchant's own historical volume, ticket distribution, and refund patterns and to propose an injection schedule that stays inside the merchant's normal statistical envelope until the final extraction window. The same capability drafts the merchant's dispute responses and acquirer correspondence in a register consistent with the business's prior communications, delaying the point at which the acquirer escalates.",
+      "kill_chain": [
+        "Merchant recruitment or takeover of an existing MID",
+        "Baseline-conforming injection of compromised credentials",
+        "Settlement acceleration or reserve release",
+        "Extraction and abandonment"
+      ],
+      "transaction_signature": "Authorizations that individually match the merchant's established MCC, currency, and ticket-size profile, so per-transaction scoring is weak; the anomaly is compositional — a step change in the ratio of new-to-repeat cardholders, a rise in the share of BINs outside the merchant's historical issuing footprint, and card-present terminals presenting keyed or fallback entry modes inconsistent with the terminal's prior EMV behaviour.",
+      "behavioral_signature": "The merchant's operational telemetry decouples from its payment telemetry: order volume rises while inventory movement, shipping labels, support tickets, and web sessions do not. Refund rate collapses toward zero even as volume rises. The merchant begins requesting faster settlement, higher limits, or reserve release shortly before the volume spike.",
+      "observable_signals": [
+        "Step change in share of first-time cardholders at an established merchant",
+        "Issuing-BIN geography broadening abruptly against the merchant's own baseline",
+        "Refund and partial-refund rate falling to near zero during a volume increase",
+        "Card-present entry-mode drift toward keyed or magstripe fallback on EMV-capable terminals",
+        "Merchant-initiated requests for reserve release, limit increase, or settlement acceleration preceding the spike",
+        "Divergence between payment volume and non-payment operational signals such as logistics or session counts"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Chargeback cluster arriving 30 to 90 days later, concentrated in fraud reason codes rather than service reason codes",
+        "Merchant becomes unresponsive or ceases trading once the reserve is exhausted",
+        "Acquirer loss materialising because settled funds were withdrawn before disputes landed",
+        "Overlap of disputed card numbers with credentials seen at other collusive MIDs in the same acquirer portfolio"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.3,
+      "real_world_grounding": "Collusive and bust-out merchants are among the oldest documented acquiring-side losses and are the reason acquirers hold rolling reserves and run chargeback-monitoring programs. GenAI changes the pacing and correspondence quality, not the fundamental pattern.",
+      "ethical_notes": "It characterises portfolio-level and settlement-timing consequences visible to an acquirer, with no guidance on recruiting merchants, sourcing credentials, or evading reserves.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "bust_out",
+      "simulatable": true
+    },
+    {
+      "id": "transaction_laundering_front_merchant",
+      "name": "Transaction Laundering Through A Legitimate-Looking Front Merchant",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Transaction laundering / MCC misrepresentation",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Process payments for an undisclosed, prohibited, or unlicensed business by routing them through the merchant identity and MCC of an approved, benign-looking storefront.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "The economics of laundering depend on maintaining a convincing cover storefront that no one actually buys from, and generative tooling makes that cover cheap and continuously refreshable: catalogue copy, product imagery, reviews, blog content, and localisation for whatever MCC the front claims. When a cover site is flagged, an equivalent replacement with different text, imagery, and layout can be stood up quickly, which weakens the content-similarity and template-matching heuristics that transaction-laundering scanners have relied on. The generative layer raises the cost of content-based detection and pushes defenders toward payment-flow and network evidence.",
+      "kill_chain": [
+        "Approved front merchant established",
+        "Undisclosed traffic routed to the approved MID",
+        "Cover storefront maintained and refreshed",
+        "Settlement to the hidden principal",
+        "Front rotation after flagging"
+      ],
+      "transaction_signature": "Authorization mix that does not fit the registered MCC — for example a claimed home-goods or education merchant showing round-number ticket amounts, high repeat-payer frequency, unusual hour-of-day concentration, and cross-border cardholder distribution characteristic of a different vertical. The descriptor shown to cardholders matches the benign front while refund and decline behaviour matches the hidden business. On UPI and A2A, the equivalent signature is a P2M VPA whose inbound payer set and amount distribution do not match the registered merchant category.",
+      "behavioral_signature": "The advertised storefront receives almost no organic browsing sessions relative to its transaction count — checkout events vastly outnumber product-page views, and payment initiations arrive with referrers or deep links from outside the site. The same settlement account, beneficial owner, device fingerprints, or support contact details recur across several unrelated front merchants.",
+      "observable_signals": [
+        "Checkout-to-browse ratio implausibly high for the claimed retail vertical",
+        "Basket and ticket distribution inconsistent with the registered MCC",
+        "Payment initiations arriving without a session on the merchant's own storefront",
+        "Shared settlement account, beneficial owner, or contact detail across multiple unrelated MIDs",
+        "Cardholder or payer geography with no relationship to the front's stated market",
+        "Rapid replacement of a flagged storefront by a near-equivalent new domain under the same payment relationship"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Disputes whose cardholder description of the purchase does not match the merchant's stated product line",
+        "Network integrity-program notification or fine to the acquirer for undisclosed aggregation",
+        "Regulatory or law-enforcement referral tying the settlement flow to an unlicensed activity",
+        "Chargebacks concentrated in service and misrepresentation reason codes rather than counterfeit"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.55,
+      "real_world_grounding": "Transaction laundering is explicitly targeted by card-network integrity and brand-protection programs and by payment-aggregator obligations to know their sub-merchants; content-generation tooling is a documented accelerant for disposable cover storefronts.",
+      "ethical_notes": "The entry stays at the level of flow-level mismatches an acquirer or scheme can measure and deliberately omits how cover infrastructure is built or rotated.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "merchant_laundering",
+      "simulatable": true
+    },
+    {
+      "id": "industrialised_refund_and_inr_abuse",
+      "name": "Industrialised Refund And Item-Not-Received Abuse Against Merchant Support",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Refund and returns abuse",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "wallet"
+      ],
+      "channel": "MESSAGING",
+      "attacker_objective": "Extract cash refunds or replacement goods from merchants at scale by asserting non-delivery, damage, or empty-box claims on transactions that were genuinely authorised and genuinely delivered.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "The bottleneck in refund abuse has always been human effort per claim — a persuasive, non-repetitive complaint written in the right register for each merchant's support policy. Language models remove that bottleneck, producing individually varied claim narratives, escalation follow-ups, and policy-citing rebuttals across hundreds of orders, and image models can supply damage or wrong-item photographs consistent with the claimed SKU. Because each claim reads as unique and emotionally plausible, merchant support teams and text-similarity heuristics lose the duplicate-language signal they previously relied on.",
+      "kill_chain": [
+        "Order placement across many merchants",
+        "Claim submission with generated evidence",
+        "Support escalation pressure",
+        "Refund capture and account rotation"
+      ],
+      "transaction_signature": "The authorizations themselves are clean and fully compliant — correct cardholder, passing 3DS or UPI PIN, normal amounts and MCCs — so there is effectively no distinctive authorization footprint. The signature appears only in the refund and credit stream: a rising ratio of full-value credits to sales for particular customer cohorts, and refunds issued without a corresponding return receipt or reverse-logistics scan.",
+      "behavioral_signature": "Account cohorts with normal purchase behaviour but abnormal post-purchase behaviour: high claim rate concentrated in high-resale-value SKUs, claims filed within a narrow window after delivery confirmation, delivery addresses that recur across nominally different accounts, and refund destinations that drift away from the original payment instrument toward wallets or bank accounts.",
+      "observable_signals": [
+        "Claim rate per account far exceeding cohort baseline, concentrated in resaleable categories",
+        "Refund requested to an instrument or account different from the original payment source",
+        "Delivery address, phone, or device shared across multiple claiming accounts",
+        "Refund issued with no reverse-logistics pickup or warehouse receipt event",
+        "Claim narratives that are linguistically varied but structurally identical in claim type and timing",
+        "Repeat claims following a fixed lag after carrier delivery confirmation"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "Merchant refund-to-sales ratio breaching internal thresholds for a specific customer cohort",
+        "Escalation to issuer chargeback when the merchant declines the refund",
+        "Refunded goods reappearing in secondary marketplace listings",
+        "Cluster linkage revealing one address or device behind many refunded orders"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.65,
+      "real_world_grounding": "Refund abuse operated as a paid service against large e-commerce merchants is a well documented and prosecuted pattern, and merchants publicly report post-purchase abuse now rivalling stolen-card losses in some categories. Generative content is a credible and already-observed force multiplier on claim volume.",
+      "ethical_notes": "It describes refund-stream and logistics-side consequences merchants already measure, without any claim template, evidence-fabrication method, or targeting guidance.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "friendly_fraud",
+      "simulatable": true
+    },
+    {
+      "id": "first_party_dispute_narrative_engineering",
+      "name": "First-Party Misuse With AI-Drafted Dispute Narratives",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Friendly fraud / first-party misuse",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a"
+      ],
+      "channel": "BACKOFFICE",
+      "attacker_objective": "Reverse a legitimate, cardholder-authorised purchase by constructing a dispute narrative that maps cleanly onto a favourable reason code and survives merchant representment.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "Dispute outcomes hinge on how a customer's account of events is framed against reason-code definitions and evidence requirements, which is exactly the kind of structured rewriting language models do well. A disputant can have their sequence of events restated in the vocabulary of unauthorised use, non-receipt, or cancelled recurring service, with internally consistent dates and a coherent second round of rebuttal when the merchant submits compelling evidence. This is distinct from refund abuse because the counterparty is the issuer and the scheme dispute process rather than merchant support, and the mechanism scales narrative quality rather than claim volume.",
+      "kill_chain": [
+        "Genuine authorised purchase and consumption",
+        "Reason-code-aligned dispute filing",
+        "Rebuttal of merchant representment",
+        "Provisional credit retention"
+      ],
+      "transaction_signature": "No distinctive authorization footprint at all — the transaction is genuine, device- and geolocation-consistent with the cardholder, and typically strongly authenticated via 3DS or UPI PIN. The abuse is invisible in the authorization stream by construction; only the later dispute record distinguishes it.",
+      "behavioral_signature": "The disputing account continues to use the same device and instrument at the same merchant, or at close substitutes, after filing an unauthorised-use claim. Dispute filings cluster after digital goods are fully consumed, after subscription value is extracted, or shortly after a billing cycle. Narrative sophistication of the claim is out of step with the account holder's own historical support interactions.",
+      "observable_signals": [
+        "Dispute filed on a transaction that passed strong customer authentication on a long-tenured device",
+        "Continued account activity at the disputed merchant after an unauthorised-use claim",
+        "Disputes concentrated on digital, downloadable, or fully-consumed services",
+        "Rising per-account dispute count across unrelated merchants within an issuing portfolio",
+        "Dispute wording tightly mirroring reason-code evidentiary language",
+        "Filing timed just inside the scheme or regulatory dispute window"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "Issuer chargeback under a fraud reason code on a strongly authenticated transaction",
+        "Merchant representment overturned despite delivery and authentication evidence",
+        "Repeat disputant identified only via cross-merchant or scheme-level negative-list matching",
+        "Provisional credit never recovered after the dispute cycle closes"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.7,
+      "real_world_grounding": "First-party misuse is the fastest-growing dispute category reported by issuers and merchants, and the card schemes have introduced dedicated first-party-misuse handling and pre-dispute data sharing in response. AI-assisted narrative drafting is a credible near-term amplifier already visible in consumer-facing dispute tooling.",
+      "ethical_notes": "The entry documents why authentication evidence alone does not stop these disputes and what defenders can correlate afterward; it supplies no reason-code playbook or dispute wording.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "friendly_fraud",
+      "simulatable": true
+    },
+    {
+      "id": "mule_network_fanin_layering",
+      "name": "Mule-Network Fan-In And Layering Across A2A And UPI Rails",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Money mule networks and layering",
+      "rails": [
+        "upi",
+        "a2a",
+        "wallet"
+      ],
+      "channel": "IN_APP",
+      "attacker_objective": "Move scam and fraud proceeds through a disposable network of third-party accounts fast enough to break traceability before recall or freeze orders can catch up.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Mule networks are constrained by recruitment throughput and by coordination across many low-trust participants. Language models scale the recruitment side by producing persuasive, localised part-time-income messaging in multiple Indian languages at conversational volume, and agentic orchestration coordinates hop timing and value splitting across the collection layer so no single account presents an obviously abnormal profile. The defensive consequence is that per-account thresholds degrade further and detection must move to graph structure.",
+      "kill_chain": [
+        "Mule recruitment at scale",
+        "Victim funds collected into first-layer accounts",
+        "Rapid multi-hop layering and value splitting",
+        "Cash-out at terminal accounts or via goods"
+      ],
+      "transaction_signature": "Individually unremarkable credits and debits, mostly below reporting and review thresholds. The pattern exists only in aggregate: high payee fan-in where many unrelated remitters credit one account within a short window, followed by fan-out to a fresh set of beneficiaries, with per-hop dwell time of minutes; near-total pass-through ratio; round or near-round amounts just under structuring thresholds; and a burst-then-dormancy lifecycle per account.",
+      "behavioral_signature": "Accounts are recently opened, or long dormant then suddenly reactivated. Device and SIM binding is shared across many accounts, or one device successively binds many VPAs. Balances never accumulate — funds are transient. Beneficiary lists are large and non-recurring. Login and transaction hours cluster tightly across the cohort, indicating shared operation rather than independent account holders.",
+      "observable_signals": [
+        "Payee fan-in from many unrelated remitters within a short window",
+        "Pass-through ratio approaching one with minutes-scale dwell time",
+        "One device or SIM associated with many distinct accounts or VPAs",
+        "Dormant account reactivating with immediate high-velocity transfer activity",
+        "Beneficiary sets that are large, one-time, and non-overlapping with history",
+        "Amounts consistently just below internal review or reporting thresholds"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "Inbound recall or freeze requests from multiple originating banks converging on the same account",
+        "Victim complaints filed through national cybercrime reporting arriving after funds have already hopped out",
+        "Terminal-layer cash withdrawal or voucher conversion at the network edge",
+        "Graph analysis linking seemingly independent accounts through shared devices or beneficiaries"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Mule-account layering on instant rails is a documented and heavily prosecuted problem in India, and the RBI Innovation Hub's MuleHunter initiative exists specifically because single-account rules fail against these graph patterns. AI-assisted multilingual recruitment is an observed accelerant.",
+      "ethical_notes": "The entry describes graph-level indicators and recall dynamics that banks and regulators already act on, and deliberately omits recruitment content, hop timing, or threshold values.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "velocity_smurfing",
+      "simulatable": true
+    },
+    {
+      "id": "voucher_and_giftcard_cashout_layer",
+      "name": "Gift-Card And Voucher Conversion As A Terminal Cash-Out Layer",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Cash-out and value conversion",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "wallet",
+        "token"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Convert fraudulently obtained card, wallet, or account balances into bearer-style stored value that can be resold for clean funds outside the payment network's reach.",
+      "genai_role": "automation_scale",
+      "genai_mechanism": "Voucher conversion is attractive because value becomes a bearer instrument the instant a code is issued, and its constraint is purchase throughput across many merchant and aggregator surfaces before the source funds are frozen. Agents capable of operating ordinary consumer checkout flows compress that window substantially, and generative content supports the resale side with convincing listings and buyer-facing support messaging on secondary marketplaces. Defensively this means the recoverable window shrinks from hours to minutes.",
+      "kill_chain": [
+        "Source funds obtained via card, scam, or account takeover",
+        "High-velocity voucher purchase across aggregators",
+        "Code extraction and redemption",
+        "Secondary-market resale for clean funds"
+      ],
+      "transaction_signature": "Concentrated authorizations at gift-card, voucher-aggregator, prepaid top-up, and digital-goods MCCs; multiple purchases in rapid succession at or just under per-transaction voucher caps; many distinct cards or VPAs converging on a small set of voucher merchants; delivery to disposable email addresses; frequent same-instrument retries after declines to maximise conversion before the instrument is blocked.",
+      "behavioral_signature": "Purchasing accounts have no consumption history in the voucher category, no prior relationship with the brands purchased, and no gifting pattern such as recipient names or scheduled delivery. Redemption occurs from geographies and devices unrelated to the purchaser within minutes. In the scam-driven variant the victim themselves performs the purchase under coercion, so the buyer profile is entirely genuine and only the redemption side is anomalous.",
+      "observable_signals": [
+        "Burst of voucher or prepaid MCC authorizations from an account with no such history",
+        "Many distinct funding instruments converging on one voucher merchant in a short window",
+        "Voucher delivery to disposable or newly created email addresses",
+        "Redemption device and geography disjoint from purchase device and geography",
+        "Purchase amounts pinned to per-transaction voucher caps",
+        "Repeated retries immediately following declines on the same instrument"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Chargebacks on the funding cards after codes are already redeemed and unrecoverable",
+        "Victim scam reports describing coerced voucher purchase, filed after redemption",
+        "Voucher codes surfacing on secondary resale markets at a discount to face value",
+        "Issuer recovery attempts failing because the voucher issuer treats the code as bearer value"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.4,
+      "real_world_grounding": "Gift-card cash-out is a documented terminal stage in both stolen-credential fraud and coercive scam typologies, and consumer-protection agencies publish standing warnings about voucher-based scam payments. Agentic checkout automation is a credible near-term compression of the recovery window.",
+      "ethical_notes": "It describes conversion-stage signals and the recovery gap defenders face; it names no merchants, caps, or automation methods that would assist a cash-out.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "merchant_laundering",
+      "simulatable": true
+    },
+    {
+      "id": "marketplace_seller_triangulation",
+      "name": "Fake Marketplace Sellers And Triangulation Fraud",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Marketplace seller abuse",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "wallet"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Collect clean payments from genuine buyers on a marketplace while fulfilling their orders using stolen card credentials at unrelated retailers, so the fraud loss lands on third parties.",
+      "genai_role": "content_generation",
+      "genai_mechanism": "A triangulation seller must look like a real store to buyers and to marketplace trust teams, which historically required scraped or stolen listing content that duplicate-detection could find. Generative models produce original product descriptions, category-appropriate imagery, storefront branding, and buyer-support messaging per seller account, so a fresh seller identity can present as an established small business and rotate cheaply after suspension. This shifts marketplace defence away from content matching and toward fulfilment-side and network-linkage evidence.",
+      "kill_chain": [
+        "Seller account creation with generated storefront identity",
+        "Below-market listing and genuine buyer acquisition",
+        "Fulfilment via compromised credentials at third-party retailers",
+        "Payout capture before dispute maturity",
+        "Seller identity rotation"
+      ],
+      "transaction_signature": "Two separate and superficially healthy authorization streams that only reveal the fraud when joined. On the marketplace side, buyer payments are fully legitimate and dispute-free. On the retailer side, card-not-present authorizations show a persistent mismatch between billing identity and shipping recipient, one payment instrument shipping to many unrelated addresses, and order composition matching another marketplace's live listings.",
+      "behavioral_signature": "Seller accounts are young, priced consistently below market, and carry no return or reverse-logistics history because the seller holds no inventory. Buyer satisfaction is initially high, which suppresses marketplace risk scores. Seller payout accounts, devices, or contact details recur across suspended predecessors. On the retailer side, guest checkouts from fresh accounts repeatedly ship to third-party names.",
+      "observable_signals": [
+        "New seller with below-market pricing and no inventory or reverse-logistics footprint",
+        "Retailer orders where billing and shipping identities never match, repeatedly, on one instrument",
+        "Single payment instrument shipping to many unrelated recipient names and addresses",
+        "Payout bank account or device shared with previously suspended seller identities",
+        "Marketplace listing content mirroring another retailer's live catalogue in SKU and availability",
+        "Buyer complaints of receiving goods in third-party retailer packaging"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "Chargebacks landing at the fulfilling retailer weeks later, with recipients who deny ordering",
+        "Marketplace payout already withdrawn before the retailer disputes mature",
+        "Cardholder disputes naming a retailer the cardholder never visited",
+        "Cross-platform linkage showing one operator behind several suspended seller identities"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.55,
+      "real_world_grounding": "Triangulation fraud is a well documented marketplace typology with prosecutions and public retailer advisories; generated storefront content is an already-visible extension that undermines duplicate-listing detection.",
+      "ethical_notes": "The entry explains why the loss is displaced onto retailers and which cross-party linkages expose it, without describing seller-onboarding evasion or fulfilment methods.",
+      "simulator_status": "FUTURE",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "qr_and_payment_link_substitution",
+      "name": "QR Substitution And Payment-Link Redirection At Merchant Points Of Acceptance",
+      "category": "Merchant & Ecosystem Abuse",
+      "subcategory": "Acceptance-surface manipulation",
+      "rails": [
+        "upi",
+        "a2a",
+        "card_cnp"
+      ],
+      "channel": "CP",
+      "attacker_objective": "Divert payments intended for a genuine merchant into an attacker-controlled payee by substituting the acceptance artefact — a static QR at the till or a shared payment link — rather than by compromising any credential.",
+      "genai_role": "multimodal_impersonation",
+      "genai_mechanism": "This attack depends entirely on the payment artefact looking authentic in the two seconds a payer inspects it, and generative tooling makes brand-accurate replicas of merchant standees, in-app confirmation screens, invoices, and payment-request messages easy to produce in the right regional language and branding. Voice and messaging models additionally sustain a live conversation asserting that a payment failed and must be retried against a different payee, or that a refund requires an approval action. The consequence for defenders is that payer-side visual and conversational verification becomes unreliable, and trust must move to the payee-identity data the app itself renders.",
+      "kill_chain": [
+        "Acceptance artefact substituted or spoofed link distributed",
+        "Payer initiates a fully authenticated payment to the wrong payee",
+        "Immediate onward layering from the receiving account",
+        "Merchant discovers the shortfall at reconciliation"
+      ],
+      "transaction_signature": "Authorization-side appearance is entirely normal — a genuine payer, a genuine device, correct PIN or authentication, and an ordinary amount. The only payment-stream anomaly is on the receiving side: a payee accumulating many small payments from payers physically clustered around a merchant location it has no registered relationship with, and a merchant whose settled volume drops without a corresponding drop in footfall or till activity. Collect-request variants show an inbound debit-request pattern where a merchant-initiated push would be expected.",
+      "behavioral_signature": "Payer sessions show a scan or link-open immediately followed by payment with no prior relationship to the payee VPA or account. Receiving accounts are newly created, briefly very active within one geographic cell, then dormant. In the coached refund or failed-payment variant, the payer's session shows an unusually long pre-payment dwell consistent with being talked through the flow, and sometimes a screen-sharing or remote-assistance application running concurrently.",
+      "observable_signals": [
+        "Payee VPA or account receiving many small payments from payers concentrated at one merchant location without a registered merchant link",
+        "Merchant settled volume diverging from till, footfall, or invoice counts",
+        "Payment initiated seconds after a scan or link-open to a first-time payee",
+        "Remote-access or screen-sharing application active on the payer device during initiation",
+        "Inbound collect-request pattern where the merchant relationship implies a push payment",
+        "Receiving account newly opened, geographically narrow, and dormant shortly after a burst"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "Merchant reconciliation shortfall reported days later against physical sales records",
+        "Victim complaints filed through cybercrime channels naming an unrecognised payee",
+        "Funds already layered out of the receiving account before any freeze request lands",
+        "Clustered complaints from multiple payers naming the same beneficiary account"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.4,
+      "real_world_grounding": "QR-substitution and collect-request misuse are documented and widely warned-about fraud patterns on Indian instant-payment rails, and remote-assistance-assisted payment diversion is a recurring complaint category. Multimodal brand-accurate spoofing is a realistic and partly observed amplifier.",
+      "ethical_notes": "The entry is written from the payee-side and reconciliation-side view a bank or merchant can act on, and contains no artefact-substitution technique, link construction, or social-engineering script.",
+      "simulator_status": "FUTURE",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "decline_code_oracle_boundary_mapping",
+      "name": "Decline-Code Oracle Threshold Mapping",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "decision-boundary probing",
+      "rails": [
+        "card_cnp",
+        "token",
+        "upi"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Recover an approximate map of the issuer's and acquirer's risk thresholds so that later high-value fraud can be placed inside the approve region on the first attempt.",
+      "genai_role": "evasion_optimization",
+      "genai_mechanism": "The approve / decline / soft-decline response is a free label, and LLM-driven agents turn a probing campaign into an adaptive experiment-design loop: they summarise thousands of noisy responses into a compact surrogate of where the boundary sits and propose which attribute region to sample next. What previously required a skilled analyst reading spreadsheets of response codes now runs continuously and cheaply. The generative contribution is hypothesis generation and result compression, not any new payment capability.",
+      "kill_chain": [
+        "credential and BIN sourcing",
+        "low-value oracle probing",
+        "surrogate boundary fitting",
+        "targeted cash-out inside the approve region"
+      ],
+      "transaction_signature": "Dense clusters of very low value or zero-value account-verification authorisations spread across many BINs but concentrated on a handful of merchant IDs; near-lattice amount ladders that step in regular increments; abnormally high ratio of soft declines and step-up requests to approvals; approvals frequently abandoned rather than captured.",
+      "behavioral_signature": "Enormous fan-out across PANs and VPAs with almost no repeat use per instrument; checkout sessions with no browsing, cart, or product-page dwell; inter-attempt spacing locked tightly to the previous response latency rather than to any human rhythm; probing pauses and resumes in lockstep with rule changes on the defender side.",
+      "observable_signals": [
+        "approval rate per merchant per BIN collapsing below a historical floor",
+        "elevated share of zero-value or nominal-value verification authorisations",
+        "low entropy and regular-increment structure in attempted amounts",
+        "inter-attempt interval correlated with authorisation response time",
+        "approved authorisations that are never captured or settled",
+        "single merchant descriptor receiving traffic from implausibly many issuers"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "near-zero chargeback rate on the probe traffic itself, followed by a concentrated fraud burst on the mapped segment",
+        "scheme excessive-authorisation-attempt monitoring flags at the acquirer",
+        "merchant-level authorisation-to-capture ratio breaching normal range"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.6,
+      "real_world_grounding": "Card-testing and BIN-attack traffic against small merchants and donation pages is a long-documented pattern, and issuers already monitor authorisation-attempt ratios for it; the newer element is systematic reuse of the responses as training labels for a surrogate model rather than as a simple validity check.",
+      "ethical_notes": "The entry describes the aggregate authorisation-stream footprint a defender can measure and the monitoring metrics that surface it, with no probing methodology, tooling, or response-code exploitation detail.",
+      "simulator_status": "FUTURE",
+      "maps_to_injector": null,
+      "simulatable": false
+    },
+    {
+      "id": "victim_ticket_distribution_amount_mimicry",
+      "name": "Victim Ticket-Distribution Amount Mimicry",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "feature-space mimicry",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "token"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Extract value from a compromised instrument using charge amounts drawn from the victim's own historical spend distribution so amount-deviation features never fire.",
+      "genai_role": "evasion_optimization",
+      "genai_mechanism": "Where the attacker already holds statement data, an account-aggregator view, or scraped transaction SMS, a language model can compress that history into a spend profile and a sequence model can sample amounts conditioned on merchant type, so each individual charge sits near the victim's modal ticket rather than at a round attacker-convenient figure. The capability that matters is cheap per-victim personalisation at population scale — previously fraud rings used one amount policy for every stolen card.",
+      "kill_chain": [
+        "instrument and spend-history compromise",
+        "per-victim amount profile synthesis",
+        "in-profile charge sequence",
+        "extraction ahead of the statement cycle"
+      ],
+      "transaction_signature": "Charges clustered around the victim's personal modal ticket rather than at classic test-and-escalate values; no single outlier amount; total daily spend inflated well above baseline while every constituent amount is unremarkable; amounts often lacking the natural catalogue-price structure of genuine retail spend.",
+      "behavioral_signature": "Spend level and rhythm look familiar while the merchant set is almost entirely new to the account; the amount distribution is unnaturally tight around the mode with the long right tail of real consumer spending missing; no returns, no partial reversals, no abandoned carts.",
+      "observable_signals": [
+        "cumulative daily or rolling-window spend far above baseline despite in-range per-transaction amounts",
+        "amount variance below the victim's own historical variance",
+        "absence of the long-tail high-ticket component present in genuine history",
+        "merchant novelty rate near one hundred percent within the burst",
+        "amount values not matching known catalogue price points for the claimed merchant",
+        "basket composition inconsistent with the amount for that merchant category"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "clustered cardholder disputes filed after the statement or SMS review",
+        "chargebacks concentrated on merchants the account never used before",
+        "refund requests never initiated by the genuine cardholder for the disputed items"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.55,
+      "real_world_grounding": "Amount-tuning to avoid velocity and deviation rules is established fraud tradecraft; what generative tooling changes is the economics of doing it per victim rather than per campaign, which is a credible near-term extrapolation from observed data-broker and aggregator leakage in India.",
+      "ethical_notes": "It states which detector feature is neutralised and which aggregate and structural residuals survive, without describing how to obtain victim history or construct amount schedules.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "adversarial_mimicry",
+      "simulatable": true
+    },
+    {
+      "id": "diurnal_pattern_timing_mimicry",
+      "name": "Diurnal Rhythm Timing Mimicry",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "temporal mimicry",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Place fraudulent activity inside the victim's habitual transacting hours so that odd-hour rules and time-of-day risk features contribute nothing to the score.",
+      "genai_role": "evasion_optimization",
+      "genai_mechanism": "Agentic orchestration lets a single operator run thousands of compromised accounts on individually inferred schedules rather than firing everything during the operator's own working hours. A model infers each account's active window from observed history and drives execution into it, and can also introduce plausible jitter so the sequence does not look machine-scheduled. The novelty is per-account scheduling at scale, not the idea of transacting during the day.",
+      "kill_chain": [
+        "account takeover or credential reuse",
+        "diurnal profile inference",
+        "in-window scheduled execution",
+        "settlement and mule cash-out"
+      ],
+      "transaction_signature": "No odd-hour footprint at all; authorisations land inside the account's usual active band and on the usual weekday pattern, and the burst is disguised as an ordinary busy day. The distinctive footprint is compression rather than displacement — a normal day's worth of activity delivered in an atypically dense run inside the normal window.",
+      "behavioral_signature": "Inter-arrival gaps are too regular and under-dispersed compared with genuine human spacing; session start times cluster to the minute across unrelated accounts run by the same operator; device idle and dwell patterns do not show the interruptions of real use; occasionally the victim is genuinely active elsewhere at the same moment.",
+      "observable_signals": [
+        "inter-transaction gap distribution under-dispersed relative to the account's own history",
+        "identical minute-of-hour start alignment across unrelated accounts",
+        "in-window transaction density far above the account's historical maximum",
+        "session interaction dwell time near-constant across steps",
+        "concurrent genuine victim session from a different device or geography",
+        "device local clock or app timezone inconsistent with the claimed active window"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "victim disputes describing normal-hours transactions they did not make",
+        "mule beneficiary receiving inbound credits from many accounts within the same narrow daily band",
+        "recall requests concentrated on a single operator-aligned time slot"
+      ],
+      "defense_difficulty": "medium",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.4,
+      "real_world_grounding": "Time-of-day features and night-time step-up rules are standard in issuer models, and fraud operations shifting into victim-normal hours has been observed for years; generative orchestration mainly raises the number of accounts one operator can schedule individually.",
+      "ethical_notes": "The description stays at the level of arrival-time statistics a defender can compute, and names no scheduling technique or evasion procedure.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "adversarial_mimicry",
+      "simulatable": true
+    },
+    {
+      "id": "sub_threshold_velocity_shaping",
+      "name": "Sub-Threshold Velocity Shaping Across Rails And Instruments",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "rate-rule evasion",
+      "rails": [
+        "upi",
+        "a2a",
+        "card_cnp",
+        "wallet",
+        "token"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Move the full value of a compromised position while keeping every per-instrument, per-rail, and per-window counter below the thresholds that would trigger a velocity rule.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "An agent can hold the full constraint set — per-transaction ceilings, daily caps, new-payee cooling periods, and separate counters across cards, UPI handles, wallets, and account-to-account rails — and plan an outflow schedule that satisfies all of them at once while maximising throughput. Solving that allocation by hand across dozens of instruments is slow and error-prone; automated planning makes it routine and lets the plan re-solve when a rule changes. The generative contribution is constraint reasoning and replanning, not access to any new rail.",
+      "kill_chain": [
+        "multi-instrument control acquisition",
+        "per-rail constraint reconnaissance",
+        "distributed sub-threshold outflow",
+        "convergent mule aggregation"
+      ],
+      "transaction_signature": "Each instrument shows a modest, rule-compliant number of modest transfers; no single counter is anomalous. The pattern is only visible when values are summed across instruments and rails — a large aggregate outflow assembled from many compliant slices, often mixing UPI, immediate account transfers, wallet loads, and card-on-file charges within the same hour.",
+      "behavioral_signature": "Nominally independent instruments that share a device, session, or network range; outflows across those instruments tightly coordinated in time; a small set of destination accounts and virtual addresses that many unrelated sources converge on; every window closing just under its limit rather than at a naturally varied level.",
+      "observable_signals": [
+        "outflow counters repeatedly finishing just below their configured limits",
+        "many unrelated source accounts converging on a small beneficiary set",
+        "shared device or session fingerprint across supposedly independent instruments",
+        "aggregate cross-rail outflow far exceeding any single-rail baseline",
+        "sudden in-degree spike on beneficiary accounts or virtual payment addresses",
+        "total outflow approaching available balance despite unremarkable per-transaction values"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "beneficiary accounts fanning out or cashing out within minutes of receipt",
+        "clustered recall requests naming the same downstream accounts",
+        "mule accounts frozen holding balances inconsistent with their declared profile",
+        "disputes arriving from many unrelated sources against one destination cluster"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.45,
+      "real_world_grounding": "Structuring under limits is a long-established laundering and fraud technique, and mule networks converging on shared beneficiary accounts is a well-documented pattern in Indian real-time payments enforcement; automated multi-rail planning is the incremental change.",
+      "ethical_notes": "It describes only the aggregate and counterparty-side convergence signals defenders use to detect structuring, and gives no limits, allocation logic, or instrument-mixing guidance.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "velocity_smurfing",
+      "simulatable": true
+    },
+    {
+      "id": "geo_plausibility_manipulation",
+      "name": "Geographic Plausibility Manipulation",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "location-feature evasion",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "token"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Present a location profile consistent with the victim's home region so that impossible-travel, country-mismatch, and distance-from-home features contribute no risk.",
+      "genai_role": "evasion_optimization",
+      "genai_mechanism": "Generative tooling maintains the coherence that used to break location spoofing: a persona whose address, postal code, phone series, language and dialect in support chat, and choice of local merchants all agree with the claimed city. Combined with residential and mobile-carrier exit points inside the victim's own network region, this turns a set of individually checkable location signals into a mutually consistent story. The model contributes the consistency layer, not the network access.",
+      "kill_chain": [
+        "victim geographic profile inference",
+        "region-coherent persona assembly",
+        "in-region session origination",
+        "local drop or reshipping logistics"
+      ],
+      "transaction_signature": "Authorisations originate from the victim's city and often the victim's own network operator, address verification matches, and the merchant selection is regionally plausible; there is no cross-border or impossible-travel footprint at all. Delivery, where physical, goes to an address in the same city that the account has never used.",
+      "behavioral_signature": "Fine-grained network churn beneath a stable apparent city — the exit point changes far more often than a residential connection does; on app rails the device location and the network-derived location disagree, or location permission is withheld entirely; round-trip latency is inconsistent with the claimed proximity; the same residential exit point reappears across victims with no other relationship.",
+      "observable_signals": [
+        "network exit point churning rapidly within a stable claimed city",
+        "device location absent or inconsistent with network-derived location",
+        "round-trip latency incompatible with the claimed location",
+        "delivery address in-city but never previously used by the account",
+        "device locale, keyboard, or SIM region drifting from the claimed home region",
+        "one residential exit point shared across otherwise unrelated accounts"
+      ],
+      "auth_time_observability": "partial",
+      "post_transaction_signals": [
+        "chargebacks where address verification passed but the cardholder never received goods",
+        "reshipping and drop-address clusters surfacing in dispute investigations",
+        "recovered goods traced to addresses linked to multiple unrelated fraud cases"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.5,
+      "real_world_grounding": "Residential proxy abuse to defeat geolocation controls and local drop addresses to defeat address verification are both well documented in card-not-present fraud; the generative element is cheap maintenance of persona coherence across the address, language, and merchant-choice signals defenders cross-check.",
+      "ethical_notes": "The entry enumerates the location residuals that survive spoofing from a defender's telemetry perspective and names no infrastructure, service, or configuration.",
+      "simulator_status": "IMPLEMENTED",
+      "maps_to_injector": "geo_anomaly",
+      "simulatable": true
+    },
+    {
+      "id": "composite_in_range_feature_assembly",
+      "name": "Composite In-Range Feature Assembly",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "joint-distribution evasion",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "token",
+        "a2a"
+      ],
+      "channel": "CNP",
+      "attacker_objective": "Keep the model score under the action threshold by holding every individual feature inside the victim's normal range, conceding a little on many axes instead of a lot on one.",
+      "genai_role": "evasion_optimization",
+      "genai_mechanism": "This is the category's core problem: a surrogate of the defender's scoring behaviour lets an adversary search for configurations that are simultaneously acceptable on amount, time, merchant, device, and geography while still paying out. Generative search over that feasible region, plus agentic execution across many accounts, converts what was once an artisanal per-target exercise into a repeatable optimisation. No single marginal feature is anomalous, which is exactly what defeats models and rules built on marginal thresholds.",
+      "kill_chain": [
+        "surrogate scoring model construction",
+        "feasible-region search under a score budget",
+        "joint-configuration execution",
+        "payout within the tolerated risk envelope"
+      ],
+      "transaction_signature": "Authorisations that are individually unremarkable on every axis a rule inspects — in-profile amount, familiar hour, plausible category, recognised device class, home-region origin — yet arrive as a coherent set that no genuine account produces. There is deliberately no single distinctive marker in the authorisation record.",
+      "behavioral_signature": "The joint configuration sits off the manifold of real behaviour: a category the victim uses only on weekday mornings appearing at the hour the victim uses only for banking, from the device the victim uses only for something else. Feature-interaction terms and joint-density scores flag what marginal thresholds cannot. Throughput is also visibly constrained — the score budget forces small, slow payouts, so the campaign compensates with breadth across many accounts.",
+      "observable_signals": [
+        "low joint-density score under a learned behavioural model despite all marginals in range",
+        "unusual feature-interaction combinations absent from the account's own history",
+        "scores clustering just beneath the action threshold rather than spreading naturally",
+        "the same near-threshold configuration recurring across unrelated accounts",
+        "payout amounts capped in a way that suggests an external constraint rather than opportunity",
+        "breadth across accounts substituting for depth within any one account"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "disputes arriving from many accounts that individually scored as low risk",
+        "fraud losses concentrated in a narrow score band just below the threshold",
+        "common downstream beneficiaries linking cases that shared no marginal feature"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "high",
+      "severity": "high",
+      "novelty_score": 0.8,
+      "real_world_grounding": "Adversarial evasion of deployed classifiers is well established in the machine-learning literature and increasingly reported in fraud-model operations, where losses concentrating just under an action threshold is a recognised warning sign; the fully automated, per-account form of it is a credible near-term extrapolation.",
+      "ethical_notes": "It explains why marginal-threshold defences fail and what joint-distribution and score-band monitoring reveals, without describing surrogate construction, feature manipulation, or any search procedure.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "adversarial_mimicry",
+      "simulatable": true
+    },
+    {
+      "id": "low_and_slow_profile_conditioning",
+      "name": "Low-And-Slow Baseline Conditioning",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "baseline steering",
+      "rails": [
+        "upi",
+        "a2a",
+        "card_cnp",
+        "wallet"
+      ],
+      "channel": "ONLINE",
+      "attacker_objective": "Move the account's own behavioural baseline over weeks so that when the payout finally happens it registers as in-profile rather than anomalous.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "Personal-baseline features are the defence this attack targets, and they are learned from whatever history the account accumulates. An agent can maintain a long, patient conditioning schedule across a large portfolio of victim and mule accounts — introducing small legitimate-looking activity, seasoning payees, and letting limit increases mature — where a human operator would lose track or lose patience. The generative contribution is durable multi-week campaign management at scale, not any individual transaction.",
+      "kill_chain": [
+        "account or mule acquisition",
+        "multi-week baseline conditioning",
+        "payee and limit seasoning",
+        "in-profile payout burst"
+      ],
+      "transaction_signature": "Weeks of small, low-margin, unremarkable activity that establishes tolerance for new categories and counterparties, followed by a payout that no longer looks like a step change against the drifted baseline. The conditioning traffic itself is economically pointless — it exists to move a statistic, not to buy anything.",
+      "behavioral_signature": "A baseline that normally stays stationary instead drifts monotonically in one direction; payees are added and then deliberately left unused past any cooling window; the account's behavioural entropy is inconsistent with its apparent tenure; on mule accounts, activity is manufactured rather than organic and lacks the incidental clutter of real life.",
+      "observable_signals": [
+        "monotone drift in a baseline statistic that is normally stationary for that account",
+        "payees added and left unused for an extended period before first use",
+        "conditioning transactions with no economic rationale or trivially reversible",
+        "limit-increase requests preceding a behaviour change rather than following one",
+        "account tenure inconsistent with the diversity of its transaction history",
+        "step change in outflow that is large against tenure-adjusted history even if small against the drifted baseline"
+      ],
+      "auth_time_observability": "low",
+      "post_transaction_signals": [
+        "dispute or recall arriving weeks after the conditioning began, when the trail is cold",
+        "mule accounts with long quiet histories cashing out in a single episode",
+        "forensic review showing the seasoning activity was attacker-controlled or self-refunded"
+      ],
+      "defense_difficulty": "high",
+      "expected_impact": "medium",
+      "severity": "medium",
+      "novelty_score": 0.55,
+      "real_world_grounding": "Mule-account ageing and deliberate seasoning ahead of a cash-out is a documented pattern in account-opening and real-time-payment fraud, and account-takeover operations are observed adding payees well ahead of use; automated portfolio-scale patience is the newer element.",
+      "ethical_notes": "The entry is written around longitudinal and trajectory features defenders should monitor, and contains no conditioning schedule, timing guidance, or seasoning technique.",
+      "simulator_status": "PARAMETERIZED",
+      "maps_to_injector": "adversarial_mimicry",
+      "simulatable": true
+    },
+    {
+      "id": "feedback_loop_poisoning_drift_exploitation",
+      "name": "Analyst Feedback-Loop Poisoning And Retraining-Window Drift Exploitation",
+      "category": "Adversarial ML & Model Evasion",
+      "subcategory": "label supply-chain attack",
+      "rails": [
+        "card_cnp",
+        "upi",
+        "a2a",
+        "token"
+      ],
+      "channel": "BACKOFFICE",
+      "attacker_objective": "Corrupt the labels and thresholds the fraud model retrains on, so that the defence itself is tuned to approve the attacker's traffic.",
+      "genai_role": "strategy_planning",
+      "genai_mechanism": "The attack surface is the defender's process rather than any single transaction: chargeback outcomes, analyst dispositions, and cardholder confirm-or-deny responses are the label supply. Generative tooling makes two things cheap at scale — coaching victims through personalised contact into confirming transactions as genuine, and producing large volumes of near-boundary traffic that pressures false-positive metrics until thresholds are relaxed. Campaigns can also be concentrated around seasonal periods when approval targets are loosened for volume, such as major festival sale windows.",
+      "kill_chain": [
+        "label channel identification",
+        "confirmation and decoy traffic generation",
+        "threshold relaxation or retraining window",
+        "monetisation of the drifted model"
+      ],
+      "transaction_signature": "During the poisoning phase, deliberately unremarkable near-boundary traffic designed to be reviewed and cleared rather than to profit; after the drift lands, ordinary-looking fraud volume in the specific feature slice whose treatment was loosened. Neither phase has a distinctive authorisation footprint on its own.",
+      "behavioral_signature": "Cohorts of transactions marked confirmed-legitimate that later attract disputes; confirmations arriving disproportionately through a single channel, or shortly after inbound contact with the cardholder; disputes withdrawn before resolution so the case closes as genuine; a narrow set of merchants, devices, or counterparties contributing an outsized share of recent training labels.",
+      "observable_signals": [
+        "confirmed-legitimate cohorts converting to disputes at an abnormal rate",
+        "cardholder confirmations concentrated in one channel or following inbound contact",
+        "unusual rate of dispute withdrawals before resolution",
+        "small entity set contributing an outsized share of high-influence recent training data",
+        "approval rate jumping on a narrow feature slice immediately after retraining",
+        "false-positive pressure concentrated in one segment ahead of a threshold review"
+      ],
+      "auth_time_observability": "none",
+      "post_transaction_signals": [
+        "delayed chargeback wave on transactions previously confirmed as genuine",
+        "loss rate rising in exactly the slice where thresholds were most recently relaxed",
+        "label-provenance audit finding clustering behind supposedly independent confirmations",
+        "recall requests on account-to-account transfers the customer earlier affirmed"
+      ],
+      "defense_difficulty": "extreme",
+      "expected_impact": "high",
+      "severity": "critical",
+      "novelty_score": 0.8,
+      "real_world_grounding": "Label noise and feedback-loop degradation are recognised failure modes in deployed fraud models, and coached-victim confirmation is a documented feature of social-engineering scams in Indian real-time payments; deliberate, sustained poisoning of the label pipeline as a campaign objective is a credible extrapolation rather than a widely documented case.",
+      "ethical_notes": "It is written as model-governance guidance — label provenance auditing, post-retraining slice monitoring, and dispute-outcome reconciliation — and describes no method for generating decoy traffic or influencing analyst decisions.",
+      "simulator_status": "RESEARCH_ONLY",
+      "maps_to_injector": null,
+      "simulatable": false
+    }
+  ]
+}

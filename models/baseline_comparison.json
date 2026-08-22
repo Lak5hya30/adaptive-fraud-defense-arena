@@ -1,0 +1,451 @@
+{
+  "rules_baseline": {
+    "precision": 0.035447311309380274,
+    "recall": 0.42485549132947975,
+    "f1": 0.06543512129979968,
+    "false_positive_rate": 0.10766000968940087,
+    "n_flagged": 4147,
+    "fraud_caught_per_1000_legit_hit": 36.8,
+    "false_positives_per_1000_legit": 107.66,
+    "fraud_caught_per_1000_fraud": 424.9,
+    "roc_auc": 0.6613909113170895,
+    "pr_auc": 0.02522778225422507,
+    "per_attack_recall": {
+      "account_takeover": {
+        "recall": 0.4565,
+        "n": 46
+      },
+      "adversarial_mimicry": {
+        "recall": 0.1296,
+        "n": 54
+      },
+      "bust_out": {
+        "recall": 0.5,
+        "n": 26
+      },
+      "card_testing": {
+        "recall": 0.9,
+        "n": 40
+      },
+      "friendly_fraud": {
+        "recall": 0.0,
+        "n": 15
+      },
+      "geo_anomaly": {
+        "recall": 0.5152,
+        "n": 33
+      },
+      "merchant_laundering": {
+        "recall": 0.3143,
+        "n": 35
+      },
+      "otp_relay": {
+        "recall": 0.5143,
+        "n": 35
+      },
+      "scam_transfer": {
+        "recall": 0.3902,
+        "n": 41
+      },
+      "wallet_provisioning": {
+        "recall": 0.381,
+        "n": 21
+      }
+    }
+  },
+  "static_ml": {
+    "precision": 0.24248704663212436,
+    "recall": 0.6763005780346821,
+    "f1": 0.35697940503432496,
+    "false_positive_rate": 0.01967486677073801,
+    "n_flagged": 965,
+    "fraud_caught_per_1000_legit_hit": 320.1,
+    "false_positives_per_1000_legit": 19.67,
+    "fraud_caught_per_1000_fraud": 676.3,
+    "roc_auc": 0.9529326617755002,
+    "pr_auc": 0.5001400919804214,
+    "per_attack_recall": {
+      "account_takeover": {
+        "recall": 0.7391,
+        "n": 46
+      },
+      "adversarial_mimicry": {
+        "recall": 0.3333,
+        "n": 54
+      },
+      "bust_out": {
+        "recall": 1.0,
+        "n": 26
+      },
+      "card_testing": {
+        "recall": 0.975,
+        "n": 40
+      },
+      "friendly_fraud": {
+        "recall": 0.1333,
+        "n": 15
+      },
+      "geo_anomaly": {
+        "recall": 0.697,
+        "n": 33
+      },
+      "merchant_laundering": {
+        "recall": 0.7143,
+        "n": 35
+      },
+      "otp_relay": {
+        "recall": 0.6571,
+        "n": 35
+      },
+      "scam_transfer": {
+        "recall": 0.7561,
+        "n": 41
+      },
+      "wallet_provisioning": {
+        "recall": 0.619,
+        "n": 21
+      }
+    }
+  },
+  "adaptive_ml": {
+    "precision": 0.4861878453038674,
+    "recall": 0.5086705202312138,
+    "f1": 0.4971751412429379,
+    "false_positive_rate": 0.005006190450557141,
+    "n_flagged": 362,
+    "fraud_caught_per_1000_legit_hit": 946.2,
+    "false_positives_per_1000_legit": 5.01,
+    "fraud_caught_per_1000_fraud": 508.7,
+    "roc_auc": 0.9362358700126734,
+    "pr_auc": 0.487078838133514,
+    "per_attack_recall": {
+      "account_takeover": {
+        "recall": 0.1957,
+        "n": 46
+      },
+      "adversarial_mimicry": {
+        "recall": 0.0556,
+        "n": 54
+      },
+      "bust_out": {
+        "recall": 1.0,
+        "n": 26
+      },
+      "card_testing": {
+        "recall": 0.975,
+        "n": 40
+      },
+      "friendly_fraud": {
+        "recall": 0.0667,
+        "n": 15
+      },
+      "geo_anomaly": {
+        "recall": 0.9394,
+        "n": 33
+      },
+      "merchant_laundering": {
+        "recall": 0.6,
+        "n": 35
+      },
+      "otp_relay": {
+        "recall": 0.4571,
+        "n": 35
+      },
+      "scam_transfer": {
+        "recall": 0.439,
+        "n": 41
+      },
+      "wallet_provisioning": {
+        "recall": 0.5714,
+        "n": 21
+      }
+    }
+  },
+  "adaptive_candidate_unpromoted": {
+    "precision": 0.6425339366515838,
+    "recall": 0.41040462427745666,
+    "f1": 0.5008818342151675,
+    "false_positive_rate": 0.002126285191365667,
+    "n_flagged": 221,
+    "fraud_caught_per_1000_legit_hit": 1797.5,
+    "false_positives_per_1000_legit": 2.13,
+    "fraud_caught_per_1000_fraud": 410.4,
+    "roc_auc": 0.9323995486991965,
+    "pr_auc": 0.5131082426887489,
+    "per_attack_recall": {
+      "account_takeover": {
+        "recall": 0.1087,
+        "n": 46
+      },
+      "adversarial_mimicry": {
+        "recall": 0.0556,
+        "n": 54
+      },
+      "bust_out": {
+        "recall": 0.8846,
+        "n": 26
+      },
+      "card_testing": {
+        "recall": 0.975,
+        "n": 40
+      },
+      "friendly_fraud": {
+        "recall": 0.0,
+        "n": 15
+      },
+      "geo_anomaly": {
+        "recall": 0.9394,
+        "n": 33
+      },
+      "merchant_laundering": {
+        "recall": 0.6857,
+        "n": 35
+      },
+      "otp_relay": {
+        "recall": 0.1429,
+        "n": 35
+      },
+      "scam_transfer": {
+        "recall": 0.1463,
+        "n": 41
+      },
+      "wallet_provisioning": {
+        "recall": 0.2857,
+        "n": 21
+      }
+    }
+  },
+  "_fpr_matched": {
+    "target_false_positive_rate": 0.02,
+    "threshold_selected_on": "validation slice",
+    "note": "Every detector re-thresholded to spend the same false-positive budget, with the threshold chosen on the validation slice and applied unchanged to the held-out test slice. This is the like-for-like comparison; the blocks above are each detector at its own native operating point. Realized test false-positive rates will differ slightly from the budget because the threshold was not fitted to the test set.",
+    "models": {
+      "rules_baseline": {
+        "precision": 0.0682261208576998,
+        "recall": 0.10115606936416185,
+        "f1": 0.08149010477299184,
+        "false_positive_rate": 0.012865371157883405,
+        "n_flagged": 513,
+        "fraud_caught_per_1000_legit_hit": 73.2,
+        "false_positives_per_1000_legit": 12.87,
+        "fraud_caught_per_1000_fraud": 101.2,
+        "roc_auc": 0.6613909113170895,
+        "pr_auc": 0.02522778225422507,
+        "per_attack_recall": {
+          "account_takeover": {
+            "recall": 0.1304,
+            "n": 46
+          },
+          "adversarial_mimicry": {
+            "recall": 0.0,
+            "n": 54
+          },
+          "bust_out": {
+            "recall": 0.1538,
+            "n": 26
+          },
+          "card_testing": {
+            "recall": 0.15,
+            "n": 40
+          },
+          "friendly_fraud": {
+            "recall": 0.0,
+            "n": 15
+          },
+          "geo_anomaly": {
+            "recall": 0.0909,
+            "n": 33
+          },
+          "merchant_laundering": {
+            "recall": 0.0,
+            "n": 35
+          },
+          "otp_relay": {
+            "recall": 0.1714,
+            "n": 35
+          },
+          "scam_transfer": {
+            "recall": 0.1463,
+            "n": 41
+          },
+          "wallet_provisioning": {
+            "recall": 0.1905,
+            "n": 21
+          }
+        },
+        "threshold": 0.153846
+      },
+      "static_ml": {
+        "precision": 0.24248704663212436,
+        "recall": 0.6763005780346821,
+        "f1": 0.35697940503432496,
+        "false_positive_rate": 0.01967486677073801,
+        "n_flagged": 965,
+        "fraud_caught_per_1000_legit_hit": 320.1,
+        "false_positives_per_1000_legit": 19.67,
+        "fraud_caught_per_1000_fraud": 676.3,
+        "roc_auc": 0.9529326617755002,
+        "pr_auc": 0.5001400919804214,
+        "per_attack_recall": {
+          "account_takeover": {
+            "recall": 0.7391,
+            "n": 46
+          },
+          "adversarial_mimicry": {
+            "recall": 0.3333,
+            "n": 54
+          },
+          "bust_out": {
+            "recall": 1.0,
+            "n": 26
+          },
+          "card_testing": {
+            "recall": 0.975,
+            "n": 40
+          },
+          "friendly_fraud": {
+            "recall": 0.1333,
+            "n": 15
+          },
+          "geo_anomaly": {
+            "recall": 0.697,
+            "n": 33
+          },
+          "merchant_laundering": {
+            "recall": 0.7143,
+            "n": 35
+          },
+          "otp_relay": {
+            "recall": 0.6571,
+            "n": 35
+          },
+          "scam_transfer": {
+            "recall": 0.7561,
+            "n": 41
+          },
+          "wallet_provisioning": {
+            "recall": 0.619,
+            "n": 21
+          }
+        },
+        "threshold": 0.541813
+      },
+      "adaptive_ml": {
+        "precision": 0.2328767123287671,
+        "recall": 0.638728323699422,
+        "f1": 0.3413127413127413,
+        "false_positive_rate": 0.01959412176347096,
+        "n_flagged": 949,
+        "fraud_caught_per_1000_legit_hit": 303.6,
+        "false_positives_per_1000_legit": 19.59,
+        "fraud_caught_per_1000_fraud": 638.7,
+        "roc_auc": 0.9362358700126734,
+        "pr_auc": 0.487078838133514,
+        "per_attack_recall": {
+          "account_takeover": {
+            "recall": 0.3696,
+            "n": 46
+          },
+          "adversarial_mimicry": {
+            "recall": 0.2593,
+            "n": 54
+          },
+          "bust_out": {
+            "recall": 1.0,
+            "n": 26
+          },
+          "card_testing": {
+            "recall": 0.975,
+            "n": 40
+          },
+          "friendly_fraud": {
+            "recall": 0.0667,
+            "n": 15
+          },
+          "geo_anomaly": {
+            "recall": 0.9697,
+            "n": 33
+          },
+          "merchant_laundering": {
+            "recall": 0.7143,
+            "n": 35
+          },
+          "otp_relay": {
+            "recall": 0.6,
+            "n": 35
+          },
+          "scam_transfer": {
+            "recall": 0.8049,
+            "n": 41
+          },
+          "wallet_provisioning": {
+            "recall": 0.619,
+            "n": 21
+          }
+        },
+        "threshold": 0.61753
+      },
+      "adaptive_candidate_unpromoted": {
+        "precision": 0.22697056030389365,
+        "recall": 0.6907514450867052,
+        "f1": 0.3416726233023588,
+        "false_positive_rate": 0.021908811971793077,
+        "n_flagged": 1053,
+        "fraud_caught_per_1000_legit_hit": 293.6,
+        "false_positives_per_1000_legit": 21.91,
+        "fraud_caught_per_1000_fraud": 690.8,
+        "roc_auc": 0.9323995486991965,
+        "pr_auc": 0.5131082426887489,
+        "per_attack_recall": {
+          "account_takeover": {
+            "recall": 0.5217,
+            "n": 46
+          },
+          "adversarial_mimicry": {
+            "recall": 0.3333,
+            "n": 54
+          },
+          "bust_out": {
+            "recall": 1.0,
+            "n": 26
+          },
+          "card_testing": {
+            "recall": 0.975,
+            "n": 40
+          },
+          "friendly_fraud": {
+            "recall": 0.0667,
+            "n": 15
+          },
+          "geo_anomaly": {
+            "recall": 1.0,
+            "n": 33
+          },
+          "merchant_laundering": {
+            "recall": 0.9429,
+            "n": 35
+          },
+          "otp_relay": {
+            "recall": 0.6286,
+            "n": 35
+          },
+          "scam_transfer": {
+            "recall": 0.6585,
+            "n": 41
+          },
+          "wallet_provisioning": {
+            "recall": 0.7619,
+            "n": 21
+          }
+        },
+        "threshold": 0.597151
+      }
+    }
+  },
+  "_meta": {
+    "schema_version": "2.0",
+    "n_eval": 37500,
+    "n_fraud_eval": 346,
+    "evaluated_on": "held-out time-split test set"
+  }
+}

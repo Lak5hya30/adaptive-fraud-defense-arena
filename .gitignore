@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Local logs
+data/streamlit.log
+
+# Local tooling
+.claude/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# The CSV is a convenience copy of the parquet; regenerating either takes one
+# command and it is ~10x the size of the parquet.
+data/transactions.csv
+
+# Keep committed for reproducibility (do NOT ignore):
+#   data/transactions.parquet, data/attack_artifacts.jsonl, data/summary.json,
+#   models/*.joblib, models/*.json, models/defend_demo.parquet,
+#   artifacts_cache/*.json, docs/figures/*.png

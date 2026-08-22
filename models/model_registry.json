@@ -1,0 +1,361 @@
+{
+  "schema_version": "2.0",
+  "gates": {
+    "min_attack_recall_gain": 0.05,
+    "max_fpr": 0.025,
+    "max_fpr_regression": 0.005,
+    "max_prior_recall_drop": 0.1,
+    "max_overall_pr_auc_drop": 0.03
+  },
+  "note": "Every adapted model is a challenger measured against the model in force. Promotion requires all gates to pass; a rejected candidate stays out of the authorization path. Deployment would additionally run a shadow / controlled-rollout period, which this prototype does not simulate.",
+  "entries": [
+    {
+      "model_version": "v0-base",
+      "stage": "champion",
+      "schema_version": "2.0",
+      "data_seed": 42,
+      "trained_at": null,
+      "metrics": {
+        "recall": 0.65882,
+        "precision": 0.50909,
+        "pr_auc": 0.60941,
+        "false_positive_rate": 0.01473
+      },
+      "replay_composition": {},
+      "attack_generations_used": [
+        {
+          "family": "scam_transfer",
+          "generation": 0
+        },
+        {
+          "family": "wallet_provisioning",
+          "generation": 0
+        },
+        {
+          "family": "otp_relay",
+          "generation": 0
+        }
+      ],
+      "acceptance": {
+        "decision": "PROMOTE",
+        "summary": "initial model in force"
+      }
+    },
+    {
+      "model_version": "v1-challenger",
+      "stage": "champion",
+      "schema_version": "2.0",
+      "data_seed": 42,
+      "trained_at": null,
+      "metrics": {
+        "recall": 0.61389,
+        "precision": 0.60966,
+        "pr_auc": 0.66549,
+        "false_positive_rate": 0.01216,
+        "attack_recall": 0.53728
+      },
+      "replay_composition": {
+        "total_rows": 566,
+        "fraud_rows": 366,
+        "evolved_attack_rows": 166,
+        "rehearsal_rows": 200,
+        "legit_context_rows": 200,
+        "by_family": {
+          "account_takeover": 26,
+          "adversarial_mimicry": 24,
+          "bust_out": 20,
+          "card_testing": 38,
+          "friendly_fraud": 25,
+          "geo_anomaly": 28,
+          "merchant_laundering": 23,
+          "otp_relay": 63,
+          "scam_transfer": 55,
+          "velocity_smurfing": 16,
+          "wallet_provisioning": 48
+        },
+        "by_generation": {
+          "1": 566
+        }
+      },
+      "attack_generations_used": [
+        {
+          "family": "scam_transfer",
+          "generation": 1,
+          "source": "heuristic"
+        },
+        {
+          "family": "wallet_provisioning",
+          "generation": 1,
+          "source": "heuristic"
+        },
+        {
+          "family": "otp_relay",
+          "generation": 1,
+          "source": "heuristic"
+        }
+      ],
+      "acceptance": {
+        "decision": "PROMOTE",
+        "failed_gates": [],
+        "gates": [
+          {
+            "gate": "attack_recall_gain",
+            "passed": true,
+            "observed": 0.5373,
+            "required": 0.4057,
+            "detail": "candidate catches 53.7% of the new attack generation vs 35.6% for the model in force"
+          },
+          {
+            "gate": "absolute_false_positive_ceiling",
+            "passed": true,
+            "observed": 0.0122,
+            "required": 0.025,
+            "detail": "candidate declines or challenges 1.22% of genuine traffic"
+          },
+          {
+            "gate": "false_positive_regression",
+            "passed": true,
+            "observed": 0.0122,
+            "required": 0.0227,
+            "detail": "customer friction moves from 1.77% to 1.22%"
+          },
+          {
+            "gate": "no_catastrophic_forgetting",
+            "passed": true,
+            "observed": 0.1209,
+            "required": 0.1,
+            "detail": "largest regression is guard:merchant_laundering at -12.1% on n=91 \u2014 inside sampling error at this sample size, so not counted"
+          },
+          {
+            "gate": "overall_ranking_quality",
+            "passed": true,
+            "observed": 0.6655,
+            "required": 0.5229,
+            "detail": "overall PR-AUC moves from 0.553 to 0.665"
+          }
+        ],
+        "thresholds": {
+          "min_attack_recall_gain": 0.05,
+          "max_fpr": 0.025,
+          "max_fpr_regression": 0.005,
+          "max_prior_recall_drop": 0.1,
+          "max_overall_pr_auc_drop": 0.03
+        },
+        "summary": "candidate promoted to champion"
+      }
+    },
+    {
+      "model_version": "v2-challenger",
+      "stage": "challenger",
+      "schema_version": "2.0",
+      "data_seed": 42,
+      "trained_at": null,
+      "metrics": {
+        "recall": 0.59028,
+        "precision": 0.56818,
+        "pr_auc": 0.63677,
+        "false_positive_rate": 0.01387,
+        "attack_recall": 0.48602
+      },
+      "replay_composition": {
+        "total_rows": 1127,
+        "fraud_rows": 727,
+        "evolved_attack_rows": 329,
+        "rehearsal_rows": 398,
+        "legit_context_rows": 400,
+        "by_family": {
+          "account_takeover": 51,
+          "adversarial_mimicry": 43,
+          "bust_out": 44,
+          "card_testing": 54,
+          "friendly_fraud": 50,
+          "geo_anomaly": 55,
+          "merchant_laundering": 49,
+          "otp_relay": 128,
+          "scam_transfer": 115,
+          "velocity_smurfing": 52,
+          "wallet_provisioning": 86
+        },
+        "by_generation": {
+          "1": 566,
+          "2": 561
+        }
+      },
+      "attack_generations_used": [
+        {
+          "family": "scam_transfer",
+          "generation": 2,
+          "source": "heuristic"
+        },
+        {
+          "family": "wallet_provisioning",
+          "generation": 2,
+          "source": "heuristic"
+        },
+        {
+          "family": "otp_relay",
+          "generation": 2,
+          "source": "heuristic"
+        }
+      ],
+      "acceptance": {
+        "decision": "REJECT",
+        "failed_gates": [
+          "attack_recall_gain"
+        ],
+        "gates": [
+          {
+            "gate": "attack_recall_gain",
+            "passed": false,
+            "observed": 0.486,
+            "required": 0.5288,
+            "detail": "candidate catches 48.6% of the new attack generation vs 47.9% for the model in force"
+          },
+          {
+            "gate": "absolute_false_positive_ceiling",
+            "passed": true,
+            "observed": 0.0139,
+            "required": 0.025,
+            "detail": "candidate declines or challenges 1.39% of genuine traffic"
+          },
+          {
+            "gate": "false_positive_regression",
+            "passed": true,
+            "observed": 0.0139,
+            "required": 0.0199,
+            "detail": "customer friction moves from 1.49% to 1.39%"
+          },
+          {
+            "gate": "no_catastrophic_forgetting",
+            "passed": true,
+            "observed": 0.0282,
+            "required": 0.1,
+            "detail": "largest regression is gen1:otp_relay at -2.8% on n=142 \u2014 inside sampling error at this sample size, so not counted"
+          },
+          {
+            "gate": "overall_ranking_quality",
+            "passed": true,
+            "observed": 0.6368,
+            "required": 0.5923,
+            "detail": "overall PR-AUC moves from 0.622 to 0.637"
+          }
+        ],
+        "thresholds": {
+          "min_attack_recall_gain": 0.05,
+          "max_fpr": 0.025,
+          "max_fpr_regression": 0.005,
+          "max_prior_recall_drop": 0.1,
+          "max_overall_pr_auc_drop": 0.03
+        },
+        "summary": "candidate held back: attack_recall_gain"
+      }
+    },
+    {
+      "model_version": "v3-challenger",
+      "stage": "challenger",
+      "schema_version": "2.0",
+      "data_seed": 42,
+      "trained_at": null,
+      "metrics": {
+        "recall": 0.625,
+        "precision": 0.62937,
+        "pr_auc": 0.68382,
+        "false_positive_rate": 0.01138,
+        "attack_recall": 0.54868
+      },
+      "replay_composition": {
+        "total_rows": 1708,
+        "fraud_rows": 1108,
+        "evolved_attack_rows": 512,
+        "rehearsal_rows": 596,
+        "legit_context_rows": 600,
+        "by_family": {
+          "account_takeover": 74,
+          "adversarial_mimicry": 67,
+          "bust_out": 59,
+          "card_testing": 92,
+          "friendly_fraud": 66,
+          "geo_anomaly": 74,
+          "merchant_laundering": 76,
+          "otp_relay": 209,
+          "scam_transfer": 180,
+          "velocity_smurfing": 88,
+          "wallet_provisioning": 123
+        },
+        "by_generation": {
+          "1": 566,
+          "2": 561,
+          "3": 581
+        }
+      },
+      "attack_generations_used": [
+        {
+          "family": "scam_transfer",
+          "generation": 3,
+          "source": "heuristic"
+        },
+        {
+          "family": "wallet_provisioning",
+          "generation": 3,
+          "source": "heuristic"
+        },
+        {
+          "family": "otp_relay",
+          "generation": 3,
+          "source": "heuristic"
+        }
+      ],
+      "acceptance": {
+        "decision": "REJECT",
+        "failed_gates": [
+          "attack_recall_gain"
+        ],
+        "gates": [
+          {
+            "gate": "attack_recall_gain",
+            "passed": false,
+            "observed": 0.5487,
+            "required": 0.6282,
+            "detail": "candidate catches 54.9% of the new attack generation vs 57.8% for the model in force"
+          },
+          {
+            "gate": "absolute_false_positive_ceiling",
+            "passed": true,
+            "observed": 0.0114,
+            "required": 0.025,
+            "detail": "candidate declines or challenges 1.14% of genuine traffic"
+          },
+          {
+            "gate": "false_positive_regression",
+            "passed": true,
+            "observed": 0.0114,
+            "required": 0.019,
+            "detail": "customer friction moves from 1.40% to 1.14%"
+          },
+          {
+            "gate": "no_catastrophic_forgetting",
+            "passed": true,
+            "observed": 0.1163,
+            "required": 0.1,
+            "detail": "largest regression is gen2:scam_transfer at -11.6% on n=129 \u2014 inside sampling error at this sample size, so not counted"
+          },
+          {
+            "gate": "overall_ranking_quality",
+            "passed": true,
+            "observed": 0.6838,
+            "required": 0.6378,
+            "detail": "overall PR-AUC moves from 0.668 to 0.684"
+          }
+        ],
+        "thresholds": {
+          "min_attack_recall_gain": 0.05,
+          "max_fpr": 0.025,
+          "max_fpr_regression": 0.005,
+          "max_prior_recall_drop": 0.1,
+          "max_overall_pr_auc_drop": 0.03
+        },
+        "summary": "candidate held back: attack_recall_gain"
+      }
+    }
+  ]
+}

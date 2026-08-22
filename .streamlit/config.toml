@@ -1,0 +1,17 @@
+# Pinned so the prototype looks identical on any machine and on any projector.
+# The custom cards in app/common.py use light text on a translucent panel; under
+# a light theme they would render as white-on-white, which is exactly the kind of
+# surprise a live demo cannot afford.
+[theme]
+base = "dark"
+primaryColor = "#EB6C1E"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#161A23"
+textColor = "#E8EAF0"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

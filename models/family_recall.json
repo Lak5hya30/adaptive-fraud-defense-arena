@@ -1,0 +1,195 @@
+{
+  "frame": {
+    "n_transactions": 90000,
+    "n_fraud": 2700,
+    "fraud_rate": 0.03,
+    "seed": 424284
+  },
+  "note": "Generated from a seed no model was trained or tuned on, so the cardholders, merchants and devices are an unseen synthetic portfolio. Fraud is enriched to 3.0% purely so each family has enough held-out examples to quote; overall precision and false-positive figures are reported on the realistic-base-rate test slice instead, never on this frame.",
+  "min_n_to_report": 30,
+  "models": {
+    "rules_baseline": {
+      "per_family_recall": {
+        "account_takeover": {
+          "recall": 0.3362,
+          "n": 351,
+          "sufficient_n": true
+        },
+        "adversarial_mimicry": {
+          "recall": 0.1556,
+          "n": 270,
+          "sufficient_n": true
+        },
+        "bust_out": {
+          "recall": 0.4321,
+          "n": 162,
+          "sufficient_n": true
+        },
+        "card_testing": {
+          "recall": 0.7819,
+          "n": 486,
+          "sufficient_n": true
+        },
+        "friendly_fraud": {
+          "recall": 0.0926,
+          "n": 162,
+          "sufficient_n": true
+        },
+        "geo_anomaly": {
+          "recall": 0.5741,
+          "n": 108,
+          "sufficient_n": true
+        },
+        "merchant_laundering": {
+          "recall": 0.2315,
+          "n": 216,
+          "sufficient_n": true
+        },
+        "otp_relay": {
+          "recall": 0.4377,
+          "n": 297,
+          "sufficient_n": true
+        },
+        "scam_transfer": {
+          "recall": 0.3926,
+          "n": 270,
+          "sufficient_n": true
+        },
+        "velocity_smurfing": {
+          "recall": 0.7731,
+          "n": 216,
+          "sufficient_n": true
+        },
+        "wallet_provisioning": {
+          "recall": 0.3333,
+          "n": 162,
+          "sufficient_n": true
+        }
+      },
+      "overall_recall_on_this_frame": 0.4422,
+      "false_positive_rate_on_this_frame": 0.11073
+    },
+    "static_ml": {
+      "per_family_recall": {
+        "account_takeover": {
+          "recall": 0.7009,
+          "n": 351,
+          "sufficient_n": true
+        },
+        "adversarial_mimicry": {
+          "recall": 0.5333,
+          "n": 270,
+          "sufficient_n": true
+        },
+        "bust_out": {
+          "recall": 0.9691,
+          "n": 162,
+          "sufficient_n": true
+        },
+        "card_testing": {
+          "recall": 0.9856,
+          "n": 486,
+          "sufficient_n": true
+        },
+        "friendly_fraud": {
+          "recall": 0.2407,
+          "n": 162,
+          "sufficient_n": true
+        },
+        "geo_anomaly": {
+          "recall": 0.8056,
+          "n": 108,
+          "sufficient_n": true
+        },
+        "merchant_laundering": {
+          "recall": 0.8704,
+          "n": 216,
+          "sufficient_n": true
+        },
+        "otp_relay": {
+          "recall": 0.7879,
+          "n": 297,
+          "sufficient_n": true
+        },
+        "scam_transfer": {
+          "recall": 0.7741,
+          "n": 270,
+          "sufficient_n": true
+        },
+        "velocity_smurfing": {
+          "recall": 0.963,
+          "n": 216,
+          "sufficient_n": true
+        },
+        "wallet_provisioning": {
+          "recall": 0.6173,
+          "n": 162,
+          "sufficient_n": true
+        }
+      },
+      "overall_recall_on_this_frame": 0.7744,
+      "false_positive_rate_on_this_frame": 0.02845
+    },
+    "adaptive_ml": {
+      "per_family_recall": {
+        "account_takeover": {
+          "recall": 0.3134,
+          "n": 351,
+          "sufficient_n": true
+        },
+        "adversarial_mimicry": {
+          "recall": 0.2259,
+          "n": 270,
+          "sufficient_n": true
+        },
+        "bust_out": {
+          "recall": 0.8704,
+          "n": 162,
+          "sufficient_n": true
+        },
+        "card_testing": {
+          "recall": 0.9568,
+          "n": 486,
+          "sufficient_n": true
+        },
+        "friendly_fraud": {
+          "recall": 0.142,
+          "n": 162,
+          "sufficient_n": true
+        },
+        "geo_anomaly": {
+          "recall": 0.9444,
+          "n": 108,
+          "sufficient_n": true
+        },
+        "merchant_laundering": {
+          "recall": 0.7778,
+          "n": 216,
+          "sufficient_n": true
+        },
+        "otp_relay": {
+          "recall": 0.3838,
+          "n": 297,
+          "sufficient_n": true
+        },
+        "scam_transfer": {
+          "recall": 0.3963,
+          "n": 270,
+          "sufficient_n": true
+        },
+        "velocity_smurfing": {
+          "recall": 0.8426,
+          "n": 216,
+          "sufficient_n": true
+        },
+        "wallet_provisioning": {
+          "recall": 0.3519,
+          "n": 162,
+          "sufficient_n": true
+        }
+      },
+      "overall_recall_on_this_frame": 0.5667,
+      "false_positive_rate_on_this_frame": 0.00474
+    }
+  }
+}
