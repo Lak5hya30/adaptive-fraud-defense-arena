@@ -52,9 +52,7 @@ st.caption(
 
 st.divider()
 
-# --------------------------------------------------------------------------- #
 # Coverage map
-# --------------------------------------------------------------------------- #
 st.subheader("Coverage map — research surface vs simulator")
 cov = tax.coverage_by_category()
 left, right = st.columns([1.15, 1])
@@ -86,9 +84,7 @@ with right:
 
 st.divider()
 
-# --------------------------------------------------------------------------- #
 # Filters
-# --------------------------------------------------------------------------- #
 st.subheader("Browse the atlas")
 f1, f2, f3 = st.columns(3)
 f4, f5, f6 = st.columns(3)

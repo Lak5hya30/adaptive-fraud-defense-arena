@@ -16,9 +16,7 @@ try:  # optional convenience
 except Exception:  # pragma: no cover - dotenv is optional
     pass
 
-# ---------------------------------------------------------------------------
 # Paths
-# ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 MODELS_DIR = ROOT / "models"
@@ -53,14 +51,10 @@ CALIBRATION_PATH = MODELS_DIR / "calibration.json"
 FAMILY_RECALL_PATH = MODELS_DIR / "family_recall.json"
 HEAD_TO_HEAD_PATH = MODELS_DIR / "head_to_head.json"
 
-# ---------------------------------------------------------------------------
 # Reproducibility
-# ---------------------------------------------------------------------------
 GLOBAL_SEED = 42
 
-# ---------------------------------------------------------------------------
 # Simulation defaults
-# ---------------------------------------------------------------------------
 DEFAULT_N_CARDHOLDERS = 6000
 DEFAULT_N_MERCHANTS = 1200
 DEFAULT_N_TRANSACTIONS = 150_000
@@ -82,9 +76,7 @@ FAMILY_EVAL = {
 # feature contract changes, so stale artifacts are detectable).
 SCHEMA_VERSION = "2.0"
 
-# ---------------------------------------------------------------------------
 # LLM (Anthropic) config
-# ---------------------------------------------------------------------------
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
 LLM_MODEL = os.getenv("FRAUD_LAB_MODEL", "claude-sonnet-5").strip()
 LLM_ENABLED = os.getenv("FRAUD_LAB_LLM_ENABLED", "1").strip() not in {"0", "false", "False"}
@@ -94,9 +86,7 @@ def llm_available() -> bool:
     """True when live generation is possible (key present and not disabled)."""
     return bool(ANTHROPIC_API_KEY) and LLM_ENABLED
 
-# ---------------------------------------------------------------------------
 # Domain constants — cards-first (Mastercard core), light multi-rail for breadth
-# ---------------------------------------------------------------------------
 RAILS = ["card_cnp", "card_cp", "upi"]
 
 # UPI is the dominant retail rail in India and the one most authorized-push-payment
@@ -149,9 +139,7 @@ HIGH_RISK_COUNTRIES = {"XX", "RU", "NG", "KP"}
 # Detection threshold target: keep false-positive rate on legit low.
 TARGET_MAX_FPR = 0.02
 
-# ---------------------------------------------------------------------------
 # Legitimate-behaviour realism (Phase 1)
-# ---------------------------------------------------------------------------
 # These rates make genuine customers behave with realistic variation so that
 # `device_changed`, `is_new_payee`, foreign spend, high value, etc. are genuine
 # *risk indicators* rather than perfect fraud shortcuts. They are deliberately
@@ -257,10 +245,8 @@ FRAUD_REALISM = {
     "geo_high_risk_prob": 0.22,        # share of geo-anomaly fraud in a high-risk jurisdiction
 }
 
-# ---------------------------------------------------------------------------
 # Risk-based decision policy (Phase 3) — prototype issuer/network decisioning.
 # NOT a claim about any production system. Thresholds are on the fused risk score.
-# ---------------------------------------------------------------------------
 # Tiers are applied to the CALIBRATED fraud probability, so they are readable as
 # statements about risk rather than as positions on an arbitrary score.
 #   >= decline : confident enough to refuse outright
@@ -273,9 +259,7 @@ DECISION_THRESHOLDS = {
     "step_up": None,     # None => use the model's tuned operating threshold
 }
 
-# ---------------------------------------------------------------------------
 # Adaptive closed-loop (Phase 2) — cumulative adversarial replay.
-# ---------------------------------------------------------------------------
 LOOP_CONFIG = {
     "replay_buffer_max": 6000,         # cap on retained adversarial examples (bounded replay)
     # Emphasis on replayed adversarial examples during retraining, applied as a
@@ -289,13 +273,11 @@ LOOP_CONFIG = {
     "focus_mix_boost": 3.5,            # up-weight focus families in loop frames for stable n
 }
 
-# ---------------------------------------------------------------------------
 # Attack-specification bounds (Phase 4).
 # The red-team agent proposes a STRUCTURED attack specification; the simulator
 # only ever executes specifications that satisfy these payment-domain bounds.
 # LLM creativity is constrained by simulation rules — an invalid or impossible
 # specification is normalized (clamped) or rejected, never silently executed.
-# ---------------------------------------------------------------------------
 ATTACK_SPEC_BOUNDS = {
     "intensity": (0.15, 1.0),
     "amount_profile": ["micro", "low", "moderate", "high", "extreme"],
@@ -312,10 +294,8 @@ ATTACK_SPEC_BOUNDS = {
     "max_variants_per_round": 4000,
 }
 
-# ---------------------------------------------------------------------------
 # Champion / challenger governance (Phase 4).
 # An adapted model is a CANDIDATE. It is promoted only if it clears every gate.
-# ---------------------------------------------------------------------------
 CHAMPION_CHALLENGER = {
     "min_attack_recall_gain": 0.05,    # candidate must beat champion on the new attack by this
     "max_fpr": 0.025,                  # absolute ceiling on legitimate false-positive rate
@@ -324,12 +304,10 @@ CHAMPION_CHALLENGER = {
     "max_overall_pr_auc_drop": 0.03,   # overall ranking quality must not materially regress
 }
 
-# ---------------------------------------------------------------------------
 # Operational scenario for cost-sensitive reporting (Phase 4).
 # These are ILLUSTRATIVE SYNTHETIC ASSUMPTIONS for a prototype, not Mastercard
 # figures and not a claim about anyone's real economics. They exist so that a
 # false-positive rate can be read as review volume and customer friction.
-# ---------------------------------------------------------------------------
 OPERATIONAL_SCENARIO = {
     "label": "synthetic illustrative scenario — not production economics",
     "monthly_authorizations": 10_000_000,

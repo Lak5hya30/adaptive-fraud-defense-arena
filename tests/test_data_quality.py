@@ -21,9 +21,7 @@ from src.defend.features import (POST_OUTCOME_COLUMNS, assert_auth_time_safe,
 from src.generate.simulate import simulate
 
 
-# --------------------------------------------------------------------------- #
 # Leakage
-# --------------------------------------------------------------------------- #
 def test_post_outcome_fields_never_reach_model():
     df, _ = simulate(n_transactions=6000, fraud_rate=0.02, seed=3)
     X = build_features(df)
@@ -46,9 +44,7 @@ def test_refund_flag_still_present_in_raw_dataset():
     assert "refund_flag" in df.columns
 
 
-# --------------------------------------------------------------------------- #
 # Legitimate-data realism  (the anti-shortcut checks)
-# --------------------------------------------------------------------------- #
 def test_realism_bundle():
     df, _ = simulate(n_transactions=20000, fraud_rate=0.02, seed=7)
     legit = df[df.is_fraud == 0]
@@ -94,9 +90,7 @@ def test_fraud_and_legit_feature_distributions_overlap():
     assert overlap > 0, "legit and fraud amount distributions do not overlap"
 
 
-# --------------------------------------------------------------------------- #
 # Temporal causality
-# --------------------------------------------------------------------------- #
 def test_historical_features_use_only_the_past():
     """A row's historical features must not change when FUTURE rows are added.
     Compute features on a card's first k rows, then on all its rows, and confirm

@@ -102,7 +102,6 @@ if sel.get("initial_ranking"):
 tab_rounds, tab_lineage, tab_gov, tab_buffer = st.tabs(
     ["🔁 Rounds", "🧬 Attack lineage", "🛡️ Promotion gates", "🗃️ Replay buffer"])
 
-# --------------------------------------------------------------------------- #
 with tab_rounds:
     for h in loop["history"]:
         st.subheader(f"Round {h['round']}")
@@ -151,7 +150,6 @@ with tab_rounds:
                                    for k, d in prior.items()))
         st.divider()
 
-# --------------------------------------------------------------------------- #
 with tab_lineage:
     lin = load_lineage()
     st.subheader("How each attack evolved, and what it cost the defense")
@@ -204,7 +202,6 @@ with tab_lineage:
                         f"`{drv.get('top_relied_signal')}`.")
                     st.caption(n.get("strategy", ""))
 
-# --------------------------------------------------------------------------- #
 with tab_gov:
     reg = load_registry()
     st.subheader("Champion / challenger")
@@ -253,7 +250,6 @@ with tab_gov:
             st.success(f"Promoted in round(s): {promo['promoted_rounds']}. "
                        + promo.get("note", ""), icon="✅")
 
-# --------------------------------------------------------------------------- #
 with tab_buffer:
     st.subheader("Cumulative replay buffer")
     st.caption("Bounded and stratified: every attack generation keeps a share, so learning the "

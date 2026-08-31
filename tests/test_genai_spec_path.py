@@ -46,9 +46,7 @@ class _StubClient:
         return self.payload
 
 
-# --------------------------------------------------------------------------- #
 # The path, end to end, with the network stubbed
-# --------------------------------------------------------------------------- #
 def test_model_proposal_becomes_an_executable_spec():
     seed = demo_specs.SEEDS[0]                      # account_takeover
     report = demo_specs._report(seed)
@@ -131,9 +129,7 @@ def test_an_unusable_model_response_falls_back_without_crashing():
         assert validation["accepted"] is True
 
 
-# --------------------------------------------------------------------------- #
 # The demonstration script itself
-# --------------------------------------------------------------------------- #
 def test_every_seed_names_a_real_family_and_real_features():
     from src.defend.features import FEATURE_COLUMNS
     assert 3 <= len(demo_specs.SEEDS) <= 5, "the brief asks for 3-5 demonstration seeds"

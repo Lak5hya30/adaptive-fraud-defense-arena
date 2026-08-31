@@ -119,9 +119,7 @@ def resolve_guards(focus: list[str], k: int = 3) -> list[str]:
     return [f for f in GUARD_CANDIDATES if f not in focus][:k]
 
 
-# --------------------------------------------------------------------------- #
 # helpers
-# --------------------------------------------------------------------------- #
 def _focus_mix(focus: list[str], floor: float = 0.07) -> dict[str, float]:
     """Up-weight focus families so loop frames contain enough of them for
     statistically stable per-family recall.
@@ -239,9 +237,7 @@ def select_focus(model, X, y, atk, k: int = 3, min_n: int = 12) -> tuple[list[st
     return focus, ranked
 
 
-# --------------------------------------------------------------------------- #
 # main loop
-# --------------------------------------------------------------------------- #
 def run_loop(rounds: int = 3, n_base: int = 45_000, n_round: int = 20_000,
              n_eval: int = 24_000, focus: list[str] | None = None,
              seed: int = config.GLOBAL_SEED, save: bool = True,

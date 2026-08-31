@@ -57,7 +57,6 @@ beat = st.radio("Walk the story", [
 
 st.divider()
 
-# --------------------------------------------------------------------------- #
 if beat.startswith("①"):
     st.header("A model can only learn from fraud that already happened")
     st.markdown(

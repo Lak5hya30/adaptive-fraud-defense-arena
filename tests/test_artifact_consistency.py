@@ -40,7 +40,6 @@ def _readme() -> str:
     return p.read_text(encoding="utf-8")
 
 
-# --------------------------------------------------------------------------- #
 def test_baseline_agrees_with_metrics_on_the_static_model():
     """Both files describe the same model on the same split. If they disagree,
     one of them was generated from a different run."""

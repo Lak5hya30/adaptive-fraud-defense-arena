@@ -66,9 +66,7 @@ tab_spec, tab_data, tab_fidelity, tab_text = st.tabs(
     ["🧬 Attack specifications", "📊 The portfolio", "🔬 Fidelity diagnostics",
      "✉️ GenAI content layer"])
 
-# --------------------------------------------------------------------------- #
 # 1. Attack specifications + constraint layer
-# --------------------------------------------------------------------------- #
 with tab_spec:
     st.subheader("Generation-0 specifications")
     st.caption("Every simulated family starts from an explicit specification. These are the "
@@ -119,9 +117,7 @@ with tab_spec:
         with st.expander("Specifications used to build the committed dataset"):
             st.json(summary["attack_specs"], expanded=False)
 
-# --------------------------------------------------------------------------- #
 # 2. The portfolio
-# --------------------------------------------------------------------------- #
 with tab_data:
     if is_demo(mode):
         df = load_dataset_cached()
@@ -194,9 +190,7 @@ with tab_data:
     st.dataframe(sample[cols].sort_values("timestamp"), width=STRETCH, hide_index=True,
                  height=300)
 
-# --------------------------------------------------------------------------- #
 # 3. Fidelity diagnostics
-# --------------------------------------------------------------------------- #
 with tab_fidelity:
     fid = load_fidelity()
     st.subheader("Internal synthetic fidelity diagnostics")
@@ -238,9 +232,7 @@ with tab_fidelity:
             with st.expander("Portfolio structure"):
                 st.json(port, expanded=False)
 
-# --------------------------------------------------------------------------- #
 # 4. GenAI content layer
-# --------------------------------------------------------------------------- #
 with tab_text:
     st.subheader("Attacker-agent content artifacts")
     st.caption("Synthetic scam messages used to train the text arm. All are clearly marked "

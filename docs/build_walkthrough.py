@@ -35,7 +35,6 @@ def num(x, dp=3):
     return "—" if x is None else f"{x:.{dp}f}"
 
 
-# --------------------------------------------------------------------------- #
 def _base_styles(doc: Document) -> None:
     normal = doc.styles["Normal"]
     normal.font.name = "Calibri"
@@ -128,7 +127,6 @@ def _mono(doc: Document, text: str) -> None:
     p.paragraph_format.space_after = Pt(9)
 
 
-# --------------------------------------------------------------------------- #
 def build_walkthrough(A: dict, figs: dict) -> Path:
     tax = A["tax"]
     counts = tax.summary_counts()
