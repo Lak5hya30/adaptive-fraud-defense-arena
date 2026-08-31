@@ -7,6 +7,9 @@ backgroundColor = "#F6F8FB"
 secondaryBackgroundColor = "#EEF2F7"
 textColor = "#25324A"
 font = "sans serif"
+borderColor = "#DCE3EC"
+baseRadius = "1rem"
+buttonRadius = "0.75rem"
 
 [client]
 showSidebarNavigation = false

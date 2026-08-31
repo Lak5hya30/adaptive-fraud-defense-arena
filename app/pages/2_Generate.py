@@ -24,7 +24,7 @@ from common import (PALETTE, STRETCH, is_demo, llm_status_badge, load_artifacts,
 import config
 from src.generate.attack_spec import BASE_SPECS, FAMILY_CONSTRAINTS, validate_spec
 
-page_setup("Generate", "⚗️")
+page_setup("Generate", ":material/science:")
 page_header("Constrained Attack Simulator", "Pillar 2 · Generate")
 st.markdown(
     "The red team writes a **specification**, not transactions — which behavioural dial to "
@@ -64,8 +64,8 @@ st.caption("Every specification behind the committed numbers carries "
            "produce specifications through the same constraint layer.")
 
 tab_spec, tab_data, tab_fidelity, tab_text = st.tabs(
-    ["🧬 Attack specifications", "📊 The portfolio", "🔬 Fidelity diagnostics",
-     "✉️ GenAI content layer"])
+    [":material/genetics: Attack specifications", ":material/bar_chart: The portfolio", ":material/biotech: Fidelity diagnostics",
+     ":material/mail: GenAI content layer"])
 
 # 1. Attack specifications + constraint layer
 with tab_spec:
@@ -125,7 +125,7 @@ with tab_data:
         if df is None:
             st.error("No committed dataset. Run `python -m src.generate.simulate`.")
             st.stop()
-        st.caption("🟢 Showing the committed seeded portfolio.")
+        st.caption(":material/check_circle: Showing the committed seeded portfolio.")
     else:
         with st.sidebar:
             st.markdown("### Regenerate (Live)")
@@ -133,7 +133,7 @@ with tab_data:
                                     value=20000)
             fraud_rate = st.slider("Fraud rate", 0.005, 0.08, config.DEFAULT_FRAUD_RATE, 0.005)
             seed = st.number_input("Seed", value=config.GLOBAL_SEED, step=1)
-            run = st.button("▶ Generate fresh portfolio", type="primary")
+            run = st.button("Generate fresh portfolio", icon=":material/play_arrow:", type="primary")
         # Simulate only on an explicit click — never automatically on first render,
         # so flipping into Live mode can never kick off heavy compute unasked.
         if run:
@@ -142,9 +142,9 @@ with tab_data:
                 gdf, _ = simulate(n_transactions=n_tx, fraud_rate=fraud_rate, seed=int(seed))
             st.session_state["gen_df"] = gdf
         if "gen_df" not in st.session_state:
-            st.info("Set the parameters in the sidebar, then click **▶ Generate fresh "
+            st.info("Set the parameters in the sidebar, then click **:material/play_arrow: Generate fresh "
                     "portfolio** to simulate a batch live. (Demo mode shows the committed "
-                    "portfolio with no compute.)", icon="▶️")
+                    "portfolio with no compute.)", icon=":material/play_arrow:")
             st.stop()
         df = st.session_state["gen_df"]
 
@@ -204,7 +204,7 @@ with tab_fidelity:
     fid = load_fidelity()
     st.subheader("Internal synthetic fidelity diagnostics")
     if not fid:
-        st.info("Run `python -m src.generate.fidelity` to generate the report.", icon="ℹ️")
+        st.info("Run `python -m src.generate.fidelity` to generate the report.", icon=":material/info:")
     else:
         st.caption(fid["scope"])
         a, b, c = columns(3)
@@ -218,7 +218,7 @@ with tab_fidelity:
 
         st.markdown("**Automated quality checks**")
         for ck in fid["checks"]:
-            icon = {"PASS": "✅", "WARN": "⚠️", "FAIL": "❌"}.get(ck["status"], "•")
+            icon = {"PASS": ":material/check_circle:", "WARN": ":material/warning:", "FAIL": ":material/cancel:"}.get(ck["status"], ":material/circle:")
             st.markdown(f"{icon} **{ck['check'].replace('_', ' ')}** — {ck['detail']}")
 
         st.markdown("**Per-feature separability and overlap**")
@@ -264,7 +264,7 @@ with tab_text:
             "is composed from a fixed slot vocabulary, so the two classes separate on "
             "vocabulary alone — the score measures the corpus, not the detector, and would not "
             "survive contact with real scam messages. **Every detection claim in this project "
-            "rests on the transaction model alone.**", icon="⚠️")
+            "rests on the transaction model alone.**", icon=":material/warning:")
         with st.expander("Show the score anyway, with its caveats"):
             t1, t2, t3 = columns(3)
             t1.metric("Corpus", f"{tm['n_corpus']}",

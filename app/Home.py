@@ -17,7 +17,7 @@ from common import (PALETTE, STRETCH, get_taxonomy, llm_status_badge, load_loao,
 
 import config
 
-page_setup("Overview", "🛡️")
+page_setup("Overview", ":material/shield:")
 
 page_header("A learning defense for payment fraud.", "Mastercard Innovation Challenge 2026 · GFF Mumbai")
 st.markdown(
@@ -39,9 +39,9 @@ with st.container(border=True, key="demo-entry"):
         st.page_link("pages/0_Judge_Demo.py", label="Run the demo", icon=":material/play_circle:")
 
 st.markdown(
-    '<div class="workflow"><b>Discover</b><span aria-hidden="true">→</span>'
-    '<b>Simulate</b><span aria-hidden="true">→</span><b>Attack</b>'
-    '<span aria-hidden="true">→</span><b>Detect</b><span aria-hidden="true">→</span>'
+    '<div class="workflow"><b>Discover</b><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>'
+    '<b>Simulate</b><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span><b>Attack</b>'
+    '<span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span><b>Detect</b><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>'
     '<b>Adapt</b></div>',
     unsafe_allow_html=True)
 
@@ -79,7 +79,7 @@ if hero and not underpowered:
 elif underpowered:
     st.info("No attack family currently clears the sample-size floor needed to headline a "
             "result, so no proof point is shown. The per-family figures are on the Benchmarks "
-            "page with their sample sizes and confidence intervals.", icon="ℹ️")
+            "page with their sample sizes and confidence intervals.", icon=":material/info:")
 
 # --- headline metrics -------------------------------------------------------
 metric_grid([
@@ -132,24 +132,24 @@ with right:
     st.subheader("What each page shows")
     st.markdown(
         """
-        - **🗺️ Threat Atlas** — the research surface, and honestly how much of it the
+        - **:material/travel_explore: Threat Atlas** — the research surface, and honestly how much of it the
           simulator reproduces.
         - **Attack Simulator** — structured attack specifications, the payment-domain constraint
           layer, and the fidelity diagnostics that say whether the synthetic data is worth
           training on.
         - **Detection & Decisions** — the operating point and what it costs, recall by family with its
           uncertainty, tiered decisions with reason codes, and the model's own blind spots.
-        - **🔄 Closed Loop** — weakness-driven attack evolution, attack lineage, and the
+        - **:material/sync: Closed Loop** — weakness-driven attack evolution, attack lineage, and the
           governance gate that can refuse a model.
         - **Unseen Attack Demo** — the 90-second story: unseen → learned.
-        - **📊 Benchmarks** — rules vs static vs adaptive, compared at a matched
+        - **:material/bar_chart: Benchmarks** — rules vs static vs adaptive, compared at a matched
           false-positive budget.
-        - **🏗️ Deployment** — what would run online, what stays offline, and what this
+        - **:material/account_tree: Deployment** — what would run online, what stays offline, and what this
           prototype does not do.
         """
     )
     st.info("Demo mode is the default: every page renders from committed artifacts. No API "
-            "key, no network, no training on stage.", icon="ℹ️")
+            "key, no network, no training on stage.", icon=":material/info:")
 
 st.divider()
 

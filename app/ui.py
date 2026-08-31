@@ -1,6 +1,7 @@
 """Reusable light-only presentation components. No model or simulation work here."""
 from dataclasses import dataclass
 from html import escape
+import re
 
 import streamlit as st
 
@@ -9,6 +10,18 @@ PALETTE = {
     "danger": "#BB3444", "safe": "#16734D", "muted": "#596579",
     "grid": "#E4E9F1",
 }
+
+
+def material_icon(name: str) -> str:
+    """Use Streamlit's bundled Google Rounded font, including offline."""
+    return (f'<span class="material-symbols-rounded" aria-hidden="true" '
+            f'translate="no">{escape(name)}</span>')
+
+
+def icon_text(text: str) -> str:
+    """Escape card text, then render only explicit Material icon tokens."""
+    return re.sub(r":material/([a-z0-9_]+):",
+                  lambda match: material_icon(match[1]), escape(text))
 
 
 def page_header(title: str, eyebrow: str):
@@ -51,13 +64,13 @@ def card(title: str, body: str, *, eyebrow: str = "", caption: str = ""):
     st.markdown(
         '<article class="card">'
         + (f'<div class="kicker">{escape(eyebrow)}</div>' if eyebrow else '')
-        + f'<h3>{escape(title)}</h3><p>{escape(body)}</p>'
+        + f'<h3>{icon_text(title)}</h3><p>{escape(body)}</p>'
         + (f'<p class="card-caption">{escape(caption)}</p>' if caption else '')
         + '</article>', unsafe_allow_html=True)
 
 
 def badge(text: str, color: str) -> str:
-    return f'<span class="pill" style="--pill-color:{escape(color, quote=True)}">{escape(text)}</span>'
+    return f'<span class="pill" style="--pill-color:{escape(color, quote=True)}">{icon_text(text)}</span>'
 
 
 def progress_steps(labels: list[str], active: int):
@@ -65,7 +78,7 @@ def progress_steps(labels: list[str], active: int):
     for i, label in enumerate(labels):
         state = "current" if i == active else "complete" if i < active else "upcoming"
         current = ' aria-current="step"' if i == active else ''
-        marker = "✓" if i < active else str(i + 1)
+        marker = material_icon("check") if i < active else str(i + 1)
         items.append(f'<li class="step-{state}"{current}><span aria-hidden="true">'
                      f'{marker}</span>{escape(label)}</li>')
     st.markdown('<ol class="progress-steps" aria-label="Demo progress" tabindex="0">'

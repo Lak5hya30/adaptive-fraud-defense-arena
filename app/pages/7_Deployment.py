@@ -24,7 +24,7 @@ from common import (PALETTE, STRETCH, load_registry, mode_selector, page_setup)
 import config
 from src.defend.features import FEATURE_COLUMNS, NETWORK_FEATURES
 
-page_setup("Deployment", "🏗️")
+page_setup("Deployment", ":material/account_tree:")
 page_header("How this would run in live payments", "Real-world feasibility")
 mode_selector()
 
@@ -122,7 +122,7 @@ st.subheader("Prototype scoring latency")
 st.caption("Measured here, now, on this machine, on the committed model. This is a sanity "
            "check that the feature set and model are cheap to evaluate — not a production "
            "latency claim, and not a measurement of any real authorization path.")
-if st.button("▶ Benchmark scoring on this machine"):
+if st.button("Benchmark scoring on this machine", icon=":material/play_arrow:"):
     from src.defend.model import DefenseModel
     if not config.MODEL_PATH.exists():
         st.error("No trained model available to benchmark.")
@@ -157,7 +157,7 @@ st.divider()
 st.subheader("Model governance — champion / challenger")
 reg = load_registry()
 if not reg:
-    st.info("Run `python -m src.loop.redteam_loop` to generate the model registry.", icon="ℹ️")
+    st.info("Run `python -m src.loop.redteam_loop` to generate the model registry.", icon=":material/info:")
 else:
     st.markdown("A candidate is promoted only if **every** gate passes:")
     g = reg.get("gates", {})

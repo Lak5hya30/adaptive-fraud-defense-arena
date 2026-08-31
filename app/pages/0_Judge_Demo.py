@@ -25,7 +25,7 @@ from __future__ import annotations
 import plotly.graph_objects as go
 import streamlit as st
 
-from ui import Metric, badge, columns, metric_grid, page_header, plot, progress_steps
+from ui import material_icon, Metric, badge, columns, metric_grid, page_header, plot, progress_steps
 
 from common import (PALETTE, STRETCH, get_taxonomy, load_head_to_head,
                     load_json, load_loop_history, load_metrics, load_summary,
@@ -33,7 +33,7 @@ from common import (PALETTE, STRETCH, get_taxonomy, load_head_to_head,
 
 import config
 
-page_setup("2-Minute Judge Demo", "🎯")
+page_setup("2-Minute Judge Demo", ":material/target:")
 
 # --- semantic colours (section 14) ------------------------------------------
 C_ATTACK = PALETTE["danger"]   # red   — the attack
@@ -69,13 +69,13 @@ def progress_bar(active_phase: int):
 
 def agent_mode_badge():
     if config.llm_available():
-        st.markdown(badge("🤖 Agent Mode: Claude-Assisted", C_CAND), unsafe_allow_html=True)
+        st.markdown(badge(":material/smart_toy: Agent Mode: Claude-Assisted", C_CAND), unsafe_allow_html=True)
         st.caption("An API key is present, so the red-team **strategist** may be Claude. It only "
                    "proposes a structured attack *recipe*; the same constraint validator, the "
                    "same simulator, the same ML detector and the same deterministic governance "
                    "run regardless. The committed numbers on this page were produced offline.")
     else:
-        st.markdown(badge("⚪ Agent Mode: Deterministic Offline", C_CURRENT),
+        st.markdown(badge(":material/offline_bolt: Agent Mode: Deterministic Offline", C_CURRENT),
                     unsafe_allow_html=True)
         st.caption("No API key present — the attack strategy comes from a weakness-driven "
                    "heuristic. Claude is an **optional** strategist; when present it only proposes "
@@ -109,7 +109,7 @@ cols = columns([1, 1])
 with cols[0]:
     agent_mode_badge()
 with cols[1]:
-    st.markdown(badge("🔒 Synthetic payment data only — no real cards or customers", C_PASS),
+    st.markdown(badge(":material/lock: Synthetic payment data only — no real cards or customers", C_PASS),
                 unsafe_allow_html=True)
     st.caption("A reproducible simulation. Nothing here is validated on real payment data or "
                "endorsed by any payment network.")
@@ -183,7 +183,7 @@ def stage_meet():
             st.caption(f"Baseline strategy (generation 0): *{spec0.get('strategy', '')}*.")
     st.info("Why it is hard: the strongest fraud signals — a failed step-up, an unverified OTP — "
             "never fire, because the real customer really did authenticate. That is the gap a "
-            "static model cannot close on its own.", icon="🎣")
+            "static model cannot close on its own.", icon=":material/phishing:")
 
 
 def stage_test():
@@ -209,7 +209,7 @@ def stage_test():
 def stage_escaped():
     if not hero:
         st.info("Run `python -m src.experiments.judge_hero` to generate the concrete example.",
-                icon="ℹ️")
+                icon=":material/info:")
         return
     txn, s = hero["transaction"], hero["stale"]
     st.markdown("**One fraudulent transaction the current detector waved through**")
@@ -265,7 +265,7 @@ def stage_weakness():
     st.info("The detector leans hardest on **3-D Secure** — but this attack *passes* 3-D Secure "
             "by relaying the OTP, so that signal is useless here. The next strongest signal the "
             "attacker can cheaply remove is the **merchant's risk level**. That becomes the "
-            "target.", icon="🔍")
+            "target.", icon=":material/search:")
 
 
 def stage_evolve():
@@ -291,10 +291,10 @@ def stage_evolve():
     accepted = cl.get("accepted", True)
     corr = cl.get("corrections", [])
     if accepted and not corr:
-        st.markdown(badge("✓ constraint validator: accepted, no corrections", C_PASS),
+        st.markdown(badge(":material/check: constraint validator: accepted, no corrections", C_PASS),
                     unsafe_allow_html=True)
     elif accepted:
-        st.markdown(badge(f"✓ accepted after {len(corr)} correction(s)", C_STEP),
+        st.markdown(badge(f":material/check: accepted after {len(corr)} correction(s)", C_STEP),
                     unsafe_allow_html=True)
     st.caption("Every proposal — heuristic or Claude — passes the **same** payment-domain "
                "validator, which clamps or rejects anything impossible before a single "
@@ -302,7 +302,7 @@ def stage_evolve():
                "batch deterministically.")
     sr = otp1.get("stale_recall")
     st.error(f"The evolution works: faced with the evolved variant, the current detector's catch "
-             f"rate collapses to **{pct(sr)}**. The attack has slipped its leash.", icon="📉")
+             f"rate collapses to **{pct(sr)}**. The attack has slipped its leash.", icon=":material/trending_down:")
 
 
 def stage_retrain():
@@ -325,7 +325,7 @@ def stage_retrain():
                   if (ar is not None and sr is not None) else None)
         st.markdown(badge("candidate detector", C_CAND), unsafe_allow_html=True)
     st.success("The candidate re-learns the evolved attack from replay alone — no waiting for it "
-               "to show up in labelled production history.", icon="🧠")
+               "to show up in labelled production history.", icon=":material/psychology:")
 
 
 def stage_gate():
@@ -342,23 +342,22 @@ def stage_gate():
                 "from measured values, never hand-set.")
     for g in gates:
         ok = g["passed"]
-        icon = "✅" if ok else "⛔"
+        icon = material_icon("check_circle" if ok else "block")
         color = C_PASS if ok else C_ATTACK
         st.markdown(
-            f'<div style="padding:8px 12px;margin-bottom:6px;border-left:4px solid {color};'
-            f'background:{color}11;border-radius:6px">{icon} <b>{friendly.get(g["gate"], g["gate"])}</b>'
+            f'<div class="safety-gate" style="--gate-color:{color}">{icon} <b>{friendly.get(g["gate"], g["gate"])}</b>'
             f'<br><span style="color:{C_GREY};font-size:.82rem">{g["detail"]}</span></div>',
             unsafe_allow_html=True)
     decision = cc.get("decision", "—")
     if decision == "PROMOTE":
-        st.markdown(badge("✅ APPROVED FOR SHADOW EVALUATION", C_PASS), unsafe_allow_html=True)
+        st.markdown(badge(":material/check_circle: APPROVED FOR SHADOW EVALUATION", C_PASS), unsafe_allow_html=True)
         st.caption("Never 'deployed to production' — a promoted candidate would still enter a "
                    "shadow / controlled-rollout period this prototype does not simulate.")
     else:
-        st.markdown(badge(f"⛔ CANDIDATE REJECTED — {cc.get('summary', '')}", C_ATTACK),
+        st.markdown(badge(f":material/block: CANDIDATE REJECTED — {cc.get('summary', '')}", C_ATTACK),
                     unsafe_allow_html=True)
     st.info("A candidate is not accepted merely because it catches more fraud. It must also "
-            "protect genuine customers and keep what it already knew.", icon="⚖️")
+            "protect genuine customers and keep what it already knew.", icon=":material/balance:")
 
 
 def stage_result():
@@ -408,7 +407,7 @@ def stage_result():
                f"{loop.get('rounds', '—')} candidates cleared every gate — later, stealthier "
                "generations were held back, and some families stay hard at authorization time. "
                "All results are on synthetic held-out data and are not production-performance "
-               "claims.", icon="⚠️")
+               "claims.", icon=":material/warning:")
 
 
 STAGES = [stage_meet, stage_test, stage_escaped, stage_weakness, stage_evolve,
@@ -424,93 +423,129 @@ if "judge_stage" not in st.session_state:
 
 if not (metrics and loop and round1):
     st.info("Core artifacts are missing. Run `python -m src.pipeline` to generate them, then "
-            "reload.", icon="ℹ️")
+            "reload.", icon=":material/info:")
     st.stop()
 
-if not st.session_state.judge_started:
-    with st.container(key="demo-start"):
-        if st.button("▶  Run 2-Minute Demo", type="primary", width=STRETCH):
-            st.session_state.judge_started = True
-            st.session_state.judge_stage = 0
-            st.rerun()
-        st.caption("Eight stages, about fifteen seconds each — Attack → Evade → Analyse → "
-                   "Evolve → Retrain → Govern.")
-    st.stop()
+# Render each static, offline stage once. Overlapping grid cells reserve the
+# tallest stage's natural height at the current width; inactive panels remain
+# in layout but are not visible or interactive. Changing stages cannot shrink
+# the page under the user's viewport or move the navigation below the deck.
+with st.container(key="judge-stage-deck"):
+    for index, render_stage in enumerate(STAGES):
+        with st.container(key=f"judge-stage-panel-{index}"):
+            st.markdown(f"### {STAGE_TITLES[index]}")
+            render_stage()
 
-stage = st.session_state.judge_stage
-progress_bar(STAGE_TO_PHASE[stage])
-st.markdown(f"### {STAGE_TITLES[stage]}")
-STAGES[stage]()
 
-st.divider()
-nav = columns([1, 1, 2, 1])
-if nav[0].button("⟵ Back", disabled=stage == 0, width=STRETCH):
-    st.session_state.judge_stage = max(0, stage - 1)
-    st.rerun()
-if nav[1].button("Restart", width=STRETCH):
+def start_demo():
+    st.session_state.judge_started = True
+    st.session_state.judge_stage = 0
+
+
+def move_stage(delta: int):
+    st.session_state.judge_stage = max(0, min(len(STAGES) - 1,
+                                            st.session_state.judge_stage + delta))
+
+
+def restart_demo():
     st.session_state.judge_started = False
     st.session_state.judge_stage = 0
-    st.rerun()
-nav[2].markdown(f"<div style='text-align:center;color:{C_GREY};padding-top:8px'>"
-                f"Stage {stage + 1} of {len(STAGES)}</div>", unsafe_allow_html=True)
-if stage < len(STAGES) - 1:
-    if nav[3].button("Next ⟶", type="primary", width=STRETCH):
-        st.session_state.judge_stage = stage + 1
-        st.rerun()
-else:
-    nav[3].markdown(badge("✓ complete", C_PASS), unsafe_allow_html=True)
 
-# --- technical evidence + glossary ------------------------------------------
-st.divider()
-with st.expander("Technical evidence (exact figures, sample sizes, reproduction)"):
-    if metrics:
-        t = columns(3)
-        t[0].metric("Recall", pct(metrics["recall"], 1))
-        t[1].metric("Precision", pct(metrics["precision"], 1))
-        t[2].metric("F1", f"{metrics['f1']:.3f}")
-        t = columns(3)
-        t[0].metric("PR-AUC", f"{metrics['pr_auc']:.3f}")
-        t[1].metric("ROC-AUC", f"{metrics['roc_auc']:.3f}")
-        t[2].metric("False-positive rate", pct(metrics["false_positive_rate"], 2))
-        st.caption(f"Portfolio detector measured on a held-out, time-split test set of "
-                   f"{metrics.get('n_eval', 0):,} transactions ({metrics.get('n_fraud_eval', 0)} "
-                   f"fraud). Train/validation/test are separated in time; the model uses "
-                   "authorization-time features only, with no refund/dispute/chargeback outcomes.")
-    if h2h and otp1:
-        st.markdown("**Hero attack (otp_relay), with 95% confidence intervals**")
-        import pandas as pd
-        models = h2h.get("models", {})
-        ev = lambda k: models.get(k, {}).get("evolved_family_recall", {}).get(HERO_FAMILY, {})
-        rows = []
-        for key, label in [("static_defense", "current / static"),
-                           ("promoted_champion", "approved candidate"),
-                           ("adaptive_defense", "final candidate")]:
-            r = ev(key)
-            if r:
-                ci = r.get("ci95", [None, None])
-                rows.append({"model": label, "otp_relay recall": pct(r.get("recall"), 1),
-                             "95% CI": f"{ci[0]*100:.0f}–{ci[1]*100:.0f}%" if ci[0] is not None else "—",
-                             "n": r.get("n")})
-        st.dataframe(pd.DataFrame(rows), width=STRETCH, hide_index=True)
-        st.caption(f"Closed-loop round 1 (promoted): otp_relay {pct(otp1.get('stale_recall'))} → "
-                   f"{pct(otp1.get('adapted_recall'))} on n = {otp1.get('n')}. Head-to-head frame "
-                   f"above is the final evolved generation on n = {ev('static_defense').get('n')}.")
-    st.code(REGEN, language="bash")
 
-with st.expander("Plain-language glossary"):
-    st.markdown(
-        "| On this page | Technical term |\n|---|---|\n"
-        "| Simulated attacker | Red team |\n"
-        "| Fraud detector | Blue team |\n"
-        "| Attack recipe | Attack specification |\n"
-        "| Practice dataset | Replay buffer |\n"
-        "| Current approved model | Champion |\n"
-        "| Candidate model | Challenger |\n"
-        "| Safety check / gate | Promotion gate |\n"
-        "| Frauds caught | Recall |\n"
-        "| Genuine payments incorrectly flagged | False-positive rate |\n"
-        "| Accidentally using future information | Temporal leakage |\n")
+@st.fragment
+def judge_controls():
+    """Update controls/state only; sidebar, header, and stage DOM stay mounted."""
+    stage = st.session_state.judge_stage
+    started = st.session_state.judge_started
+    with st.container(key="judge-view-state"):
+        st.html(f'<span data-judge-started="{str(started).lower()}" '
+                f'data-judge-stage="{stage}" hidden></span>')
 
-st.caption("Every figure on this page is read from a committed artifact produced by "
-           "`python -m src.pipeline`. Reproducible experiment artifacts — nothing is shown as "
-           "live that was not computed offline and committed.")
+    if not started:
+        with st.container(key="demo-start"):
+            st.button("Run 2-Minute Demo", icon=":material/play_arrow:",
+                      type="primary", width=STRETCH, key="judge-start",
+                      on_click=start_demo)
+            st.caption("Eight stages, about fifteen seconds each — Attack → Evade → Analyse → "
+                       "Evolve → Retrain → Govern.")
+        return
+
+    with st.container(key="judge-navigation"):
+        # Native columns inside a stable keyed container: do not use ui.columns'
+        # incrementing row key inside a fragment that runs on every click.
+        nav = st.columns([1, 1, 2, 1], gap="small", vertical_alignment="center")
+        nav[0].button("Back", icon=":material/arrow_back:", disabled=stage == 0,
+                      width=STRETCH, key="judge-back", on_click=move_stage, args=(-1,))
+        nav[1].button("Restart", width=STRETCH, key="judge-restart", on_click=restart_demo)
+        nav[2].markdown(f'<div class="judge-stage-count" role="status" aria-live="polite">'
+                        f'Stage {stage + 1} of {len(STAGES)}</div>', unsafe_allow_html=True)
+        nav[3].button("Next", icon=":material/arrow_forward:", icon_position="right",
+                      type="primary", width=STRETCH, key="judge-next",
+                      disabled=stage == len(STAGES) - 1, on_click=move_stage, args=(1,))
+
+    # This stack always follows the navigation row, never the page header.
+    with st.container(key="judge-progress"):
+        progress_bar(STAGE_TO_PHASE[stage])
+        complete = "" if stage == len(STAGES) - 1 else ' style="visibility:hidden"'
+        st.markdown(f'<div class="judge-completion"{complete}>'
+                    + badge(":material/check: complete", C_PASS) + '</div>',
+                    unsafe_allow_html=True)
+
+
+judge_controls()
+
+with st.container(key="judge-evidence"):
+    # --- technical evidence + glossary ------------------------------------------
+    st.divider()
+    with st.expander("Technical evidence (exact figures, sample sizes, reproduction)"):
+        if metrics:
+            t = columns(3)
+            t[0].metric("Recall", pct(metrics["recall"], 1))
+            t[1].metric("Precision", pct(metrics["precision"], 1))
+            t[2].metric("F1", f"{metrics['f1']:.3f}")
+            t = columns(3)
+            t[0].metric("PR-AUC", f"{metrics['pr_auc']:.3f}")
+            t[1].metric("ROC-AUC", f"{metrics['roc_auc']:.3f}")
+            t[2].metric("False-positive rate", pct(metrics["false_positive_rate"], 2))
+            st.caption(f"Portfolio detector measured on a held-out, time-split test set of "
+                       f"{metrics.get('n_eval', 0):,} transactions ({metrics.get('n_fraud_eval', 0)} "
+                       f"fraud). Train/validation/test are separated in time; the model uses "
+                       "authorization-time features only, with no refund/dispute/chargeback outcomes.")
+        if h2h and otp1:
+            st.markdown("**Hero attack (otp_relay), with 95% confidence intervals**")
+            import pandas as pd
+            models = h2h.get("models", {})
+            ev = lambda k: models.get(k, {}).get("evolved_family_recall", {}).get(HERO_FAMILY, {})
+            rows = []
+            for key, label in [("static_defense", "current / static"),
+                               ("promoted_champion", "approved candidate"),
+                               ("adaptive_defense", "final candidate")]:
+                r = ev(key)
+                if r:
+                    ci = r.get("ci95", [None, None])
+                    rows.append({"model": label, "otp_relay recall": pct(r.get("recall"), 1),
+                                 "95% CI": f"{ci[0]*100:.0f}–{ci[1]*100:.0f}%" if ci[0] is not None else "—",
+                                 "n": r.get("n")})
+            st.dataframe(pd.DataFrame(rows), width=STRETCH, hide_index=True)
+            st.caption(f"Closed-loop round 1 (promoted): otp_relay {pct(otp1.get('stale_recall'))} → "
+                       f"{pct(otp1.get('adapted_recall'))} on n = {otp1.get('n')}. Head-to-head frame "
+                       f"above is the final evolved generation on n = {ev('static_defense').get('n')}.")
+        st.code(REGEN, language="bash")
+
+    with st.expander("Plain-language glossary"):
+        st.markdown(
+            "| On this page | Technical term |\n|---|---|\n"
+            "| Simulated attacker | Red team |\n"
+            "| Fraud detector | Blue team |\n"
+            "| Attack recipe | Attack specification |\n"
+            "| Practice dataset | Replay buffer |\n"
+            "| Current approved model | Champion |\n"
+            "| Candidate model | Challenger |\n"
+            "| Safety check / gate | Promotion gate |\n"
+            "| Frauds caught | Recall |\n"
+            "| Genuine payments incorrectly flagged | False-positive rate |\n"
+            "| Accidentally using future information | Temporal leakage |\n")
+
+    st.caption("Every figure on this page is read from a committed artifact produced by "
+               "`python -m src.pipeline`. Reproducible experiment artifacts — nothing is shown as "
+               "live that was not computed offline and committed.")

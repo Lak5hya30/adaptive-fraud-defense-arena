@@ -51,16 +51,33 @@ def test_atlas_search_combines_with_filters_and_recovers_from_empty_results(app)
     assert any(c.value == f"{total} of {total} attacks shown." for c in app.caption)
 
 
-def test_judge_demo_advances_and_reverses_with_shared_components(app):
+def test_judge_demo_advances_and_reverses_with_shared_components(app, monkeypatch):
+    # Widget callbacks must not request a second/full app rerun. In the browser,
+    # the controls' fragment is the only region that should update.
+    import streamlit as st
+
+    def unexpected_rerun(*args, **kwargs):
+        pytest.fail("Judge Demo navigation must not call st.rerun")
+
+    monkeypatch.setattr(st, "rerun", unexpected_rerun)
     app.switch_page("pages/0_Judge_Demo.py").run()
     next(b for b in app.button if "Run 2-Minute Demo" in b.label).click().run()
+    back_id = app.button(key="judge-back").proto.id
+    next_id = app.button(key="judge-next").proto.id
     for stage in range(8):
+        assert app.button(key="judge-back").proto.id == back_id
+        assert app.button(key="judge-next").proto.id == next_id
+        assert app.button(key="judge-back").disabled == (stage == 0)
+        assert app.button(key="judge-next").disabled == (stage == 7)
         assert not app.exception, [e.message for e in app.exception]
         assert app.session_state.judge_stage == stage
         if stage < 7:
-            next(b for b in app.button if b.label == "Next ⟶").click().run()
-    next(b for b in app.button if b.label == "⟵ Back").click().run()
-    assert app.session_state.judge_stage == 6
+            next(b for b in app.button if b.label == "Next").click().run()
+    for stage in range(6, -1, -1):
+        app.button(key="judge-back").click().run()
+        assert app.session_state.judge_stage == stage
+        assert not app.exception
+    assert app.button(key="judge-back").disabled
     next(b for b in app.button if b.label == "Restart").click().run()
     assert not app.session_state.judge_started
 

@@ -18,7 +18,7 @@ from ui import Metric, columns, metric_grid, page_header, plot
 from common import (PALETTE, STATUS_LABEL, STRETCH, get_taxonomy, mode_selector,
                     observability_pill, page_setup, pill, severity_pill, status_pill)
 
-page_setup("Threat Atlas", "🗺️")
+page_setup("Threat Atlas", ":material/travel_explore:")
 page_header("Threat Atlas", "Pillar 1 · Identify")
 mode_selector()
 

@@ -22,7 +22,7 @@ from common import (PALETTE, STRETCH, fmt_ci, is_demo, load_blind_spots,
 
 import config
 
-page_setup("Defend", "🎯")
+page_setup("Defend", ":material/target:")
 page_header("Detection, Decisions & Blind Spots", "Pillar 3 · Defend")
 
 metrics = load_metrics()
@@ -58,15 +58,15 @@ st.caption(
     "is tiered decisioning, not a bigger number.")
 
 tab_ops, tab_family, tab_decisions, tab_blind = st.tabs(
-    ["⚖️ Operating point", "🎯 Recall by family", "🚦 Decisions & reason codes",
-     "🕳️ Blind spots"])
+    [":material/balance: Operating point", ":material/target: Recall by family", ":material/traffic: Decisions & reason codes",
+     ":material/visibility_off: Blind spots"])
 
 # Operating point: threshold sweep, calibration, operational volumes
 with tab_ops:
     sweep = load_threshold_sweep()
     st.subheader("There is no magic threshold")
     if not sweep:
-        st.info("Run `python -m src.defend.diagnostics` to generate the sweep.", icon="ℹ️")
+        st.info("Run `python -m src.defend.diagnostics` to generate the sweep.", icon=":material/info:")
     else:
         pts = pd.DataFrame(sweep["points"])
         fig = go.Figure()
@@ -106,7 +106,7 @@ with tab_ops:
             f"one were reviewed by hand, and an estimated "
             f"**{sc['estimated_genuine_customers_abandoning_after_step_up']:,} genuine customers "
             f"abandoning** at the challenge.")
-        st.warning(sc["label"] + " — " + o["disclaimer"], icon="⚠️")
+        st.warning(sc["label"] + " — " + o["disclaimer"], icon=":material/warning:")
 
     cal = load_calibration()
     if cal:
@@ -137,7 +137,7 @@ with tab_family:
     fam = load_family_recall()
     st.subheader("Recall by attack family")
     if not fam:
-        st.info("Run `python -m src.defend.diagnostics` to generate family recall.", icon="ℹ️")
+        st.info("Run `python -m src.defend.diagnostics` to generate family recall.", icon=":material/info:")
     else:
         st.caption(fam["note"])
         which = st.radio("Detector", list(fam["models"]), horizontal=True)
@@ -172,7 +172,7 @@ with tab_family:
             "bottom by construction. There is very little to see at authorization time. The "
             "correct control for those is friction, payee-risk intelligence and "
             "post-transaction recall, not a hard decline, and they are reported here rather "
-            "than quietly excluded.", icon="ℹ️")
+            "than quietly excluded.", icon=":material/info:")
 
 # Decisions and reason codes
 with tab_decisions:
@@ -180,9 +180,9 @@ with tab_decisions:
         dframe = load_demo_scores()
         if dframe is None:
             st.info("Run `python -m src.defend.diagnostics` to precompute demo scores.",
-                    icon="ℹ️")
+                    icon=":material/info:")
             st.stop()
-        st.caption("🟢 Precomputed scores for the committed held-out test split.")
+        st.caption(":material/check_circle: Precomputed scores for the committed held-out test split.")
         y = dframe["is_fraud"].to_numpy()
         scores = dframe["risk_score"].to_numpy()
     else:
@@ -195,7 +195,7 @@ with tab_decisions:
         seed = lc[2].number_input("Seed", value=777, step=1)
         # Simulate + score only on an explicit click — never automatically on first
         # render, so entering Live mode never triggers heavy compute unasked.
-        if lc[3].button("▶ Score fresh batch", type="primary"):
+        if lc[3].button("Score fresh batch", icon=":material/play_arrow:", type="primary"):
             from src.generate.simulate import simulate
             with st.spinner("Simulating and scoring…"):
                 fresh = simulate(n_transactions=n, fraud_rate=fr, seed=int(seed))[0]
@@ -206,8 +206,8 @@ with tab_decisions:
                 st.session_state["def_df"] = decision_frame(
                     fresh, Xf, pf, step_up=mdl.threshold_probability)
         if "def_df" not in st.session_state:
-            st.info("Click **▶ Score fresh batch** to simulate and score a fresh batch live. "
-                    "(Demo mode shows the committed held-out split with no compute.)", icon="▶️")
+            st.info("Click **:material/play_arrow: Score fresh batch** to simulate and score a fresh batch live. "
+                    "(Demo mode shows the committed held-out split with no compute.)", icon=":material/play_arrow:")
             st.stop()
         dframe = st.session_state["def_df"]
         y = dframe["is_fraud"].to_numpy()
@@ -260,7 +260,7 @@ with tab_decisions:
     show = [c for c in ["timestamp", "card_id", "amount", "mcc", "geo_city", "device_id",
                         "attack_type", "risk_score", "action", "reason_codes"]
             if c in dframe.columns]
-    t1, t2 = st.tabs(["🚨 Challenged or declined", "⚠️ Genuine customers we inconvenienced"])
+    t1, t2 = st.tabs([":material/notification_important: Challenged or declined", ":material/warning: Genuine customers we inconvenienced"])
     with t1:
         flagged = dframe[dframe.action != "APPROVE"].sort_values("risk_score", ascending=False)
         st.dataframe(flagged[show].head(40), width=STRETCH, hide_index=True,
@@ -280,7 +280,7 @@ with tab_blind:
     bs = load_blind_spots()
     st.subheader("Where this defense is still weakest")
     if not bs:
-        st.info("Run `python -m src.defend.diagnostics` to generate blind spots.", icon="ℹ️")
+        st.info("Run `python -m src.defend.diagnostics` to generate blind spots.", icon=":material/info:")
     else:
         st.caption(bs["note"])
         for d in bs["hardest"]:
@@ -305,6 +305,6 @@ with tab_blind:
         if nxt:
             st.success(
                 f"**Next red-team target: {nxt['family']}** — {nxt['strategy']}\n\n"
-                f"Proposed specification change: `{nxt['proposed_change']}`", icon="🎯")
+                f"Proposed specification change: `{nxt['proposed_change']}`", icon=":material/target:")
             st.caption("Chosen from measured weakness, not decided in advance. This is the "
                        "input to the next round of the closed loop.")

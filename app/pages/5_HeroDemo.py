@@ -23,7 +23,7 @@ from common import (PALETTE, STRETCH, load_hero, load_loao, load_loop_history,
 
 import config
 
-page_setup("Hero Demo", "🎬")
+page_setup("Hero Demo", ":material/movie:")
 page_header("What happens when an unseen attack arrives?", "The 90-second story")
 mode_selector()
 
@@ -33,7 +33,7 @@ hero = load_hero()
 
 if not loao:
     st.info("Run `python -m src.experiments.leave_one_out` to generate the hero result.",
-            icon="ℹ️")
+            icon=":material/info:")
     st.stop()
 
 # Chosen from measured evidence: the largest unseen→learned gain among families
@@ -43,13 +43,13 @@ from src.experiments.leave_one_out import select_hero_family
 
 hero_family, H, underpowered = select_hero_family(loao)
 if H is None:
-    st.info("Leave-one-attack-family-out has not produced a usable result yet.", icon="ℹ️")
+    st.info("Leave-one-attack-family-out has not produced a usable result yet.", icon=":material/info:")
     st.stop()
 if underpowered:
     st.warning(
         f"No family clears the {config.FAMILY_EVAL['min_n_to_report']}-transaction floor this "
         f"run, so **{hero_family}** is shown for illustration only and its number must not be "
-        "quoted as a headline — the interval is far too wide to carry one.", icon="⚠️")
+        "quoted as a headline — the interval is far too wide to carry one.", icon=":material/warning:")
 
 beat = st.radio("Walk the story", [
     "① The problem", "② An unseen attack", "③ The blind spot",
@@ -69,7 +69,7 @@ if beat.startswith("①"):
     )
     st.info("So the question is not 'how accurate is the model on last year's fraud'. It is "
             "**'what does it do the first time it meets something new, and how quickly can it "
-            "learn?'** That is what this demo measures.", icon="💡")
+            "learn?'** That is what this demo measures.", icon=":material/lightbulb:")
 
 elif beat.startswith("②"):
     st.header(f"An attack family the defense has never seen: {hero_family.replace('_', ' ')}")
@@ -178,7 +178,7 @@ elif beat.startswith("⑤"):
         "closed loop has to *reach* that bound by generating the family itself, and on the "
         "hardest families it does not get all the way. Some families barely move even when "
         "learned; those are reported as residual frontiers rather than smoothed over.",
-        icon="⚠️")
+        icon=":material/warning:")
 
 else:
     st.header("The guardrails")
@@ -209,12 +209,12 @@ else:
                 "In this run **no candidate cleared every promotion gate**. The adapted model "
                 "learned the evolved attack, and it also breached a constraint the gates "
                 "protect — so it would not be deployed. That result is shown here rather than "
-                "quietly replaced with a better-looking one.", icon="⛔")
+                "quietly replaced with a better-looking one.", icon=":material/block:")
         else:
             st.success(f"Promoted in round(s) {promo['promoted_rounds']} — the candidate beat "
                        "the model in force on the new attack without breaching the "
                        "false-positive ceiling or regressing a previously-learned family.",
-                       icon="✅")
+                       icon=":material/check_circle:")
 
     st.divider()
     st.subheader("Continuous evolution is harder than a single unseen family")

@@ -19,7 +19,7 @@ from common import (PALETTE, STRETCH, is_demo, llm_status_badge, load_lineage,
 
 import config
 
-page_setup("Closed Loop", "🔄")
+page_setup("Closed Loop", ":material/sync:")
 page_header("Red Team ⇄ Blue Team", "Pillar 4 · Closed Loop")
 st.markdown(
     "Each round measures **which signals the current defense actually depends on** for a "
@@ -36,9 +36,9 @@ st.caption("Every specification on this page carries `spec_source: \"heuristic\"
 
 mode = mode_selector()
 STATUS_STYLE = {
-    "adapted": ("#16734D", "✅ Defense adapted"),
-    "partial": ("#976000", "◐ Partial recovery"),
-    "residual_frontier": ("#BB3444", "⚠ Residual frontier"),
+    "adapted": ("#16734D", ":material/check_circle: Defense adapted"),
+    "partial": ("#976000", ":material/contrast: Partial recovery"),
+    "residual_frontier": ("#BB3444", ":material/warning: Residual frontier"),
     "n/a": ("#596579", "—"),
 }
 
@@ -46,7 +46,7 @@ if mode == "LIVE":
     st.sidebar.markdown("### Run the loop")
     rounds = st.sidebar.slider("Rounds", 2, 4, 3)
     confirm = st.sidebar.checkbox("I understand this retrains models (several minutes)")
-    if st.sidebar.button("▶ Run closed loop", type="primary", disabled=not confirm):
+    if st.sidebar.button("Run closed loop", icon=":material/play_arrow:", type="primary", disabled=not confirm):
         from src.loop.redteam_loop import run_loop
         with st.spinner("Running the loop (measure → propose → constrain → simulate → "
                         "retrain → govern)…"):
@@ -55,7 +55,7 @@ if mode == "LIVE":
 
 loop = load_loop_history()
 if not loop:
-    st.info("Run `python -m src.loop.redteam_loop` to generate the loop history.", icon="ℹ️")
+    st.info("Run `python -m src.loop.redteam_loop` to generate the loop history.", icon=":material/info:")
     st.stop()
 
 sel = loop.get("focus_selection", {})
@@ -82,7 +82,7 @@ if retired:
           "yield to more of the same — it sits on the legitimate behavioural centroid, or the "
           "genuine customer authorized it. Continuing to hammer it burns replay capacity on "
           "examples the model cannot separate, and drags down families it could. The frontier "
-          "is reported, not hidden.", icon="🔀")
+          "is reported, not hidden.", icon=":material/shuffle:")
 
 if sel.get("initial_ranking"):
     with st.expander("How the targets were chosen — measured, not decided in advance"):
@@ -100,7 +100,7 @@ if sel.get("initial_ranking"):
                    " — their limit is observability, not the decision boundary.")
 
 tab_rounds, tab_lineage, tab_gov, tab_buffer = st.tabs(
-    ["🔁 Rounds", "🧬 Attack lineage", "🛡️ Promotion gates", "🗃️ Replay buffer"])
+    [":material/repeat: Rounds", ":material/genetics: Attack lineage", ":material/shield: Promotion gates", ":material/inventory_2: Replay buffer"])
 
 with tab_rounds:
     for h in loop["history"]:
@@ -116,7 +116,7 @@ with tab_rounds:
                 st.caption(d.get("strategy", ""))
                 corr = d.get("constraint_layer", {}).get("corrections", [])
                 if corr:
-                    st.caption(f"⚙️ constraint layer corrected {len(corr)} value(s): " +
+                    st.caption(f":material/settings: constraint layer corrected {len(corr)} value(s): " +
                                ", ".join(f"{c['field']} {c['from']}→{c['to']}" for c in corr))
 
         li = h["legit_impact"]
@@ -148,7 +148,7 @@ with tab_lineage:
     lin = load_lineage()
     st.subheader("How each attack evolved, and what it cost the defense")
     if not lin:
-        st.info("Run `python -m src.loop.redteam_loop` to generate the lineage.", icon="ℹ️")
+        st.info("Run `python -m src.loop.redteam_loop` to generate the lineage.", icon=":material/info:")
     else:
         st.caption(lin.get("note", ""))
         for fam, nodes in lin["lineage"].items():
@@ -206,7 +206,7 @@ with tab_gov:
     )
     if not reg:
         st.info("Run `python -m src.loop.redteam_loop` to generate the model registry.",
-                icon="ℹ️")
+                icon=":material/info:")
     else:
         st.caption(reg.get("note", ""))
         st.markdown("**Gates**")
@@ -214,7 +214,7 @@ with tab_gov:
         for e in reg["entries"]:
             acc = e.get("acceptance", {})
             decision = acc.get("decision", "—")
-            icon = "✅" if decision == "PROMOTE" else ("⛔" if decision == "REJECT" else "•")
+            icon = ":material/check_circle:" if decision == "PROMOTE" else (":material/block:" if decision == "REJECT" else ":material/circle:")
             with st.expander(f"{icon} {e['model_version']} · {e['stage']} · {decision}"):
                 st.caption(acc.get("summary", ""))
                 m = e.get("metrics", {})
@@ -239,10 +239,10 @@ with tab_gov:
                 "No candidate cleared every gate in this run. That is the governance layer "
                 "doing its job, and it is reported rather than hidden: the adapted model "
                 "improved detection on the evolved attack but breached another constraint, so "
-                "it stays out of the authorization path. " + promo.get("note", ""), icon="⛔")
+                "it stays out of the authorization path. " + promo.get("note", ""), icon=":material/block:")
         else:
             st.success(f"Promoted in round(s): {promo['promoted_rounds']}. "
-                       + promo.get("note", ""), icon="✅")
+                       + promo.get("note", ""), icon=":material/check_circle:")
 
 with tab_buffer:
     st.subheader("Cumulative replay buffer")

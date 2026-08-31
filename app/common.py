@@ -24,7 +24,7 @@ import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
 from src.identify.taxonomy import load_taxonomy  # noqa: E402
-from ui import PALETTE, badge  # noqa: E402
+from ui import PALETTE, badge, material_icon  # noqa: E402
 
 # Semantic colors stay consistent across charts, badges, and controls.
 SEVERITY_COLOR = {"critical": PALETTE["danger"], "high": "#A44D16",
@@ -33,28 +33,45 @@ CATEGORY_ORDER = ["Social Engineering", "Technical Evasion",
                   "Identity & Onboarding", "Laundering & Abuse"]
 
 
-def page_setup(title: str, icon: str = "🛡️"):
+def page_setup(title: str, icon: str = ":material/shield:"):
     st.set_page_config(page_title=f"{title} · AI Defense Lab",
-                       page_icon=icon, layout="wide", initial_sidebar_state="auto")
+                       page_icon=icon, layout="wide", initial_sidebar_state="expanded")
     st.session_state["_ui_row"] = 0
-    # Local CSS keeps the app offline; stable Streamlit hooks avoid generated classes.
-    st.markdown(
-        f"<style>{(ROOT / 'app' / 'styles.css').read_text(encoding='utf-8')}</style>",
-        unsafe_allow_html=True,
-    )
+    # Style-only HTML goes into Streamlit's event container, so loading the
+    # shared stylesheet never creates an empty row above the page heading.
+    stylesheet = ROOT / "app" / "styles.css"
+    st.html(stylesheet)
+    # Streamlit clears the event container when switching pages. Keep the same
+    # local CSS in <head> across those client-side transitions so the default
+    # sidebar geometry cannot flash between the outgoing and incoming page.
+    # This enhancement touches styling only, never navigation or widget events.
+    css_json = json.dumps(stylesheet.read_text(encoding="utf-8")).replace("<", "\\u003c")
+    with st.container(key="lab-style-bootstrap"):
+        st.html(
+            "<script>(() => {"
+            "let style = document.getElementById('lab-persistent-styles');"
+            "if (!style) { style = document.createElement('style');"
+            "style.id = 'lab-persistent-styles'; document.head.append(style); }"
+            f"const css = {css_json};"
+            "if (style.textContent !== css) style.textContent = css;"
+            "})();</script>",
+            unsafe_allow_javascript=True,
+        )
     with st.sidebar:
         st.markdown(
             '<div class="lab-brand"><span class="lab-mark" aria-hidden="true">'
-            '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
-            'stroke="currentColor" stroke-width="1.6"><path d="M12 3 4.5 6v6c0 4 '
-            '7.5 9 7.5 9s7.5-5 7.5-9V6L12 3Z"/><path d="m8 12 3 3 5-6"/>'
-            '</svg></span><div>AI Defense Lab<span>Adaptive payment security</span></div></div>',
+            f'{material_icon("verified_user")}</span><div>AI Defense Lab'
+            '<span class="lab-brand-caption">Adaptive payment security</span></div></div>',
             unsafe_allow_html=True,
         )
         for section, pages in NAVIGATION:
             st.markdown(f'<div class="nav-label">{section}</div>', unsafe_allow_html=True)
             for path, label, symbol in pages:
-                st.page_link(path, label=label, icon=f":material/{symbol}:")
+                # The native link keeps routing and keyboard behavior. The keyed
+                # wrapper styles the current page without relying on generated CSS.
+                active = title == NAV_TITLES[path]
+                with st.container(key=f"nav-{'active-' if active else ''}{symbol}"):
+                    st.page_link(path, label=label, icon=f":material/{symbol}:")
         st.divider()
         st.caption("Synthetic data only · Research prototype")
 
@@ -71,6 +88,15 @@ NAVIGATION = [
                   ("pages/6_Benchmarks.py", "Benchmarks", "bar_chart"),
                   ("pages/7_Deployment.py", "Deployment", "account_tree")]),
 ]
+
+
+NAV_TITLES = {
+    "Home.py": "Overview", "pages/0_Judge_Demo.py": "2-Minute Judge Demo",
+    "pages/1_Threat_Atlas.py": "Threat Atlas", "pages/2_Generate.py": "Generate",
+    "pages/3_Defend.py": "Defend", "pages/4_ClosedLoop.py": "Closed Loop",
+    "pages/5_HeroDemo.py": "Hero Demo", "pages/6_Benchmarks.py": "Benchmarks",
+    "pages/7_Deployment.py": "Deployment",
+}
 
 
 @st.cache_resource(show_spinner=False)
@@ -124,11 +150,11 @@ def llm_status_badge():
     otherwise would be the easiest thing in this project to catch.
     """
     if config.llm_available():
-        st.caption("🟢 Live generation available (ANTHROPIC_API_KEY detected). Committed "
+        st.caption(":material/check_circle: Live generation available (ANTHROPIC_API_KEY detected). Committed "
                    "artifacts were still produced by the deterministic offline path — "
                    "regenerate in Live mode to replace them.")
     else:
-        st.caption("⚪ Offline path — no API key present. Attack specifications come from the "
+        st.caption(":material/offline_bolt: Offline path — no API key present. Attack specifications come from the "
                    "weakness-driven heuristic and content artifacts from deterministic "
                    "templates, both seeded and reproducible. This is the path that produced "
                    "every committed artifact.")
@@ -291,7 +317,7 @@ def metric_note(text: str):
 
 
 def artifact_missing(name: str, command: str):
-    st.info(f"`{name}` has not been generated yet. Run `{command}`.", icon="ℹ️")
+    st.info(f"`{name}` has not been generated yet. Run `{command}`.", icon=":material/info:")
 
 
 # Streamlit width helper (avoids the deprecated use_container_width kwarg).
