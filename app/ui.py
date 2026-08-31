@@ -68,7 +68,7 @@ def progress_steps(labels: list[str], active: int):
         marker = "✓" if i < active else str(i + 1)
         items.append(f'<li class="step-{state}"{current}><span aria-hidden="true">'
                      f'{marker}</span>{escape(label)}</li>')
-    st.markdown('<ol class="progress-steps" aria-label="Demo progress">'
+    st.markdown('<ol class="progress-steps" aria-label="Demo progress" tabindex="0">'
                 + ''.join(items) + '</ol>', unsafe_allow_html=True)
 
 
