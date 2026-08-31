@@ -15,6 +15,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui import Metric, card, columns, metric_grid, page_header, plot
+
 from common import (PALETTE, STRETCH, is_demo, llm_status_badge, load_artifacts,
                     load_dataset_cached, load_fidelity, load_summary, mode_selector,
                     page_setup)
@@ -22,9 +24,8 @@ from common import (PALETTE, STRETCH, is_demo, llm_status_badge, load_artifacts,
 import config
 from src.generate.attack_spec import BASE_SPECS, FAMILY_CONSTRAINTS, validate_spec
 
-page_setup("Generate", "⚗️")
-st.markdown('<div class="kicker">Pillar 2 · Generate</div>', unsafe_allow_html=True)
-st.title("⚗️ Constrained Attack Simulator")
+page_setup("Generate", ":material/science:")
+page_header("Constrained Attack Simulator", "Pillar 2 · Generate")
 st.markdown(
     "The red team writes a **specification**, not transactions — which behavioural dial to "
     "move and which detector signal that defeats.\n\n"
@@ -63,8 +64,8 @@ st.caption("Every specification behind the committed numbers carries "
            "produce specifications through the same constraint layer.")
 
 tab_spec, tab_data, tab_fidelity, tab_text = st.tabs(
-    ["🧬 Attack specifications", "📊 The portfolio", "🔬 Fidelity diagnostics",
-     "✉️ GenAI content layer"])
+    [":material/genetics: Attack specifications", ":material/bar_chart: The portfolio", ":material/biotech: Fidelity diagnostics",
+     ":material/mail: GenAI content layer"])
 
 # 1. Attack specifications + constraint layer
 with tab_spec:
@@ -84,7 +85,7 @@ with tab_spec:
                "before anything is generated. Try it: ask for an authorized push payment "
                "scam that runs from an attacker's device — a contradiction in terms, because "
                "the genuine customer is the one authenticating.")
-    c1, c2 = st.columns([1, 1])
+    c1, c2 = columns([1, 1])
     with c1:
         fam = st.selectbox("Attack family", sorted(BASE_SPECS), index=sorted(BASE_SPECS).index(
             "scam_transfer") if "scam_transfer" in BASE_SPECS else 0)
@@ -124,7 +125,7 @@ with tab_data:
         if df is None:
             st.error("No committed dataset. Run `python -m src.generate.simulate`.")
             st.stop()
-        st.caption("🟢 Showing the committed seeded portfolio.")
+        st.caption(":material/check_circle: Showing the committed seeded portfolio.")
     else:
         with st.sidebar:
             st.markdown("### Regenerate (Live)")
@@ -132,7 +133,7 @@ with tab_data:
                                     value=20000)
             fraud_rate = st.slider("Fraud rate", 0.005, 0.08, config.DEFAULT_FRAUD_RATE, 0.005)
             seed = st.number_input("Seed", value=config.GLOBAL_SEED, step=1)
-            run = st.button("▶ Generate fresh portfolio", type="primary")
+            run = st.button("Generate fresh portfolio", icon=":material/play_arrow:", type="primary")
         # Simulate only on an explicit click — never automatically on first render,
         # so flipping into Live mode can never kick off heavy compute unasked.
         if run:
@@ -141,9 +142,9 @@ with tab_data:
                 gdf, _ = simulate(n_transactions=n_tx, fraud_rate=fraud_rate, seed=int(seed))
             st.session_state["gen_df"] = gdf
         if "gen_df" not in st.session_state:
-            st.info("Set the parameters in the sidebar, then click **▶ Generate fresh "
+            st.info("Set the parameters in the sidebar, then click **:material/play_arrow: Generate fresh "
                     "portfolio** to simulate a batch live. (Demo mode shows the committed "
-                    "portfolio with no compute.)", icon="▶️")
+                    "portfolio with no compute.)", icon=":material/play_arrow:")
             st.stop()
         df = st.session_state["gen_df"]
 
@@ -152,12 +153,13 @@ with tab_data:
     cover = (df[df.actor_role == "fraud_actor_cover"] if "actor_role" in df.columns
              else df.iloc[0:0])
 
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Transactions", f"{len(df):,}")
-    m2.metric("Fraud", f"{int(df.is_fraud.sum()):,}", f"{df.is_fraud.mean()*100:.2f}%")
-    m3.metric("Cardholders", f"{df.cardholder_id.nunique():,}")
-    m4.metric("Merchants", f"{df.merchant_id.nunique():,}")
-    m5.metric("Fraud-actor cover traffic", f"{len(cover):,}", "labelled legitimate")
+    metric_grid([
+        Metric("Transactions", f"{len(df):,}"),
+        Metric("Fraud", f"{int(df.is_fraud.sum()):,}", f"{df.is_fraud.mean()*100:.2f}%"),
+        Metric("Cardholders", f"{df.cardholder_id.nunique():,}"),
+        Metric("Merchants", f"{df.merchant_id.nunique():,}"),
+        Metric("Fraud-actor cover traffic", f"{len(cover):,}", "Labelled legitimate"),
+    ])
     st.caption("Cover traffic is the ordinary-looking spend a mule, bust-out account or front "
                "merchant produces before it is used. It is labelled **legitimate**, because at "
                "authorization time it is — which is what stops \"this card has no history\" "
@@ -173,7 +175,7 @@ with tab_data:
                          color_discrete_sequence=[PALETTE["info"]])
             fig.update_layout(height=260, yaxis_title="", plot_bgcolor="rgba(0,0,0,0)",
                               paper_bgcolor="rgba(0,0,0,0)", margin=dict(t=10))
-            st.plotly_chart(fig, width=STRETCH)
+            plot(fig, width=STRETCH)
             st.caption("Amount, frequency, device count, travel, night-time propensity, "
                        "weekday shape and channel mix all follow the archetype. A portfolio "
                        "built from one behaviour would be trivially separable from fraud.")
@@ -185,7 +187,7 @@ with tab_data:
                  color="count", color_continuous_scale="Oranges")
     fig.update_layout(height=360, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                       yaxis_title="", xaxis_title="", coloraxis_showscale=False)
-    st.plotly_chart(fig, width=STRETCH)
+    plot(fig, width=STRETCH)
 
     st.subheader("Sample transactions")
     show_fraud = st.toggle("Show fraud only", value=False)
@@ -202,10 +204,10 @@ with tab_fidelity:
     fid = load_fidelity()
     st.subheader("Internal synthetic fidelity diagnostics")
     if not fid:
-        st.info("Run `python -m src.generate.fidelity` to generate the report.", icon="ℹ️")
+        st.info("Run `python -m src.generate.fidelity` to generate the report.", icon=":material/info:")
     else:
         st.caption(fid["scope"])
-        a, b, c = st.columns(3)
+        a, b, c = columns(3)
         a.metric("Strongest single feature", f"{fid['max_single_feature_auc']:.3f} AUC",
                  fid["separability"][0]["feature"])
         b.metric("Failing checks", fid["n_fail"], delta_color="inverse")
@@ -216,7 +218,7 @@ with tab_fidelity:
 
         st.markdown("**Automated quality checks**")
         for ck in fid["checks"]:
-            icon = {"PASS": "✅", "WARN": "⚠️", "FAIL": "❌"}.get(ck["status"], "•")
+            icon = {"PASS": ":material/check_circle:", "WARN": ":material/warning:", "FAIL": ":material/cancel:"}.get(ck["status"], ":material/circle:")
             st.markdown(f"{icon} **{ck['check'].replace('_', ' ')}** — {ck['detail']}")
 
         st.markdown("**Per-feature separability and overlap**")
@@ -229,7 +231,7 @@ with tab_fidelity:
         fig.update_layout(barmode="group", height=760, yaxis=dict(autorange="reversed"),
                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                           legend=dict(orientation="h"), margin=dict(t=10), yaxis_title="")
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
         st.caption("High AUC with low overlap on any single feature would be a shortcut. "
                    "The strongest feature here is distance from home, which is a genuine "
                    "fraud signal rather than an artifact of how rows are produced.")
@@ -247,15 +249,12 @@ with tab_text:
                "shape of an approach a detector needs to recognize.")
     arts = [a for a in load_artifacts() if a.get("label") == 1]
     if arts:
-        cols3 = st.columns(3)
+        cols3 = columns(3)
         for i, art in enumerate(arts[:6]):
             with cols3[i % 3]:
-                st.markdown(
-                    f'<div class="card"><span class="kicker">{art.get("artifact_type","")}</span>'
-                    f'<br><b>{art.get("attack_id","")}</b><br><br>'
-                    f'{art.get("display_text", art.get("text",""))[:280]}…'
-                    f'<br><br><span class="kicker">source: {art.get("source","")}</span></div>',
-                    unsafe_allow_html=True)
+                card(art.get("attack_id", ""),
+                     art.get("display_text", art.get("text", ""))[:280] + "…",
+                     eyebrow=art.get("artifact_type", ""), caption=f'Source: {art.get("source", "")}')
     from common import load_text_metrics
     tm = load_text_metrics()
     if tm:
@@ -265,9 +264,9 @@ with tab_text:
             "is composed from a fixed slot vocabulary, so the two classes separate on "
             "vocabulary alone — the score measures the corpus, not the detector, and would not "
             "survive contact with real scam messages. **Every detection claim in this project "
-            "rests on the transaction model alone.**", icon="⚠️")
+            "rests on the transaction model alone.**", icon=":material/warning:")
         with st.expander("Show the score anyway, with its caveats"):
-            t1, t2, t3 = st.columns(3)
+            t1, t2, t3 = columns(3)
             t1.metric("Corpus", f"{tm['n_corpus']}",
                       f"{tm['n_fraud']} scam / {tm['n_benign']} genuine")
             t2.metric("ROC-AUC (5-fold)", f"{tm.get('roc_auc_cv5') or tm['roc_auc']:.3f}",

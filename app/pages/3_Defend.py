@@ -13,6 +13,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui import Metric, columns, metric_grid, page_header, plot
+
 from common import (PALETTE, STRETCH, fmt_ci, is_demo, load_blind_spots,
                     load_calibration, load_demo_scores, load_family_recall,
                     load_metrics, load_operational, load_threshold_sweep,
@@ -20,9 +22,8 @@ from common import (PALETTE, STRETCH, fmt_ci, is_demo, load_blind_spots,
 
 import config
 
-page_setup("Defend", "🎯")
-st.markdown('<div class="kicker">Pillar 3 · Defend</div>', unsafe_allow_html=True)
-st.title("🎯 Detection, Decisioning and Blind Spots")
+page_setup("Defend", ":material/target:")
+page_header("Detection, Decisions & Blind Spots", "Pillar 3 · Defend")
 
 metrics = load_metrics()
 if metrics is None:
@@ -39,15 +40,16 @@ st.caption("Gradient boosting fused with an isolation forest over "
 
 fpr = metrics["false_positive_rate"]
 within = fpr <= config.TARGET_MAX_FPR
-m1, m2, m3, m4, m5 = st.columns(5)
-m1.metric("Recall", f"{metrics['recall']*100:.1f}%")
-m2.metric("Precision", f"{metrics['precision']:.3f}")
-m3.metric("PR-AUC", f"{metrics['pr_auc']:.3f}", f"ROC-AUC {metrics['roc_auc']:.3f}")
-m4.metric("False-positive rate", f"{fpr*100:.2f}%",
-          f"budget ≤ {config.TARGET_MAX_FPR*100:.0f}%" if within
-          else f"OVER budget of {config.TARGET_MAX_FPR*100:.0f}%",
-          delta_color="normal" if within else "inverse")
-m5.metric("False positives", f"{fpr*1000:.1f}", "per 1,000 genuine payments")
+metric_grid([
+    Metric("Recall", f"{metrics['recall']*100:.1f}%"),
+    Metric("Precision", f"{metrics['precision']:.3f}"),
+    Metric("PR-AUC", f"{metrics['pr_auc']:.3f}", f"ROC-AUC {metrics['roc_auc']:.3f}"),
+    Metric("False-positive rate", f"{fpr*100:.2f}%",
+           f"Budget ≤ {config.TARGET_MAX_FPR*100:.0f}%" if within
+           else f"OVER budget of {config.TARGET_MAX_FPR*100:.0f}%",
+           "safe" if within else "danger"),
+    Metric("False positives", f"{fpr*1000:.1f}", "Per 1,000 genuine payments"),
+])
 st.caption(
     f"Held-out time-split test set: {metrics.get('test_size', 0):,} transactions, "
     f"{metrics.get('n_fraud_eval', 0)} of them fraudulent at a "
@@ -56,15 +58,15 @@ st.caption(
     "is tiered decisioning, not a bigger number.")
 
 tab_ops, tab_family, tab_decisions, tab_blind = st.tabs(
-    ["⚖️ Operating point", "🎯 Recall by family", "🚦 Decisions & reason codes",
-     "🕳️ Blind spots"])
+    [":material/balance: Operating point", ":material/target: Recall by family", ":material/traffic: Decisions & reason codes",
+     ":material/visibility_off: Blind spots"])
 
 # Operating point: threshold sweep, calibration, operational volumes
 with tab_ops:
     sweep = load_threshold_sweep()
     st.subheader("There is no magic threshold")
     if not sweep:
-        st.info("Run `python -m src.defend.diagnostics` to generate the sweep.", icon="ℹ️")
+        st.info("Run `python -m src.defend.diagnostics` to generate the sweep.", icon=":material/info:")
     else:
         pts = pd.DataFrame(sweep["points"])
         fig = go.Figure()
@@ -78,7 +80,7 @@ with tab_ops:
                           yaxis_title="", xaxis_range=[0, 0.12],
                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                           legend=dict(orientation="h"), margin=dict(t=10))
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
         st.caption(sweep["note"] + " Every point on this curve is a different answer to "
                    "'how much genuine friction are we willing to buy detection with'.")
 
@@ -88,7 +90,7 @@ with tab_ops:
         st.subheader("What that costs to run")
         d = o["action_distribution"]
         sc = o["scenario"]
-        k1, k2, k3, k4 = st.columns(4)
+        k1, k2, k3, k4 = columns(4)
         k1.metric("Approved outright", f"{d['approve']*100:.1f}%")
         k2.metric("Sent to step-up", f"{d['step_up']*100:.2f}%",
                   f"{d['genuine_customers_stepped_up']*100:.2f}% of genuine customers")
@@ -104,12 +106,12 @@ with tab_ops:
             f"one were reviewed by hand, and an estimated "
             f"**{sc['estimated_genuine_customers_abandoning_after_step_up']:,} genuine customers "
             f"abandoning** at the challenge.")
-        st.warning(sc["label"] + " — " + o["disclaimer"], icon="⚠️")
+        st.warning(sc["label"] + " — " + o["disclaimer"], icon=":material/warning:")
 
     cal = load_calibration()
     if cal:
         st.subheader("Does the probability mean anything?")
-        c1, c2 = st.columns([1, 1.3])
+        c1, c2 = columns([1, 1.3])
         with c1:
             st.metric("Brier score", f"{cal['brier_calibrated']:.5f}",
                       f"{cal['brier_improvement']:+.5f} vs uncalibrated")
@@ -128,14 +130,14 @@ with tab_ops:
                                   yaxis_title="observed fraud rate",
                                   plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                                   legend=dict(orientation="h"), margin=dict(t=10))
-                st.plotly_chart(fig, width=STRETCH)
+                plot(fig, width=STRETCH)
 
 # Per-family recall with intervals
 with tab_family:
     fam = load_family_recall()
     st.subheader("Recall by attack family")
     if not fam:
-        st.info("Run `python -m src.defend.diagnostics` to generate family recall.", icon="ℹ️")
+        st.info("Run `python -m src.defend.diagnostics` to generate family recall.", icon=":material/info:")
     else:
         st.caption(fam["note"])
         which = st.radio("Detector", list(fam["models"]), horizontal=True)
@@ -161,7 +163,7 @@ with tab_family:
                           xaxis_title="recall (95% Wilson interval)",
                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                           margin=dict(t=10))
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
         st.dataframe(fdf[["family", "recall", "n", "lo", "hi", "enough"]],
                      width=STRETCH, hide_index=True)
         st.info(
@@ -170,7 +172,7 @@ with tab_family:
             "bottom by construction. There is very little to see at authorization time. The "
             "correct control for those is friction, payee-risk intelligence and "
             "post-transaction recall, not a hard decline, and they are reported here rather "
-            "than quietly excluded.", icon="ℹ️")
+            "than quietly excluded.", icon=":material/info:")
 
 # Decisions and reason codes
 with tab_decisions:
@@ -178,22 +180,22 @@ with tab_decisions:
         dframe = load_demo_scores()
         if dframe is None:
             st.info("Run `python -m src.defend.diagnostics` to precompute demo scores.",
-                    icon="ℹ️")
+                    icon=":material/info:")
             st.stop()
-        st.caption("🟢 Precomputed scores for the committed held-out test split.")
+        st.caption(":material/check_circle: Precomputed scores for the committed held-out test split.")
         y = dframe["is_fraud"].to_numpy()
         scores = dframe["risk_score"].to_numpy()
     else:
         from src.defend.decision_policy import decision_frame
         from src.defend.features import build_xy
         from src.defend.model import DefenseModel
-        lc = st.columns([1, 1, 1, 2])
+        lc = columns([1, 1, 1, 2])
         n = lc[0].select_slider("Batch", [4000, 8000, 15000], value=8000)
         fr = lc[1].slider("Fraud rate", 0.005, 0.05, config.DEFAULT_FRAUD_RATE, 0.005)
         seed = lc[2].number_input("Seed", value=777, step=1)
         # Simulate + score only on an explicit click — never automatically on first
         # render, so entering Live mode never triggers heavy compute unasked.
-        if lc[3].button("▶ Score fresh batch", type="primary"):
+        if lc[3].button("Score fresh batch", icon=":material/play_arrow:", type="primary"):
             from src.generate.simulate import simulate
             with st.spinner("Simulating and scoring…"):
                 fresh = simulate(n_transactions=n, fraud_rate=fr, seed=int(seed))[0]
@@ -204,14 +206,14 @@ with tab_decisions:
                 st.session_state["def_df"] = decision_frame(
                     fresh, Xf, pf, step_up=mdl.threshold_probability)
         if "def_df" not in st.session_state:
-            st.info("Click **▶ Score fresh batch** to simulate and score a fresh batch live. "
-                    "(Demo mode shows the committed held-out split with no compute.)", icon="▶️")
+            st.info("Click **:material/play_arrow: Score fresh batch** to simulate and score a fresh batch live. "
+                    "(Demo mode shows the committed held-out split with no compute.)", icon=":material/play_arrow:")
             st.stop()
         dframe = st.session_state["def_df"]
         y = dframe["is_fraud"].to_numpy()
         scores = dframe["risk_score"].to_numpy()
 
-    left, right = st.columns([1.4, 1])
+    left, right = columns([1.4, 1])
     with left:
         st.subheader("Where genuine and fraudulent traffic sit")
         fig = go.Figure()
@@ -230,7 +232,7 @@ with tab_decisions:
                           paper_bgcolor="rgba(0,0,0,0)", legend=dict(orientation="h"),
                           yaxis_type="log", margin=dict(t=10),
                           xaxis_title="calibrated fraud probability")
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
     with right:
         st.subheader("Tiered decisions")
         counts = dframe["action"].value_counts()
@@ -258,7 +260,7 @@ with tab_decisions:
     show = [c for c in ["timestamp", "card_id", "amount", "mcc", "geo_city", "device_id",
                         "attack_type", "risk_score", "action", "reason_codes"]
             if c in dframe.columns]
-    t1, t2 = st.tabs(["🚨 Challenged or declined", "⚠️ Genuine customers we inconvenienced"])
+    t1, t2 = st.tabs([":material/notification_important: Challenged or declined", ":material/warning: Genuine customers we inconvenienced"])
     with t1:
         flagged = dframe[dframe.action != "APPROVE"].sort_values("risk_score", ascending=False)
         st.dataframe(flagged[show].head(40), width=STRETCH, hide_index=True,
@@ -278,7 +280,7 @@ with tab_blind:
     bs = load_blind_spots()
     st.subheader("Where this defense is still weakest")
     if not bs:
-        st.info("Run `python -m src.defend.diagnostics` to generate blind spots.", icon="ℹ️")
+        st.info("Run `python -m src.defend.diagnostics` to generate blind spots.", icon=":material/info:")
     else:
         st.caption(bs["note"])
         for d in bs["hardest"]:
@@ -293,7 +295,7 @@ with tab_blind:
                                       xaxis_title="AUC drop when this feature is shuffled",
                                       plot_bgcolor="rgba(0,0,0,0)",
                                       paper_bgcolor="rgba(0,0,0,0)")
-                    st.plotly_chart(fig, width=STRETCH)
+                    plot(fig, width=STRETCH)
                 if d["escape_profile"]:
                     st.markdown("**How the transactions that got through differ from the "
                                 "ones that were caught**")
@@ -303,6 +305,6 @@ with tab_blind:
         if nxt:
             st.success(
                 f"**Next red-team target: {nxt['family']}** — {nxt['strategy']}\n\n"
-                f"Proposed specification change: `{nxt['proposed_change']}`", icon="🎯")
+                f"Proposed specification change: `{nxt['proposed_change']}`", icon=":material/target:")
             st.caption("Chosen from measured weakness, not decided in advance. This is the "
                        "input to the next round of the closed loop.")

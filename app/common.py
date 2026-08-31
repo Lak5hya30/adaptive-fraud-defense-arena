@@ -24,41 +24,79 @@ import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
 from src.identify.taxonomy import load_taxonomy  # noqa: E402
+from ui import PALETTE, badge, material_icon  # noqa: E402
 
-# --- palette (colour-blind safe, works on Streamlit's dark theme) -----------
-PALETTE = {
-    "primary": "#EB6C1E",     # Mastercard-ish orange
-    "accent": "#F79E1B",
-    "danger": "#E5484D",
-    "safe": "#30A46C",
-    "info": "#3E7BFA",
-    "muted": "#8B93A7",
-    "grid": "rgba(139,147,167,0.18)",
-}
-SEVERITY_COLOR = {"critical": "#E5484D", "high": "#EB6C1E",
-                  "medium": "#F79E1B", "low": "#30A46C"}
+# Semantic colors stay consistent across charts, badges, and controls.
+SEVERITY_COLOR = {"critical": PALETTE["danger"], "high": "#A44D16",
+                  "medium": PALETTE["accent"], "low": PALETTE["safe"]}
 CATEGORY_ORDER = ["Social Engineering", "Technical Evasion",
                   "Identity & Onboarding", "Laundering & Abuse"]
 
 
-def page_setup(title: str, icon: str = "🛡️"):
+def page_setup(title: str, icon: str = ":material/shield:"):
     st.set_page_config(page_title=f"{title} · AI Defense Lab",
-                       page_icon=icon, layout="wide")
-    st.markdown(
-        """
-        <style>
-        .block-container {padding-top: 2.2rem; max-width: 1250px;}
-        div[data-testid="stMetricValue"] {font-size: 1.7rem;}
-        .pill {display:inline-block;padding:2px 10px;border-radius:12px;
-               font-size:0.72rem;font-weight:600;margin-right:6px;color:#fff;}
-        .card {background:rgba(255,255,255,0.03);border:1px solid rgba(139,147,167,0.22);
-               border-radius:12px;padding:16px 18px;margin-bottom:12px;}
-        .kicker {color:#EB6C1E;font-weight:700;letter-spacing:.08em;
-                 text-transform:uppercase;font-size:.72rem;}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+                       page_icon=icon, layout="wide", initial_sidebar_state="expanded")
+    st.session_state["_ui_row"] = 0
+    # Style-only HTML goes into Streamlit's event container, so loading the
+    # shared stylesheet never creates an empty row above the page heading.
+    stylesheet = ROOT / "app" / "styles.css"
+    st.html(stylesheet)
+    # Streamlit clears the event container when switching pages. Keep the same
+    # local CSS in <head> across those client-side transitions so the default
+    # sidebar geometry cannot flash between the outgoing and incoming page.
+    # This enhancement touches styling only, never navigation or widget events.
+    css_json = json.dumps(stylesheet.read_text(encoding="utf-8")).replace("<", "\\u003c")
+    with st.container(key="lab-style-bootstrap"):
+        st.html(
+            "<script>(() => {"
+            "let style = document.getElementById('lab-persistent-styles');"
+            "if (!style) { style = document.createElement('style');"
+            "style.id = 'lab-persistent-styles'; document.head.append(style); }"
+            f"const css = {css_json};"
+            "if (style.textContent !== css) style.textContent = css;"
+            "})();</script>",
+            unsafe_allow_javascript=True,
+        )
+    with st.sidebar:
+        st.markdown(
+            '<div class="lab-brand"><span class="lab-mark" aria-hidden="true">'
+            f'{material_icon("verified_user")}</span><div>AI Defense Lab'
+            '<span class="lab-brand-caption">Adaptive payment security</span></div></div>',
+            unsafe_allow_html=True,
+        )
+        for section, pages in NAVIGATION:
+            st.markdown(f'<div class="nav-label">{section}</div>', unsafe_allow_html=True)
+            for path, label, symbol in pages:
+                # The native link keeps routing and keyboard behavior. The keyed
+                # wrapper styles the current page without relying on generated CSS.
+                active = title == NAV_TITLES[path]
+                with st.container(key=f"nav-{'active-' if active else ''}{symbol}"):
+                    st.page_link(path, label=label, icon=f":material/{symbol}:")
+        st.divider()
+        st.caption("Synthetic data only · Research prototype")
+
+
+# Native page links retain keyboard navigation, current-page state, and routing.
+NAVIGATION = [
+    ("Start here", [("Home.py", "Overview", "space_dashboard"),
+                    ("pages/0_Judge_Demo.py", "2-Minute Judge Demo", "play_circle")]),
+    ("Explore the lab", [("pages/1_Threat_Atlas.py", "Threat Atlas", "travel_explore"),
+                         ("pages/2_Generate.py", "Attack Simulator", "science"),
+                         ("pages/3_Defend.py", "Detection & Decisions", "shield"),
+                         ("pages/4_ClosedLoop.py", "Closed Loop", "sync")]),
+    ("Evidence", [("pages/5_HeroDemo.py", "Unseen Attack Demo", "movie"),
+                  ("pages/6_Benchmarks.py", "Benchmarks", "bar_chart"),
+                  ("pages/7_Deployment.py", "Deployment", "account_tree")]),
+]
+
+
+NAV_TITLES = {
+    "Home.py": "Overview", "pages/0_Judge_Demo.py": "2-Minute Judge Demo",
+    "pages/1_Threat_Atlas.py": "Threat Atlas", "pages/2_Generate.py": "Generate",
+    "pages/3_Defend.py": "Defend", "pages/4_ClosedLoop.py": "Closed Loop",
+    "pages/5_HeroDemo.py": "Hero Demo", "pages/6_Benchmarks.py": "Benchmarks",
+    "pages/7_Deployment.py": "Deployment",
+}
 
 
 @st.cache_resource(show_spinner=False)
@@ -101,8 +139,8 @@ def get_defense_model():
 
 
 def severity_pill(sev: str) -> str:
-    c = SEVERITY_COLOR.get(sev, "#8B93A7")
-    return f'<span class="pill" style="background:{c}">{sev.upper()}</span>'
+    c = SEVERITY_COLOR.get(sev, PALETTE["muted"])
+    return pill(sev.upper(), c)
 
 
 def llm_status_badge():
@@ -112,11 +150,11 @@ def llm_status_badge():
     otherwise would be the easiest thing in this project to catch.
     """
     if config.llm_available():
-        st.caption("🟢 Live generation available (ANTHROPIC_API_KEY detected). Committed "
+        st.caption(":material/check_circle: Live generation available (ANTHROPIC_API_KEY detected). Committed "
                    "artifacts were still produced by the deterministic offline path — "
                    "regenerate in Live mode to replace them.")
     else:
-        st.caption("⚪ Offline path — no API key present. Attack specifications come from the "
+        st.caption(":material/offline_bolt: Offline path — no API key present. Attack specifications come from the "
                    "weakness-driven heuristic and content artifacts from deterministic "
                    "templates, both seeded and reproducible. This is the path that produced "
                    "every committed artifact.")
@@ -127,16 +165,16 @@ def mode_selector() -> str:
     """Sidebar Demo/Live switch. DEMO (default) renders instantly from committed
     artifacts and never triggers heavy compute; LIVE unlocks regeneration/retrain
     behind explicit confirmation. Returns 'DEMO' or 'LIVE'."""
-    st.sidebar.markdown("### Mode")
+    st.sidebar.markdown('<div class="nav-label">Environment</div>', unsafe_allow_html=True)
     live = st.sidebar.toggle(
         "Developer / Live mode", value=False,
         help="OFF = Demo mode: instant, offline, from committed artifacts (safe for "
              "presenting). ON = allows live regeneration and retraining.")
     mode = "LIVE" if live else "DEMO"
     if mode == "DEMO":
-        st.sidebar.caption("🟢 Demo mode — instant, no heavy compute, no API key.")
+        st.sidebar.caption("Demo · Offline artifacts. No training or API calls.")
     else:
-        st.sidebar.caption("🛠️ Live mode — regeneration/retraining enabled.")
+        st.sidebar.caption("Live · Regeneration and retraining enabled.")
     return mode
 
 
@@ -239,27 +277,27 @@ def load_demo_scores():
 
 # --- small UI helpers -------------------------------------------------------
 STATUS_COLOR = {
-    "IMPLEMENTED": "#30A46C", "PARAMETERIZED": "#3E7BFA",
-    "RESEARCH_ONLY": "#8B93A7", "FUTURE": "#F79E1B",
+    "IMPLEMENTED": PALETTE["safe"], "PARAMETERIZED": PALETTE["info"],
+    "RESEARCH_ONLY": PALETTE["muted"], "FUTURE": PALETTE["accent"],
 }
 STATUS_LABEL = {
     "IMPLEMENTED": "SIMULATED", "PARAMETERIZED": "CONFIGURABLE",
     "RESEARCH_ONLY": "RESEARCH ONLY", "FUTURE": "ROADMAP",
 }
-OBSERVABILITY_COLOR = {"high": "#30A46C", "partial": "#F79E1B",
-                       "low": "#EB6C1E", "none": "#E5484D"}
+OBSERVABILITY_COLOR = {"high": PALETTE["safe"], "partial": PALETTE["accent"],
+                       "low": "#A44D16", "none": PALETTE["danger"]}
 
 
 def pill(text: str, color: str) -> str:
-    return f'<span class="pill" style="background:{color}">{text}</span>'
+    return badge(text, color)
 
 
 def status_pill(status: str) -> str:
-    return pill(STATUS_LABEL.get(status, status), STATUS_COLOR.get(status, "#8B93A7"))
+    return pill(STATUS_LABEL.get(status, status), STATUS_COLOR.get(status, PALETTE["muted"]))
 
 
 def observability_pill(level: str) -> str:
-    return pill(f"AUTH-TIME: {level.upper()}", OBSERVABILITY_COLOR.get(level, "#8B93A7"))
+    return pill(f"AUTH-TIME: {level.upper()}", OBSERVABILITY_COLOR.get(level, PALETTE["muted"]))
 
 
 def coverage_bar(done: int, total: int, width: int = 18) -> str:
@@ -279,7 +317,7 @@ def metric_note(text: str):
 
 
 def artifact_missing(name: str, command: str):
-    st.info(f"`{name}` has not been generated yet. Run `{command}`.", icon="ℹ️")
+    st.info(f"`{name}` has not been generated yet. Run `{command}`.", icon=":material/info:")
 
 
 # Streamlit width helper (avoids the deprecated use_container_width kwarg).

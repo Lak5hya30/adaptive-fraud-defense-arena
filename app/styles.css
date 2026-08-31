@@ -1,0 +1,416 @@
+/* One light design system. Content determines height; rows use their available
+   width. Do not add height:100% to metrics with following captions. */
+:root {
+  color-scheme: light only;
+  --lab-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --lab-ink: #25324a; --lab-bg: #f6f8fb; --lab-surface: #fff;
+  --lab-border: #dce3ec; --lab-muted: #596579; --lab-accent: #2458c6;
+  --lab-radius: 1rem;
+  --lab-space: clamp(1.25rem, 2vw, 1.75rem);
+}
+.stApp {color-scheme: light only; color: var(--lab-ink); background: var(--lab-bg); font-family: var(--lab-font); font-optical-sizing: auto;}
+.stApp :is(h1,h2,h3,h4,p,label,input,textarea,button) {font-family: var(--lab-font);}
+.stMainBlockContainer {container: lab-main / inline-size; width: 100%; max-width: 80rem; padding: 2.25rem clamp(1.25rem, 3vw, 3rem) 5rem;}
+.stApp h1 {font-size: clamp(1.85rem,3vw,2.65rem); font-weight: 650; line-height: 1.2; letter-spacing: -.035em; padding: 0 0 .6rem; text-wrap: balance;}
+.stApp h2 {font-size: 1.5rem; line-height: 1.3; letter-spacing: -.025em; font-weight: 600;}
+.stApp h3 {font-size: 1.16rem; line-height: 1.4; letter-spacing: -.015em; font-weight: 600;}
+.stApp h4 {font-size: 1.05rem; line-height: 1.5; font-weight: 550;}
+.stApp p {line-height: 1.7; overflow-wrap: anywhere;}
+.stApp [data-testid="stCaptionContainer"],.stApp [data-testid="stCaptionContainer"] p {color: var(--lab-muted);}
+.stApp hr {border-color: var(--lab-border); margin: 1.5rem 0;}
+.stApp [data-testid="stVerticalBlock"] {gap: var(--lab-space);}
+.kicker,.nav-label {color: var(--lab-muted); font-size: .72rem; font-weight: 650; letter-spacing: .07em; text-transform: uppercase;}
+.kicker {color: var(--lab-accent); margin: 0 0 .4rem;}
+.nav-label {margin: 1.5rem .9rem .65rem;}
+
+/* The style persistence script has no visible row or reserved layout space. */
+.st-key-lab-style-bootstrap,
+[data-testid="stLayoutWrapper"]:has(> .st-key-lab-style-bootstrap) {display: none;}
+
+/* Permanent navigation: no toggle row, collapsed footprint, or sliding panel.
+   Explicit geometry also handles a previously collapsed browser session. */
+.stApp [data-testid="stSidebar"] {
+  background: #eef2f7; border-right: 1px solid var(--lab-border);
+  width: 18.75rem !important; min-width: 18.75rem !important;
+  max-width: 18.75rem !important; transform: none !important;
+  transition: none; box-shadow: none;
+}
+[data-testid="stSidebarHeader"], [data-testid="stSidebarCollapseButton"],
+[data-testid="stExpandSidebarButton"],
+[data-testid="stSidebar"] > div:not([data-testid="stSidebarContent"]) {display: none !important;}
+/* Keep framework status/toolbar controls out of document flow so reruns do not
+   add or remove a header-sized gap. The unused sidebar logo spacer is gone too. */
+.stApp [data-testid="stHeader"] {
+  position: absolute; top: 0; right: 0; left: auto; height: 0;
+  min-height: 0; background: transparent;
+}
+.stApp [data-testid="stMain"] {
+  position: relative; min-width: 0; scrollbar-gutter: stable;
+}
+.stApp [data-testid="stSidebarContent"] {scrollbar-gutter: stable;}
+/* A rerun should not dim the persistent navigation or animate its width. */
+[data-testid="stSidebar"] [data-stale="true"] {opacity: 1; transition: none;}
+[data-testid="stSidebarUserContent"] {padding: .75rem 1.1rem 2rem;}
+[data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {gap: .45rem;}
+/* Streamlit gives page-link wrappers negative margins; those collide with
+   our 44px targets. Reset the wrappers as well as sizing the links. */
+[data-testid="stElementContainer"]:has(> [data-testid="stPageLink"]) {margin: 0;}
+.lab-brand {display: flex; align-items: center; gap: .85rem; margin: 0 .65rem 1.2rem; font-weight: 650;}
+.lab-brand-caption {display: block; font-size: .7rem; color: var(--lab-muted); font-weight: 450; margin-top: .2rem;}
+.lab-mark {display: grid; place-items: center; width: 2.75rem; height: 2.75rem; flex-shrink: 0; border-radius: .7rem; color: var(--lab-accent); background: #e2ebfc;}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {min-height: 3.1rem; border-radius: .75rem; padding: .75rem .9rem; gap: .85rem; border: 1px solid transparent;}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] p {font-size: .88rem; font-weight: 500; line-height: 1.4;}
+.st-key-demo-entry [data-testid="stPageLink-NavLink"] {min-height: 2.75rem; padding: .6rem 1rem; border-radius: .65rem; color: var(--lab-accent); background: #eaf0fd;}
+.st-key-demo-start {max-width: 34rem; margin-inline: auto; width: 100%;}
+
+/* Each reusable ui.columns row is a container. Nested rows respond to their
+   own width. Native weighted proportions are preserved on wide screens. */
+[class*="st-key-lab-columns-"] {container: lab-row / inline-size;}
+[data-testid="stColumn"] {min-width: 0;}
+@container lab-row (max-width: 64rem) {
+  [data-testid="stHorizontalBlock"] {flex-wrap: wrap; gap: 1rem; align-items: stretch;}
+  [data-testid="stColumn"] {flex: 1 1 16rem; min-width: min(100%,16rem);}
+}
+@container lab-row (max-width: 38rem) {
+  [data-testid="stColumn"] {flex: 1 1 100%; min-width: 100%;}
+}
+.card,.metric-card,[data-testid="stMetric"] {background: var(--lab-surface); border: 1px solid var(--lab-border); border-radius: var(--lab-radius); padding: var(--lab-space); box-sizing: border-box; min-width: 0;}
+.card {margin: 0; overflow-wrap: anywhere;}
+.card h3 {padding: .3rem 0 .5rem; margin: 0;}
+.card p {margin: 0;}
+.card .card-caption {color: var(--lab-muted); font-size: .8rem; margin-top: .75rem;}
+.metric-grid {display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,12rem),1fr)); gap: 1.25rem; margin: .5rem 0;}
+.metric-card {display: flex; flex-direction: column; gap: .85rem;}
+.metric-card dt {font-size: .81rem; color: var(--lab-muted); line-height: 1.4; min-height: 2.3em;}
+.metric-card dd {margin: 0; overflow-wrap: anywhere;}
+.metric-value {font-size: 1.9rem; font-weight: 600; line-height: 1.2; letter-spacing: -.03em; font-variant-numeric: tabular-nums;}
+.metric-note {font-size: .78rem; line-height: 1.45; color: var(--lab-muted); margin-top: auto !important;}
+@supports (grid-template-rows: subgrid) {
+  .metric-card {display: grid; grid-template-rows: subgrid; grid-row: span 3; row-gap: .85rem;}
+}
+.tone-safe {color: #16734d;}.tone-danger {color: #bb3444;}.tone-accent {color: #976000;}
+/* Contextual native metrics also grow with multiline values and deltas. */
+[data-testid="stMetric"] {height: auto;}
+[data-testid="stMetricLabel"] {color: var(--lab-muted); height: auto; min-height: 1.6rem;}
+[data-testid="stMetricLabel"] p {white-space: normal; overflow: visible; line-height: 1.4;}
+[data-testid="stMetricValue"] {font-size: 1.7rem; line-height: 1.25; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums;}
+[data-testid="stMetricValue"] > div {white-space: normal; overflow-wrap: anywhere; overflow: visible;}
+[data-testid="stMetricDelta"] {font-size: .78rem; max-width: 100%; height: auto; align-items: flex-start;}
+[data-testid="stMetricDelta"] > div {white-space: normal; overflow: visible; overflow-wrap: anywhere;}
+.pill {display: inline-block; max-width: 100%; padding: .35rem .7rem; border-radius: .4rem; font-size: .72rem; line-height: 1.5; font-weight: 600; letter-spacing: .02em; margin: .15rem .35rem .25rem 0; color: var(--pill-color,var(--lab-muted)); background: color-mix(in srgb,var(--pill-color,var(--lab-muted)) 8%,white); border: 1px solid color-mix(in srgb,var(--pill-color,var(--lab-muted)) 22%,white); overflow-wrap: anywhere;}
+[data-testid="stExpander"] details {border: 1px solid var(--lab-border); border-radius: var(--lab-radius); background: white;}
+[data-testid="stExpander"] summary {min-height: 3.5rem; padding: 1rem 1.25rem;}
+[data-testid="stExpander"] summary p {font-weight: 500; line-height: 1.5; overflow-wrap: anywhere;}
+[data-testid="stExpander"] details[open] {border-color: #a8bce8;}
+[data-testid="stButton"] button,[data-testid="stDownloadButton"] button,[data-testid="stLinkButton"] a {min-height: 3rem; padding: .7rem 1.15rem; border-radius: .75rem; font-weight: 550; touch-action: manipulation; transition: background-color 120ms ease-out,transform 120ms ease-out;}
+[data-testid="stButton"] button:active:not(:disabled),[data-testid="stDownloadButton"] button:active:not(:disabled) {transform: scale(.98); transition: none;}
+.stApp :is(a,button,input,textarea,summary,[role="tab"],[role="switch"]):focus-visible {outline: 2px solid var(--lab-accent); outline-offset: 3px;}
+[data-testid="stTextInput"] input {min-height: 3rem;}
+[data-testid="stTabs"] [role="tablist"] {gap: .5rem; height: auto; flex-wrap: wrap; overflow: visible; padding-bottom: .5rem;}
+[data-testid="stTabs"] [role="tab"] {min-height: 3rem; padding: .75rem 1rem; height: auto; white-space: normal; flex: 0 1 auto; max-width: 100%;}
+[data-testid="stTabs"] [role="tabpanel"] {padding-top: 1.5rem;}
+[data-testid="stDataFrame"],[data-testid="stCode"],[data-testid="stPlotlyChart"] {max-width: 100%; min-width: 0;}
+[data-testid="stCode"] pre {overflow-x: auto;}
+[data-testid="stMarkdownContainer"] ol.progress-steps {display: flex; flex-flow: row wrap; gap: .75rem; width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: auto; list-style: none; padding: .25rem 0 .65rem; margin: .5rem 0;}
+[data-testid="stMarkdownContainer"] ol.progress-steps > li {display: flex; flex: 1 1 8rem; align-items: center; justify-content: center; gap: .5rem; box-sizing: border-box; min-width: 0; white-space: normal; margin: 0; padding: 1rem; border: 1px solid var(--lab-border); border-radius: .6rem; background: white; color: var(--lab-muted); font-size: .8rem;}
+.progress-steps li > span {flex-shrink: 0; font-variant-numeric: tabular-nums;}
+[data-testid="stMarkdownContainer"] ol.progress-steps > .step-current {border-color: var(--lab-accent); background: #eaf0fd; color: var(--lab-accent); font-weight: 600;}
+[data-testid="stMarkdownContainer"] ol.progress-steps > .step-complete {color: #16734d;}
+.progress-steps:focus-visible {outline: 2px solid var(--lab-accent); outline-offset: 3px;}
+.coverage-row {margin-bottom: 1rem;}
+.coverage-label {display: flex; gap: .75rem; justify-content: space-between; font-size: .85rem; margin-bottom: .4rem;}
+.coverage-label span:last-child {color: var(--lab-muted); white-space: nowrap;}
+.coverage-row progress {display: block; width: 100%; height: .4rem; border: 0; border-radius: 1rem; background: var(--lab-border); accent-color: var(--lab-accent);}
+.coverage-row progress::-webkit-progress-bar {background: var(--lab-border); border-radius: 1rem;}
+.coverage-row progress::-webkit-progress-value {background: var(--lab-accent); border-radius: 1rem;}
+.coverage-row progress::-moz-progress-bar {background: var(--lab-accent); border-radius: 1rem;}
+.workflow {display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; color: var(--lab-muted); font-size: .85rem; margin: .5rem 0;}
+.workflow b {color: var(--lab-ink); font-weight: 550;}
+@container lab-main (max-width: 48rem) {
+  .metric-grid {grid-template-columns: repeat(2,minmax(0,1fr));}
+  .metric-value {font-size: 1.65rem;}
+}
+@container lab-main (max-width: 23rem) {
+  .metric-grid {gap: .85rem;}
+  .metric-card {padding: 1.1rem;}
+  .metric-value {font-size: 1.4rem;}
+}
+@media (max-width: 640px) {
+  .stMainBlockContainer {padding: 1.5rem 1rem 3rem;}
+  .stApp h1 {font-size: 1.85rem;}
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="stButton"] button,[data-testid="stDownloadButton"] button {transition: none;}
+  [data-testid="stButton"] button:active,[data-testid="stDownloadButton"] button:active {transform: none;}
+}
+@media (prefers-contrast: more) {:root {--lab-muted: #25324a; --lab-border: #596579;}}
+
+/* Google Material Symbols Rounded is served locally by Streamlit. */
+.material-symbols-rounded,
+.stApp [data-testid="stIconMaterial"] {
+  font-family: "Material Symbols Rounded" !important;
+  font-weight: 400; font-style: normal; font-size: 1.25rem;
+  line-height: 1; letter-spacing: normal; text-transform: none;
+  display: inline-block; white-space: nowrap; word-wrap: normal;
+  direction: ltr; font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  vertical-align: -.2em; flex-shrink: 0;
+}
+.lab-mark .material-symbols-rounded {font-size: 1.5rem;}
+.pill .material-symbols-rounded {font-size: 1rem; margin-right: .2rem;}
+.workflow .material-symbols-rounded {font-size: 1rem;}
+
+/* Keep all sidebar items aligned, with a blue inset marker on the active page. */
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {color: var(--lab-muted); transition: background-color 120ms ease, border-color 120ms ease;}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"] {color: inherit;}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"]:hover {background: #e2e9f3; color: var(--lab-ink);}
+[data-testid="stSidebar"] [class*="st-key-nav-active-"] [data-testid="stPageLink-NavLink"] {
+  background: #e2ebfc; color: var(--lab-accent); border-color: #c9d8f5;
+  box-shadow: inset 3px 0 0 var(--lab-accent);
+}
+/* Keep label metrics identical when selection changes, avoiding row rewrap. */
+[data-testid="stSidebar"] [class*="st-key-nav-active-"] p {font-weight: 500;}
+[data-testid="stSidebar"] [class*="st-key-nav-active-"] [data-testid="stIconMaterial"] {font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {padding-inline: .65rem;}
+
+/* Consistent surfaces, input heights, and comfortable internal padding. */
+[data-testid="stLayoutWrapper"]:has(> [data-testid="stVerticalBlockBorderWrapper"]),
+[data-testid="stVerticalBlockBorderWrapper"] {min-width: 0;}
+[data-testid="stVerticalBlockBorderWrapper"]:has(> [data-testid="stVerticalBlock"]) {border-radius: var(--lab-radius);}
+.st-key-demo-entry {padding: var(--lab-space); background: white; border: 1px solid var(--lab-border); border-radius: var(--lab-radius);}
+.st-key-demo-entry [data-testid="stHorizontalBlock"] {align-items: center;}
+.st-key-demo-entry [data-testid="stPageLink-NavLink"] {min-height: 3rem; padding: .8rem 1.1rem; border: 1px solid #c9d8f5;}
+[data-testid="stExpanderDetails"] {padding: .5rem 1.25rem 1.5rem;}
+[data-testid="stAlertContainer"] {padding: 1.25rem; border-radius: var(--lab-radius); gap: .85rem;}
+[data-testid="stWidgetLabel"] {margin-bottom: .5rem;}
+[data-baseweb="select"] > div {min-height: 3rem; border-radius: .75rem;}
+[data-testid="stNumberInputContainer"], [data-testid="stTextInputRootElement"],
+[data-testid="stTextAreaRootElement"] {border-radius: .75rem;}
+[data-testid="stRadio"] [role="radiogroup"] {gap: .75rem 1.25rem; flex-wrap: wrap;}
+[data-testid="stRadio"] label, [data-testid="stCheckbox"] label {min-height: 2.75rem;}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {background: #eaf0fd; border-radius: .65rem; color: var(--lab-accent); box-shadow: inset 0 -3px 0 var(--lab-accent);}
+/* The native sliding underline assumes a single row; selected tabs carry their
+   own underline so wrapped rows preserve a clear selected state. */
+[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+[data-testid="stTabs"] [data-baseweb="tab-border"] {display: none;}
+.stApp [data-testid="stMarkdownContainer"] li {margin-bottom: .6rem; line-height: 1.65;}
+.safety-gate {padding: 1.25rem 1.5rem; margin-bottom: .5rem; border-left: 4px solid var(--gate-color); background: color-mix(in srgb, var(--gate-color) 7%, white); border-radius: .75rem; line-height: 1.7;}
+.safety-gate > .material-symbols-rounded {color: var(--gate-color); margin-right: .5rem;}
+
+@container lab-main (max-width: 23rem) {
+  .metric-grid {grid-template-columns: minmax(0, 1fr);}
+  .metric-card dt {min-height: 0;}
+}
+@media (max-width: 640px) {
+  [data-testid="stTabs"] [role="tab"] {padding: .75rem;}
+  .coverage-label {flex-wrap: wrap; gap: .3rem;}
+  .stApp h2 {font-size: 1.35rem;}
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {transition: none;}
+}
+
+/* Match framework utility icons to the same Rounded set. Only the artwork is
+   replaced: original buttons, tooltips, keyboard access, and actions stay intact. */
+.stApp [aria-label="Link to heading"] {--lab-control-icon: "link";}
+.stApp [aria-label^="Help for "] {--lab-control-icon: "help";}
+.stApp [aria-label="Copy to clipboard"] {--lab-control-icon: "content_copy";}
+.stApp [aria-label="Copied!"] {--lab-control-icon: "check";}
+.stApp [aria-label="Show/hide columns"] {--lab-control-icon: "view_column";}
+.stApp [aria-label="Download as CSV"] {--lab-control-icon: "download";}
+.stApp [aria-label="Search"] {--lab-control-icon: "search";}
+.stApp [aria-label="Fullscreen"] {--lab-control-icon: "fullscreen";}
+.stApp [aria-label="Close fullscreen"] {--lab-control-icon: "fullscreen_exit";}
+.stApp [aria-label="Open"][aria-haspopup="listbox"] {--lab-control-icon: "expand_more";}
+.stApp [aria-label="Open"][aria-expanded="true"] {--lab-control-icon: "expand_less";}
+.stApp .modebar-btn[data-title="Download plot as a PNG"] {--lab-control-icon: "photo_camera";}
+.stApp .modebar-btn[data-title="Zoom"] {--lab-control-icon: "search";}
+.stApp .modebar-btn[data-title="Pan"] {--lab-control-icon: "pan_tool";}
+.stApp .modebar-btn[data-title="Box Select"] {--lab-control-icon: "select";}
+.stApp .modebar-btn[data-title="Lasso Select"] {--lab-control-icon: "lasso_select";}
+.stApp .modebar-btn[data-title="Zoom in"] {--lab-control-icon: "zoom_in";}
+.stApp .modebar-btn[data-title="Zoom out"] {--lab-control-icon: "zoom_out";}
+.stApp .modebar-btn[data-title="Autoscale"] {--lab-control-icon: "fit_screen";}
+.stApp .modebar-btn[data-title="Reset axes"] {--lab-control-icon: "restart_alt";}
+.stApp .modebar-btn[data-title="Exit fullscreen"] {--lab-control-icon: "fullscreen_exit";}
+.stApp [data-testid="stJson"] .collapsed-icon {--lab-control-icon: "chevron_right";}
+.stApp [data-testid="stJson"] .expanded-icon {--lab-control-icon: "expand_more";}
+.stApp [data-testid="stJson"] .copy-icon {--lab-control-icon: "content_copy";}
+.stApp :is(
+  a[aria-label="Link to heading"], button[aria-label^="Help for "],
+  [data-testid="stBaseButton-elementToolbar"], button[aria-label="Open"][aria-haspopup="listbox"],
+  .modebar-btn, [data-testid="stJson"] .collapsed-icon,
+  [data-testid="stJson"] .expanded-icon, [data-testid="stJson"] .copy-icon
+) {position: relative;}
+.stApp :is(
+  a[aria-label="Link to heading"], button[aria-label^="Help for "],
+  [data-testid="stBaseButton-elementToolbar"], button[aria-label="Open"][aria-haspopup="listbox"],
+  .modebar-btn, [data-testid="stJson"] .collapsed-icon,
+  [data-testid="stJson"] .expanded-icon, [data-testid="stJson"] .copy-icon
+)::after {
+  content: var(--lab-control-icon, "more_horiz") / "";
+  font-family: "Material Symbols Rounded"; font-size: 1.15rem; font-weight: 400;
+  font-feature-settings: "liga"; line-height: 1; font-style: normal;
+  position: absolute; inset: 0; display: grid; place-items: center;
+  pointer-events: none; color: inherit;
+}
+.stApp :is(
+  a[aria-label="Link to heading"], button[aria-label^="Help for "],
+  [data-testid="stBaseButton-elementToolbar"], button[aria-label="Open"][aria-haspopup="listbox"],
+  .modebar-btn, [data-testid="stJson"] .collapsed-icon,
+  [data-testid="stJson"] .expanded-icon, [data-testid="stJson"] .copy-icon
+) > svg {visibility: hidden;}
+.stApp .modebar-btn {color: var(--lab-muted);}
+.stApp .modebar-btn:is(:hover, .active) {color: var(--lab-accent);}
+/* Toolbar groups may wrap on narrow plots without changing chart interactions. */
+.stApp .modebar {display: flex; flex-wrap: wrap; justify-content: flex-end; max-width: 100%;}
+.stApp .modebar-group {display: flex; flex-wrap: wrap; min-width: 0;}
+
+/* Long navigation labels wrap instead of disappearing behind an ellipsis. */
+.stApp [data-testid="stPageLink-NavLink"] > span:has([data-testid="stMarkdownContainer"]) {min-width: 0; white-space: normal; overflow: visible;}
+.stApp [data-testid="stPageLink-NavLink"] :is([data-testid="stMarkdownContainer"], p) {white-space: normal; overflow-wrap: anywhere;}
+
+[data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Up"]) {--lab-delta-icon: "arrow_upward";}
+[data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Down"]) {--lab-delta-icon: "arrow_downward";}
+[data-testid="stMetricDelta"]:has([data-testid^="stMetricDeltaIcon-"])::before {
+  content: var(--lab-delta-icon) / ""; font-family: "Material Symbols Rounded";
+  font-feature-settings: "liga"; font-size: 1rem; line-height: 1.4;
+  flex-shrink: 0; margin-right: .25rem;
+}
+[data-testid="stMetricDelta"] > [data-testid^="stMetricDeltaIcon-"] {display: none;}
+
+/* Preserve the success/caution/failure meanings previously carried by emoji. */
+.stApp [role="img"][aria-label="check_circle icon"] {color: #16734d;}
+.stApp [role="img"][aria-label="warning icon"] {color: #976000;}
+.stApp [role="img"]:is([aria-label="cancel icon"], [aria-label="block icon"]) {color: #bb3444;}
+
+.stApp [data-testid="stNumberInputClearButton"]:has(> svg) {position: relative;}
+.stApp [data-testid="stNumberInputClearButton"] > svg {visibility: hidden;}
+.stApp [data-testid="stNumberInputClearButton"]:has(> svg)::after {
+  content: "close" / ""; font-family: "Material Symbols Rounded";
+  font-feature-settings: "liga"; font-size: 1.15rem; position: absolute;
+  inset: 0; display: grid; place-items: center; pointer-events: none;
+}
+
+
+/* Fade content in place: never animate dimensions or translate the page. The
+   main surface keeps its viewport height when changing between short/long views.
+   No timers, routing interception, or delayed interactions are introduced. */
+.stMainBlockContainer {min-height: 100%;}
+@keyframes lab-view-enter {
+  from {opacity: .82;}
+  to {opacity: 1;}
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stApp[data-test-script-state="notRunning"] [data-testid="stMainBlockContainer"],
+  .stApp [role="tabpanel"]:not([hidden]) {animation: lab-view-enter 160ms ease-out;}
+  .stApp [role="tab"] {transition: background-color 160ms ease-out, color 160ms ease-out;}
+}
+
+/* On smaller screens, expanded navigation stays above the content instead of
+   becoming an unclosable overlay. Its bounded, scrollable height is the same on
+   every page, including those with optional environment controls. */
+@media (max-width: 900px) {
+  .stApp [data-testid="stAppViewContainer"] {
+    flex-direction: column; overflow-y: auto; scrollbar-gutter: stable;
+  }
+  .stApp [data-testid="stSidebar"] {
+    width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+    height: min(24rem, 45svh) !important; flex: 0 0 auto;
+    border-right: 0; border-bottom: 1px solid var(--lab-border);
+  }
+  .stApp [data-testid="stSidebar"] + div {height: auto; min-height: 55svh; flex: 1 0 auto;}
+  .stApp [data-testid="stMain"] {height: auto; min-height: 55svh; overflow: visible;}
+  [data-testid="stSidebarUserContent"] {padding: 1rem;}
+  [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem;
+  }
+  [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] > :not(:has([data-testid="stPageLink-NavLink"])) {grid-column: 1 / -1;}
+  [data-testid="stSidebar"] .lab-brand {margin: 0 .4rem .5rem;}
+  [data-testid="stSidebar"] .nav-label {margin: .7rem .4rem .25rem;}
+  [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {height: 100%;}
+}
+@media (max-width: 640px) {
+  [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {grid-template-columns: repeat(2, minmax(0, 1fr));}
+  [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {padding: .65rem; gap: .6rem;}
+}
+@media print {
+  .stApp [data-testid="stSidebar"] {height: auto !important;}
+  .stApp [data-testid="stAppViewContainer"] {overflow: visible;}
+}
+
+
+/* Judge Demo: stage changes are a local fragment update, never page navigation.
+   All stage panels share one grid cell, sized by the tallest content. This keeps
+   document height, the navigation row, and the viewport stable in both directions.
+   Align shorter stages to the controls so their content is visible near Next. */
+.st-key-judge-view-state,
+[data-testid="stLayoutWrapper"]:has(> .st-key-judge-view-state) {display: none;}
+.stApp:has(.st-key-judge-stage-deck) [data-testid="stMainBlockContainer"] {animation: none;}
+/* Browser scroll anchoring can otherwise follow a redrawn fragment at the
+   bottom of a page, even when the surrounding layout has an unchanged height. */
+.stApp:has(.st-key-judge-stage-deck) :is([data-testid="stMain"], [data-testid="stAppViewContainer"]) {overflow-anchor: none;}
+.st-key-judge-stage-deck {
+  display: grid; grid-template-columns: minmax(0, 1fr); align-items: end;
+  overflow-anchor: none;
+}
+.st-key-judge-stage-deck > [data-testid="stLayoutWrapper"] {
+  grid-area: 1 / 1; min-width: 0; visibility: hidden; opacity: 0;
+  pointer-events: none;
+}
+/* The welcome state keeps its existing start/demo flow. During a fragment
+   update the default is the expanded deck, so a transient state-marker update
+   cannot collapse document height and clamp the browser's current scroll. */
+.stApp:has([data-judge-started="false"]) :is(
+  [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-deck),
+  [data-testid="stLayoutWrapper"]:has(> .st-key-judge-evidence)
+) {display: none;}
+.stApp:has([data-judge-stage="0"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-0) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="1"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-1) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="2"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-2) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="3"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-3) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="4"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-4) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="5"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-5) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="6"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-6) {visibility: visible; opacity: 1; pointer-events: auto;}
+.stApp:has([data-judge-stage="7"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-7) {visibility: visible; opacity: 1; pointer-events: auto;}
+
+.st-key-judge-navigation {padding-top: 1.5rem; border-top: 1px solid var(--lab-border);}
+.st-key-judge-navigation [data-testid="stHorizontalBlock"] {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  gap: .75rem; align-items: center;
+}
+.st-key-judge-navigation [data-testid="stColumn"] {width: 100%; min-width: 0;}
+.st-key-judge-navigation [data-testid="stButton"] button {height: 3rem; min-height: 3rem; box-sizing: border-box;}
+.judge-stage-count {text-align: center; color: var(--lab-muted); font-variant-numeric: tabular-nums; white-space: nowrap;}
+.st-key-judge-progress [data-testid="stMarkdownContainer"] ol.progress-steps {
+  flex-wrap: nowrap; gap: .5rem; margin-top: 0; overflow-x: auto;
+}
+.st-key-judge-progress [data-testid="stMarkdownContainer"] ol.progress-steps > li {
+  flex: 1 0 7rem; white-space: nowrap; font-weight: 500; padding: .9rem .6rem;
+}
+.st-key-judge-progress .progress-steps li > span {width: 1.25rem; flex: 0 0 1.25rem; text-align: center;}
+.judge-completion {min-height: 2rem;}
+@media (prefers-reduced-motion: no-preference) {
+  .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"] {
+    transition: opacity 160ms ease-out, visibility 0s linear 160ms;
+  }
+  .stApp:has([data-judge-stage="0"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-0) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="1"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-1) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="2"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-2) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="3"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-3) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="4"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-4) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="5"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-5) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="6"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-6) {transition: opacity 160ms ease-out, visibility 0s;}
+  .stApp:has([data-judge-stage="7"]) .st-key-judge-stage-deck > [data-testid="stLayoutWrapper"]:has(> .st-key-judge-stage-panel-7) {transition: opacity 160ms ease-out, visibility 0s;}
+}
+@media (max-width: 640px) {
+  .st-key-judge-navigation [data-testid="stHorizontalBlock"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: .3rem;
+  }
+  .st-key-judge-navigation [data-testid="stButton"] button {padding: .5rem .2rem;}
+  .st-key-judge-navigation [data-testid="stButton"] button p,
+  .judge-stage-count {font-size: .75rem;}
+  .st-key-judge-navigation [data-testid="stIconMaterial"] {font-size: .85rem;}
+}

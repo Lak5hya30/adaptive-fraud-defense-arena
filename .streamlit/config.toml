@@ -1,14 +1,19 @@
-# Pinned so the prototype looks identical on any machine and on any projector.
-# The custom cards in app/common.py use light text on a translucent panel; under
-# a light theme they would render as white-on-white, which is exactly the kind of
-# surprise a live demo cannot afford.
+# One light appearance. Minimal toolbar removes the viewer theme selector.
+# Charts also use an explicit light template in app/ui.py.
 [theme]
-base = "dark"
-primaryColor = "#EB6C1E"
-backgroundColor = "#0E1117"
-secondaryBackgroundColor = "#161A23"
-textColor = "#E8EAF0"
+base = "light"
+primaryColor = "#2458C6"
+backgroundColor = "#F6F8FB"
+secondaryBackgroundColor = "#EEF2F7"
+textColor = "#25324A"
 font = "sans serif"
+borderColor = "#DCE3EC"
+baseRadius = "1rem"
+buttonRadius = "0.75rem"
+
+[client]
+showSidebarNavigation = false
+toolbarMode = "minimal"
 
 [server]
 headless = true

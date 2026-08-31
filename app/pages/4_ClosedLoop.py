@@ -12,14 +12,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui import Metric, card, columns, metric_grid, page_header, plot
+
 from common import (PALETTE, STRETCH, is_demo, llm_status_badge, load_lineage,
                     load_loop_history, load_registry, mode_selector, page_setup)
 
 import config
 
-page_setup("Closed Loop", "🔄")
-st.markdown('<div class="kicker">Pillar 4 · Closed Loop</div>', unsafe_allow_html=True)
-st.title("🔄 Red Team ⇄ Blue Team")
+page_setup("Closed Loop", ":material/sync:")
+page_header("Red Team ⇄ Blue Team", "Pillar 4 · Closed Loop")
 st.markdown(
     "Each round measures **which signals the current defense actually depends on** for a "
     "family, aims the next attack generation at removing exactly that signal, folds what "
@@ -35,17 +36,17 @@ st.caption("Every specification on this page carries `spec_source: \"heuristic\"
 
 mode = mode_selector()
 STATUS_STYLE = {
-    "adapted": ("#30A46C", "✅ Defense adapted"),
-    "partial": ("#F79E1B", "◐ Partial recovery"),
-    "residual_frontier": ("#E5484D", "⚠ Residual frontier"),
-    "n/a": ("#8B93A7", "—"),
+    "adapted": ("#16734D", ":material/check_circle: Defense adapted"),
+    "partial": ("#976000", ":material/contrast: Partial recovery"),
+    "residual_frontier": ("#BB3444", ":material/warning: Residual frontier"),
+    "n/a": ("#596579", "—"),
 }
 
 if mode == "LIVE":
     st.sidebar.markdown("### Run the loop")
     rounds = st.sidebar.slider("Rounds", 2, 4, 3)
     confirm = st.sidebar.checkbox("I understand this retrains models (several minutes)")
-    if st.sidebar.button("▶ Run closed loop", type="primary", disabled=not confirm):
+    if st.sidebar.button("Run closed loop", icon=":material/play_arrow:", type="primary", disabled=not confirm):
         from src.loop.redteam_loop import run_loop
         with st.spinner("Running the loop (measure → propose → constrain → simulate → "
                         "retrain → govern)…"):
@@ -54,7 +55,7 @@ if mode == "LIVE":
 
 loop = load_loop_history()
 if not loop:
-    st.info("Run `python -m src.loop.redteam_loop` to generate the loop history.", icon="ℹ️")
+    st.info("Run `python -m src.loop.redteam_loop` to generate the loop history.", icon=":material/info:")
     st.stop()
 
 sel = loop.get("focus_selection", {})
@@ -63,13 +64,12 @@ promo = loop.get("promotion", {})
 attacked = loop.get("families_attacked", loop["focus"])
 retired = loop.get("retired_frontiers", [])
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Rounds", loop["rounds"])
-c2.metric("Families attacked", len(attacked), ", ".join(attacked))
-c3.metric("Control families", len(loop.get("guard_families", [])),
-          "never attacked")
-c4.metric("Candidates promoted", len(promo.get("promoted_rounds", [])),
-          f"of {loop['rounds']}", delta_color="off")
+metric_grid([
+    Metric("Rounds", loop["rounds"]),
+    Metric("Families attacked", len(attacked), ", ".join(attacked)),
+    Metric("Control families", len(loop.get("guard_families", [])), "Never attacked"),
+    Metric("Candidates promoted", len(promo.get("promoted_rounds", [])), f"Of {loop['rounds']}"),
+])
 
 if retired:
     st.warning(
@@ -82,7 +82,7 @@ if retired:
           "yield to more of the same — it sits on the legitimate behavioural centroid, or the "
           "genuine customer authorized it. Continuing to hammer it burns replay capacity on "
           "examples the model cannot separate, and drags down families it could. The frontier "
-          "is reported, not hidden.", icon="🔀")
+          "is reported, not hidden.", icon=":material/shuffle:")
 
 if sel.get("initial_ranking"):
     with st.expander("How the targets were chosen — measured, not decided in advance"):
@@ -94,41 +94,35 @@ if sel.get("initial_ranking"):
         fig.update_layout(height=340, yaxis_title="", coloraxis_showscale=False,
                           margin=dict(t=10), plot_bgcolor="rgba(0,0,0,0)",
                           paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
         st.caption("Excluded from targeting as authorization-time invisible: "
                    + ", ".join(sel.get("excluded_as_auth_invisible", [])) +
                    " — their limit is observability, not the decision boundary.")
 
 tab_rounds, tab_lineage, tab_gov, tab_buffer = st.tabs(
-    ["🔁 Rounds", "🧬 Attack lineage", "🛡️ Promotion gates", "🗃️ Replay buffer"])
+    [":material/repeat: Rounds", ":material/genetics: Attack lineage", ":material/shield: Promotion gates", ":material/inventory_2: Replay buffer"])
 
 with tab_rounds:
     for h in loop["history"]:
         st.subheader(f"Round {h['round']}")
-        cols = st.columns(len(h["families"]))
+        cols = columns(len(h["families"]))
         for col, (fam, d) in zip(cols, h["families"].items()):
             color, label = STATUS_STYLE.get(d["status"], STATUS_STYLE["n/a"])
             stale = d["stale_recall"]
             adapted = d["adapted_recall"]
             with col:
-                st.markdown(
-                    f'<div class="card"><span class="kicker">{fam}</span><br>'
-                    f'<b style="color:{color}">{label}</b><br><br>'
-                    f'stale defense <b>{(stale or 0)*100:.0f}%</b> → '
-                    f'adapted <b>{(adapted or 0)*100:.0f}%</b><br>'
-                    f'<span style="color:#8B93A7;font-size:.8rem">n={d["n"]} · '
-                    f'targets: {d.get("targets_signal") or "—"}</span></div>',
-                    unsafe_allow_html=True)
+                card(label, f"Stale defense {(stale or 0)*100:.0f}% → adapted {(adapted or 0)*100:.0f}%",
+                     eyebrow=fam, caption=f'n={d["n"]} · targets: {d.get("targets_signal") or "—"}')
                 st.caption(d.get("strategy", ""))
                 corr = d.get("constraint_layer", {}).get("corrections", [])
                 if corr:
-                    st.caption(f"⚙️ constraint layer corrected {len(corr)} value(s): " +
+                    st.caption(f":material/settings: constraint layer corrected {len(corr)} value(s): " +
                                ", ".join(f"{c['field']} {c['from']}→{c['to']}" for c in corr))
 
         li = h["legit_impact"]
         gr = h.get("guard_families_on_base", {})
         cc = h.get("champion_challenger", {})
-        g1, g2, g3 = st.columns(3)
+        g1, g2, g3 = columns(3)
         g1.metric("Legitimate false positives",
                   f"{li['adapted_fpr']*100:.2f}%",
                   f"{li['fpr_regression']*100:+.2f} pts vs the base defense",
@@ -154,7 +148,7 @@ with tab_lineage:
     lin = load_lineage()
     st.subheader("How each attack evolved, and what it cost the defense")
     if not lin:
-        st.info("Run `python -m src.loop.redteam_loop` to generate the lineage.", icon="ℹ️")
+        st.info("Run `python -m src.loop.redteam_loop` to generate the lineage.", icon=":material/info:")
     else:
         st.caption(lin.get("note", ""))
         for fam, nodes in lin["lineage"].items():
@@ -190,7 +184,7 @@ with tab_lineage:
                                   yaxis_title="recall", plot_bgcolor="rgba(0,0,0,0)",
                                   paper_bgcolor="rgba(0,0,0,0)",
                                   legend=dict(orientation="h"), margin=dict(t=10))
-                st.plotly_chart(fig, width=STRETCH)
+                plot(fig, width=STRETCH)
             with st.expander(f"Evidence behind each mutation — {fam}"):
                 for n in nodes:
                     drv = n.get("driven_by", {})
@@ -212,7 +206,7 @@ with tab_gov:
     )
     if not reg:
         st.info("Run `python -m src.loop.redteam_loop` to generate the model registry.",
-                icon="ℹ️")
+                icon=":material/info:")
     else:
         st.caption(reg.get("note", ""))
         st.markdown("**Gates**")
@@ -220,11 +214,11 @@ with tab_gov:
         for e in reg["entries"]:
             acc = e.get("acceptance", {})
             decision = acc.get("decision", "—")
-            icon = "✅" if decision == "PROMOTE" else ("⛔" if decision == "REJECT" else "•")
+            icon = ":material/check_circle:" if decision == "PROMOTE" else (":material/block:" if decision == "REJECT" else ":material/circle:")
             with st.expander(f"{icon} {e['model_version']} · {e['stage']} · {decision}"):
                 st.caption(acc.get("summary", ""))
                 m = e.get("metrics", {})
-                cols = st.columns(len(m) or 1)
+                cols = columns(len(m) or 1)
                 for col, (k, v) in zip(cols, m.items()):
                     col.metric(k.replace("_", " "),
                                f"{v:.3f}" if isinstance(v, (int, float)) and v is not None
@@ -245,10 +239,10 @@ with tab_gov:
                 "No candidate cleared every gate in this run. That is the governance layer "
                 "doing its job, and it is reported rather than hidden: the adapted model "
                 "improved detection on the evolved attack but breached another constraint, so "
-                "it stays out of the authorization path. " + promo.get("note", ""), icon="⛔")
+                "it stays out of the authorization path. " + promo.get("note", ""), icon=":material/block:")
         else:
             st.success(f"Promoted in round(s): {promo['promoted_rounds']}. "
-                       + promo.get("note", ""), icon="✅")
+                       + promo.get("note", ""), icon=":material/check_circle:")
 
 with tab_buffer:
     st.subheader("Cumulative replay buffer")
@@ -260,7 +254,7 @@ with tab_buffer:
                "forgetting gate refuses to promote.")
     last_comp = loop["history"][-1].get("replay_composition", {})
     if last_comp.get("evolved_attack_rows") is not None:
-        b1, b2, b3 = st.columns(3)
+        b1, b2, b3 = columns(3)
         b1.metric("Evolved attack rows", f"{last_comp['evolved_attack_rows']:,}")
         b2.metric("Rehearsal rows", f"{last_comp.get('rehearsal_rows', 0):,}",
                   "families never attacked")
@@ -276,7 +270,7 @@ with tab_buffer:
         fig.update_layout(height=340, plot_bgcolor="rgba(0,0,0,0)",
                           paper_bgcolor="rgba(0,0,0,0)", margin=dict(t=10),
                           legend=dict(orientation="h", y=-0.2))
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
         last = loop["history"][-1].get("replay_composition", {})
         st.json(last, expanded=False)
     cfg = loop.get("config", {})
