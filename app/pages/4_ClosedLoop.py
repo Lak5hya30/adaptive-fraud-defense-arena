@@ -19,7 +19,7 @@ import config
 
 page_setup("Closed Loop", "🔄")
 st.markdown('<div class="kicker">Pillar 4 · Closed Loop</div>', unsafe_allow_html=True)
-st.title("🔄 Red Team ⇄ Blue Team")
+st.title("Red Team ⇄ Blue Team")
 st.markdown(
     "Each round measures **which signals the current defense actually depends on** for a "
     "family, aims the next attack generation at removing exactly that signal, folds what "

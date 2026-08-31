@@ -23,7 +23,7 @@ import config
 
 page_setup("Hero Demo", "🎬")
 st.markdown('<div class="kicker">The 90-second story</div>', unsafe_allow_html=True)
-st.title("🎬 What happens when fraud arrives that the defense has never seen?")
+st.title("What happens when an unseen attack arrives?")
 mode_selector()
 
 loao = load_loao()

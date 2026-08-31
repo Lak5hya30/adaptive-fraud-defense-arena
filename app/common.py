@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import sys
+from html import escape
 from pathlib import Path
 
 
@@ -25,18 +26,18 @@ import streamlit as st  # noqa: E402
 import config  # noqa: E402
 from src.identify.taxonomy import load_taxonomy  # noqa: E402
 
-# --- palette (colour-blind safe, works on Streamlit's dark theme) -----------
+# Semantic colors stay consistent across charts, badges, and controls.
 PALETTE = {
-    "primary": "#EB6C1E",     # Mastercard-ish orange
-    "accent": "#F79E1B",
-    "danger": "#E5484D",
-    "safe": "#30A46C",
-    "info": "#3E7BFA",
-    "muted": "#8B93A7",
+    "primary": "#6AAFFF",
+    "accent": "#F5BD61",
+    "danger": "#FF8589",
+    "safe": "#6AC99B",
+    "info": "#6AAFFF",
+    "muted": "#A1A7B2",
     "grid": "rgba(139,147,167,0.18)",
 }
-SEVERITY_COLOR = {"critical": "#E5484D", "high": "#EB6C1E",
-                  "medium": "#F79E1B", "low": "#30A46C"}
+SEVERITY_COLOR = {"critical": PALETTE["danger"], "high": "#F5A16C",
+                  "medium": PALETTE["accent"], "low": PALETTE["safe"]}
 CATEGORY_ORDER = ["Social Engineering", "Technical Evasion",
                   "Identity & Onboarding", "Laundering & Abuse"]
 
@@ -44,21 +45,40 @@ CATEGORY_ORDER = ["Social Engineering", "Technical Evasion",
 def page_setup(title: str, icon: str = "🛡️"):
     st.set_page_config(page_title=f"{title} · AI Defense Lab",
                        page_icon=icon, layout="wide")
+    # Local CSS keeps the app offline; stable Streamlit hooks avoid generated classes.
     st.markdown(
-        """
-        <style>
-        .block-container {padding-top: 2.2rem; max-width: 1250px;}
-        div[data-testid="stMetricValue"] {font-size: 1.7rem;}
-        .pill {display:inline-block;padding:2px 10px;border-radius:12px;
-               font-size:0.72rem;font-weight:600;margin-right:6px;color:#fff;}
-        .card {background:rgba(255,255,255,0.03);border:1px solid rgba(139,147,167,0.22);
-               border-radius:12px;padding:16px 18px;margin-bottom:12px;}
-        .kicker {color:#EB6C1E;font-weight:700;letter-spacing:.08em;
-                 text-transform:uppercase;font-size:.72rem;}
-        </style>
-        """,
+        f"<style>{(ROOT / 'app' / 'styles.css').read_text(encoding='utf-8')}</style>",
         unsafe_allow_html=True,
     )
+    with st.sidebar:
+        st.markdown(
+            '<div class="lab-brand"><span class="lab-mark" aria-hidden="true">'
+            '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
+            'stroke="currentColor" stroke-width="1.6"><path d="M12 3 4.5 6v6c0 4 '
+            '7.5 9 7.5 9s7.5-5 7.5-9V6L12 3Z"/><path d="m8 12 3 3 5-6"/>'
+            '</svg></span><div>AI Defense Lab<span>Adaptive payment security</span></div></div>',
+            unsafe_allow_html=True,
+        )
+        for section, pages in NAVIGATION:
+            st.markdown(f'<div class="nav-label">{section}</div>', unsafe_allow_html=True)
+            for path, label, symbol in pages:
+                st.page_link(path, label=label, icon=f":material/{symbol}:")
+        st.divider()
+        st.caption("Synthetic data only · Research prototype")
+
+
+# Native page links retain keyboard navigation, current-page state, and routing.
+NAVIGATION = [
+    ("Start here", [("Home.py", "Overview", "space_dashboard"),
+                    ("pages/0_Judge_Demo.py", "2-Minute Judge Demo", "play_circle")]),
+    ("Explore the lab", [("pages/1_Threat_Atlas.py", "Threat Atlas", "travel_explore"),
+                         ("pages/2_Generate.py", "Attack Simulator", "science"),
+                         ("pages/3_Defend.py", "Detection & Decisions", "shield"),
+                         ("pages/4_ClosedLoop.py", "Closed Loop", "sync")]),
+    ("Evidence", [("pages/5_HeroDemo.py", "Unseen Attack Demo", "movie"),
+                  ("pages/6_Benchmarks.py", "Benchmarks", "bar_chart"),
+                  ("pages/7_Deployment.py", "Deployment", "account_tree")]),
+]
 
 
 @st.cache_resource(show_spinner=False)
@@ -102,7 +122,7 @@ def get_defense_model():
 
 def severity_pill(sev: str) -> str:
     c = SEVERITY_COLOR.get(sev, "#8B93A7")
-    return f'<span class="pill" style="background:{c}">{sev.upper()}</span>'
+    return pill(sev.upper(), c)
 
 
 def llm_status_badge():
@@ -127,16 +147,16 @@ def mode_selector() -> str:
     """Sidebar Demo/Live switch. DEMO (default) renders instantly from committed
     artifacts and never triggers heavy compute; LIVE unlocks regeneration/retrain
     behind explicit confirmation. Returns 'DEMO' or 'LIVE'."""
-    st.sidebar.markdown("### Mode")
+    st.sidebar.markdown('<div class="nav-label">Environment</div>', unsafe_allow_html=True)
     live = st.sidebar.toggle(
         "Developer / Live mode", value=False,
         help="OFF = Demo mode: instant, offline, from committed artifacts (safe for "
              "presenting). ON = allows live regeneration and retraining.")
     mode = "LIVE" if live else "DEMO"
     if mode == "DEMO":
-        st.sidebar.caption("🟢 Demo mode — instant, no heavy compute, no API key.")
+        st.sidebar.caption("Demo · Offline artifacts. No training or API calls.")
     else:
-        st.sidebar.caption("🛠️ Live mode — regeneration/retraining enabled.")
+        st.sidebar.caption("Live · Regeneration and retraining enabled.")
     return mode
 
 
@@ -239,19 +259,19 @@ def load_demo_scores():
 
 # --- small UI helpers -------------------------------------------------------
 STATUS_COLOR = {
-    "IMPLEMENTED": "#30A46C", "PARAMETERIZED": "#3E7BFA",
-    "RESEARCH_ONLY": "#8B93A7", "FUTURE": "#F79E1B",
+    "IMPLEMENTED": PALETTE["safe"], "PARAMETERIZED": PALETTE["info"],
+    "RESEARCH_ONLY": PALETTE["muted"], "FUTURE": PALETTE["accent"],
 }
 STATUS_LABEL = {
     "IMPLEMENTED": "SIMULATED", "PARAMETERIZED": "CONFIGURABLE",
     "RESEARCH_ONLY": "RESEARCH ONLY", "FUTURE": "ROADMAP",
 }
-OBSERVABILITY_COLOR = {"high": "#30A46C", "partial": "#F79E1B",
-                       "low": "#EB6C1E", "none": "#E5484D"}
+OBSERVABILITY_COLOR = {"high": PALETTE["safe"], "partial": PALETTE["accent"],
+                       "low": "#F5A16C", "none": PALETTE["danger"]}
 
 
 def pill(text: str, color: str) -> str:
-    return f'<span class="pill" style="background:{color}">{text}</span>'
+    return f'<span class="pill" style="--pill-color:{color}">{escape(text)}</span>'
 
 
 def status_pill(status: str) -> str:

@@ -19,7 +19,7 @@ import config
 
 page_setup("Benchmarks", "📊")
 st.markdown('<div class="kicker">Evidence</div>', unsafe_allow_html=True)
-st.title("📊 Rules vs Static ML vs Adaptive Defense")
+st.title("Rules vs Static ML vs Adaptive Defense")
 mode_selector()
 
 comp = load_baseline()

@@ -19,7 +19,7 @@ page_setup("Overview", "🛡️")
 
 st.markdown('<div class="kicker">Mastercard Innovation Challenge 2026 · GFF Mumbai</div>',
             unsafe_allow_html=True)
-st.title("🛡️ AI Defense Lab for Adaptive Payment Fraud")
+st.title("A learning defense for payment fraud.")
 st.markdown(
     "#### A closed-loop GenAI red team / blue team for payment security.\n"
     "Traditional fraud systems learn from fraud that has already happened. This lab actively "
@@ -28,23 +28,21 @@ st.markdown(
     "into training data for the next defense."
 )
 
-with st.container(border=True):
+with st.container(border=True, key="demo-entry"):
     jc1, jc2 = st.columns([3, 1])
     with jc1:
-        st.markdown("#### 🎯 New here? Start with the 2-Minute Judge Demo")
+        st.markdown("#### Start with the 2-Minute Judge Demo")
         st.markdown("One attack, end to end — a scam evades the detector, the system learns it, "
                     "and genuine customers stay protected. Plain language, every number from a "
                     "committed artifact, no API key required.")
     with jc2:
-        st.page_link("pages/0_Judge_Demo.py", label="Run the 2-Minute Demo", icon="▶️")
+        st.page_link("pages/0_Judge_Demo.py", label="Run the demo", icon=":material/play_circle:")
 
 st.markdown(
-    f'<div style="font-size:1.05rem;letter-spacing:.02em;margin:.4rem 0 1rem 0">'
-    f'<b style="color:{PALETTE["primary"]}">DISCOVER</b> → '
-    f'<b style="color:{PALETTE["accent"]}">SIMULATE</b> → '
-    f'<b style="color:{PALETTE["danger"]}">ATTACK</b> → '
-    f'<b style="color:{PALETTE["info"]}">DETECT</b> → '
-    f'<b style="color:{PALETTE["safe"]}">ADAPT</b></div>',
+    '<div class="workflow"><b>Discover</b><span aria-hidden="true">→</span>'
+    '<b>Simulate</b><span aria-hidden="true">→</span><b>Attack</b>'
+    '<span aria-hidden="true">→</span><b>Detect</b><span aria-hidden="true">→</span>'
+    '<b>Adapt</b></div>',
     unsafe_allow_html=True)
 
 llm_status_badge()
@@ -86,17 +84,17 @@ elif underpowered:
 # --- headline metrics -------------------------------------------------------
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Attacks catalogued", counts["total_attacks"],
-          f'{counts["implemented"]} simulated end-to-end')
+          help=f'{counts["implemented"]} simulated end-to-end')
 c2.metric("Transactions simulated",
           f'{summary["n_transactions"]:,}' if summary else "—",
-          f'{summary["fraud_rate"]*100:.1f}% fraud' if summary else None)
+          help=f'{summary["fraud_rate"]*100:.1f}% fraud' if summary else None)
 c3.metric("Recall", f'{metrics["recall"]*100:.1f}%' if metrics else "—",
-          f'PR-AUC {metrics["pr_auc"]:.3f}' if metrics else None)
-c4.metric("False positives",
+          help=f'PR-AUC {metrics["pr_auc"]:.3f}' if metrics else None)
+c4.metric("False positives / 1,000",
           f'{metrics["false_positive_rate"]*1000:.1f}' if metrics else "—",
-          "per 1,000 genuine payments" if metrics else None)
+          help="Per 1,000 genuine payments" if metrics else None)
 c5.metric("Red-team rounds", loop["rounds"] if loop else "—",
-          "weakness-driven" if loop else None)
+          help="Weakness-driven" if loop else None)
 
 st.divider()
 
@@ -139,14 +137,14 @@ with right:
         """
         - **🗺️ Threat Atlas** — the research surface, and honestly how much of it the
           simulator reproduces.
-        - **⚗️ Generate** — structured attack specifications, the payment-domain constraint
+        - **Attack Simulator** — structured attack specifications, the payment-domain constraint
           layer, and the fidelity diagnostics that say whether the synthetic data is worth
           training on.
-        - **🎯 Defend** — the operating point and what it costs, recall by family with its
+        - **Detection & Decisions** — the operating point and what it costs, recall by family with its
           uncertainty, tiered decisions with reason codes, and the model's own blind spots.
         - **🔄 Closed Loop** — weakness-driven attack evolution, attack lineage, and the
           governance gate that can refuse a model.
-        - **🎬 Hero Demo** — the 90-second story: unseen → learned.
+        - **Unseen Attack Demo** — the 90-second story: unseen → learned.
         - **📊 Benchmarks** — rules vs static vs adaptive, compared at a matched
           false-positive budget.
         - **🏗️ Deployment** — what would run online, what stays offline, and what this

@@ -24,7 +24,7 @@ from src.defend.features import FEATURE_COLUMNS, NETWORK_FEATURES
 
 page_setup("Deployment", "🏗️")
 st.markdown('<div class="kicker">Real-world feasibility</div>', unsafe_allow_html=True)
-st.title("🏗️ How this would run in live payments")
+st.title("How this would run in live payments")
 mode_selector()
 
 st.markdown(

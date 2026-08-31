@@ -1,0 +1,173 @@
+/* Apple-design principles: hierarchy, immediate feedback, restrained materials.
+   No gesture animations or input locks; native Streamlit controls remain intact. */
+.stApp {
+  --lab-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --lab-ink: var(--text-color, #f2f3f5);
+  --lab-bg: var(--background-color, #151619);
+  --lab-surface: color-mix(in srgb, var(--lab-bg) 94%, var(--lab-ink));
+  --lab-border: color-mix(in srgb, var(--lab-ink) 14%, var(--lab-bg));
+  --lab-muted: color-mix(in srgb, var(--lab-ink) 70%, var(--lab-bg));
+  --lab-accent: var(--primary-color, #6aafff);
+  font-family: var(--lab-font);
+  font-optical-sizing: auto;
+}
+.stApp :is(h1, h2, h3, h4, p, label, input, textarea, button) {
+  font-family: var(--lab-font);
+}
+.stMainBlockContainer {
+  max-width: 82rem;
+  padding: 3.5rem 2.5rem 4rem;
+}
+.stApp h1 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  padding-top: .35rem;
+  padding-bottom: .85rem;
+  text-wrap: balance;
+}
+.stApp h2 {font-size: 1.6rem; line-height: 1.25; letter-spacing: -.025em; font-weight: 600;}
+.stApp h3 {font-size: 1.2rem; line-height: 1.35; letter-spacing: -.015em; font-weight: 600;}
+.stApp h4 {font-size: 1.06rem; line-height: 1.5; font-weight: 500;}
+.stApp p {line-height: 1.6; letter-spacing: 0;}
+.stApp [data-testid="stCaptionContainer"] {color: var(--lab-muted);}
+.stApp hr {border-color: var(--lab-border); margin: 1.3rem 0;}
+.kicker, .nav-label {
+  color: var(--lab-muted);
+  font-size: .72rem;
+  font-weight: 650;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+.kicker {color: var(--lab-accent); margin-bottom: .25rem;}
+.nav-label {margin: 1.2rem .7rem .35rem;}
+
+/* Material is reserved for chrome; content cards use solid, legible surfaces. */
+[data-testid="stHeader"] {
+  background: color-mix(in srgb, var(--lab-bg) 86%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+[data-testid="stSidebar"] {
+  background: color-mix(in srgb, var(--lab-surface) 94%, transparent);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-right: 1px solid var(--lab-border);
+  box-shadow: .5rem 0 2rem rgb(0 0 0 / 8%);
+}
+[data-testid="stSidebarUserContent"] {padding: 1rem 1rem 2rem;}
+[data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {gap: .25rem;}
+[data-testid="stSidebarCollapseButton"] {visibility: visible; opacity: 1;}
+[data-testid="stSidebarCollapseButton"] button {min-width: 2.75rem; min-height: 2.75rem;}
+.lab-brand {display: flex; align-items: center; gap: .75rem; margin: .3rem .65rem 1.4rem; font-weight: 650;}
+.lab-brand span:not(.lab-mark) {display: block; font-size: .7rem; color: var(--lab-muted); font-weight: 450; margin-top: .2rem;}
+.lab-mark {display: grid; place-items: center; width: 2.6rem; height: 2.6rem; flex-shrink: 0;
+  border-radius: .8rem; color: var(--lab-accent); background: color-mix(in srgb, var(--lab-accent) 12%, var(--lab-bg));}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {
+  min-height: 2.75rem;
+  border-radius: .65rem;
+  padding: .5rem .75rem;
+}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] p {font-size: .88rem; font-weight: 500;}
+.st-key-demo-entry [data-testid="stPageLink-NavLink"] {
+  min-height: 2.75rem;
+  padding: .6rem 1rem;
+  border-radius: .7rem;
+  color: var(--lab-accent);
+  background: color-mix(in srgb, var(--lab-accent) 14%, var(--lab-bg));
+}
+.card, [data-testid="stMetric"], [data-testid="stVerticalBlockBorderWrapper"] > div {
+  border: 1px solid var(--lab-border);
+  border-radius: 1rem;
+  background: var(--lab-surface);
+}
+.card {padding: 1.3rem 1.5rem; margin-bottom: 1rem; line-height: 1.6;}
+[data-testid="stMetric"] {padding: 1rem 1.15rem; height: 100%;}
+[data-testid="stMetricLabel"] {color: var(--lab-muted); font-size: .8rem;}
+[data-testid="stMetricLabel"] p {white-space: normal; line-height: 1.35;}
+[data-testid="stMetricValue"] {
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums;
+}
+[data-testid="stMetricDelta"] {font-size: .75rem;}
+.pill {
+  display: inline-block;
+  padding: .2rem .6rem;
+  border-radius: .45rem;
+  font-size: .7rem;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: .025em;
+  margin: .15rem .35rem .25rem 0;
+  color: var(--pill-color, var(--lab-ink));
+  background: color-mix(in srgb, var(--pill-color, var(--lab-muted)) 12%, var(--lab-bg));
+  border: 1px solid color-mix(in srgb, var(--pill-color, var(--lab-muted)) 28%, var(--lab-bg));
+}
+[data-testid="stExpander"] details {border: 1px solid var(--lab-border); border-radius: .8rem; background: var(--lab-surface);}
+[data-testid="stExpander"] summary {min-height: 3rem; padding: .75rem 1rem;}
+[data-testid="stExpander"] summary p {font-weight: 500; line-height: 1.4;}
+[data-testid="stExpander"] details[open] {border-color: color-mix(in srgb, var(--lab-accent) 40%, var(--lab-bg));}
+[data-testid="stButton"] button,
+[data-testid="stDownloadButton"] button,
+[data-testid="stLinkButton"] a {
+  min-height: 2.75rem;
+  padding: .55rem 1rem;
+  border-radius: .7rem;
+  font-weight: 550;
+  touch-action: manipulation;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, transform 120ms ease-out;
+}
+[data-testid="stButton"] button:active:not(:disabled),
+[data-testid="stDownloadButton"] button:active:not(:disabled),
+[data-testid="stLinkButton"] a:active {
+  transform: scale(.98);
+  transition: none;
+}
+.stApp :is(a, button, input, textarea, summary, [role="tab"], [role="switch"]):focus-visible {
+  outline: 2px solid var(--lab-accent);
+  outline-offset: 3px;
+}
+[data-testid="stTextInput"] input {min-height: 2.75rem;}
+[data-testid="stTabs"] [role="tab"] {min-height: 2.75rem;}
+[data-testid="stDataFrame"], [data-testid="stCode"] {border-radius: .75rem; overflow: hidden;}
+.coverage-row {margin-bottom: 1rem;}
+.coverage-label {display: flex; gap: 1rem; justify-content: space-between; font-size: .85rem; margin-bottom: .4rem;}
+.coverage-label span:last-child {color: var(--lab-muted); white-space: nowrap; font-variant-numeric: tabular-nums;}
+.coverage-row progress {display: block; width: 100%; height: .4rem; border: 0; border-radius: 1rem; background: var(--lab-border); accent-color: var(--lab-accent);}
+.coverage-row progress::-webkit-progress-bar {background: var(--lab-border); border-radius: 1rem;}
+.coverage-row progress::-webkit-progress-value {background: var(--lab-accent); border-radius: 1rem;}
+.coverage-row progress::-moz-progress-bar {background: var(--lab-accent); border-radius: 1rem;}
+.workflow {display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; color: var(--lab-muted); font-size: .85rem; margin: .6rem 0 1rem;}
+.workflow b {color: var(--lab-ink); font-weight: 550;}
+@media (hover: hover) {
+  [data-testid="stPageLink-NavLink"]:hover, [data-testid="stExpander"] summary:hover {
+    background: color-mix(in srgb, var(--lab-ink) 6%, transparent);
+  }
+}
+@media (max-width: 1100px) and (min-width: 641px) {
+  [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) {flex-wrap: wrap;}
+  [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) > [data-testid="stColumn"] {min-width: 12rem; flex: 1 1 12rem;}
+}
+@media (max-width: 640px) {
+  .stMainBlockContainer {padding: 4rem 1.15rem 2rem;}
+  .stApp h1 {font-size: 2rem;}
+  .card {padding: 1rem;}
+  [data-testid="stHorizontalBlock"] {flex-wrap: wrap;}
+  [data-testid="stColumn"] {min-width: 100%;}
+  .st-key-atlas-metrics [data-testid="stColumn"] {min-width: calc(50% - .5rem); flex: 1 1 calc(50% - .5rem);}
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="stButton"] button, [data-testid="stDownloadButton"] button, [data-testid="stLinkButton"] a {transition: none;}
+  [data-testid="stButton"] button:active, [data-testid="stDownloadButton"] button:active, [data-testid="stLinkButton"] a:active {transform: none;}
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-testid="stHeader"], [data-testid="stSidebar"] {background: var(--lab-bg); backdrop-filter: none; -webkit-backdrop-filter: none;}
+}
+@media (prefers-contrast: more) {
+  .stApp {--lab-muted: var(--lab-ink); --lab-border: var(--lab-ink);}
+  [data-testid="stHeader"], [data-testid="stSidebar"] {background: var(--lab-bg); backdrop-filter: none; -webkit-backdrop-filter: none;}
+  .pill {background: var(--lab-bg); border-color: currentColor;}
+}

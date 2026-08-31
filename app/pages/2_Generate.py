@@ -24,7 +24,7 @@ from src.generate.attack_spec import BASE_SPECS, FAMILY_CONSTRAINTS, validate_sp
 
 page_setup("Generate", "⚗️")
 st.markdown('<div class="kicker">Pillar 2 · Generate</div>', unsafe_allow_html=True)
-st.title("⚗️ Constrained Attack Simulator")
+st.title("Constrained Attack Simulator")
 st.markdown(
     "The red team writes a **specification**, not transactions — which behavioural dial to "
     "move and which detector signal that defeats.\n\n"

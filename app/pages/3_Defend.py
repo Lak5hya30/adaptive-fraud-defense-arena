@@ -22,7 +22,7 @@ import config
 
 page_setup("Defend", "🎯")
 st.markdown('<div class="kicker">Pillar 3 · Defend</div>', unsafe_allow_html=True)
-st.title("🎯 Detection, Decisioning and Blind Spots")
+st.title("Detection, Decisions & Blind Spots")
 
 metrics = load_metrics()
 if metrics is None:

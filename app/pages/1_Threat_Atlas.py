@@ -7,16 +7,18 @@ simulate without having to ask for it.
 """
 from __future__ import annotations
 
+from html import escape
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from common import (PALETTE, STRETCH, coverage_bar, get_taxonomy, mode_selector,
-                    observability_pill, page_setup, severity_pill, status_pill)
+from common import (PALETTE, STATUS_LABEL, STRETCH, get_taxonomy, mode_selector,
+                    observability_pill, page_setup, pill, severity_pill, status_pill)
 
 page_setup("Threat Atlas", "🗺️")
 st.markdown('<div class="kicker">Pillar 1 · Identify</div>', unsafe_allow_html=True)
-st.title("🗺️ GenAI Payment Fraud Threat Atlas")
+st.title("Threat Atlas")
 mode_selector()
 
 tax = get_taxonomy()
@@ -24,23 +26,20 @@ counts = tax.summary_counts()
 prov = tax.provenance
 
 st.markdown(
-    "A structured catalog of how generative AI is changing payment fraud — across "
-    "social engineering, account and identity compromise, payment instruments, "
-    "authorized push payment scams, merchant and ecosystem abuse, and attacks aimed "
-    "at fraud models themselves. Every entry carries what a **defender** could "
-    "observe: the transaction signature, the behavioural signature, how visible it "
-    "is at authorization time, and what only shows up after settlement."
+    "Explore how generative AI changes payment fraud. Find the signals a defender can "
+    "observe, understand each attack, and see exactly what the simulator can reproduce."
 )
 
-c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Attacks catalogued", counts["total_attacks"], f'{counts["categories"]} surfaces')
-c2.metric("Simulated end-to-end", counts["implemented"], "dedicated injectors")
-c3.metric("Configurable today", counts["parameterized"], "via attack-spec dials")
-c4.metric("Research only", counts["research_only"] + counts["future"], "not simulated")
+with st.container(key="atlas-metrics"):
+    c1, c2, c3, c4, c5 = st.columns(5)
+c1.metric("Attacks catalogued", counts["total_attacks"], help=f'{counts["categories"]} fraud surfaces')
+c2.metric("Simulated end-to-end", counts["implemented"], help="Dedicated transaction-level injectors")
+c3.metric("Configurable today", counts["parameterized"], help="Reachable via attack-specification dials")
+c4.metric("Research only", counts["research_only"] + counts["future"], help="Characterized but not simulated")
 c5.metric("Hard at auth time", counts["auth_time_hard"],
-          "low or no visibility", delta_color="off")
+          help="Low or no visibility at authorization time")
 
-st.caption(
+provenance_note = (
     f"Deliberately wider than the simulator. {prov.get('authored_entries', '—')} entries were "
     f"drafted across six fraud surfaces, {prov.get('merged_as_duplicates', '—')} merged as "
     f"duplicates, leaving {counts['total_attacks']} distinct attacks. "
@@ -50,55 +49,79 @@ st.caption(
     "labelled that way everywhere they appear."
 )
 
+with st.expander("Simulator coverage · what is and isn’t reproduced"):
+    st.caption(provenance_note)
+    cov = tax.coverage_by_category()
+    left, right = st.columns([1, 1.3])
+    with left:
+        for cat, d in sorted(cov.items(), key=lambda kv: -kv[1]["total"]):
+            simulated = d["IMPLEMENTED"] + d["PARAMETERIZED"]
+            st.markdown(
+                f'<div class="coverage-row"><div class="coverage-label">'
+                f'<span>{escape(cat)}</span><span>{simulated} / {d["total"]}</span></div>'
+                f'<progress value="{simulated}" max="{d["total"]}" '
+                f'aria-label="{escape(cat)}: {simulated} of {d["total"]} simulated">'
+                f'{simulated} of {d["total"]}</progress></div>', unsafe_allow_html=True)
+        st.caption("Simulated includes dedicated injectors and configurable variants. "
+                   "The remaining entries are characterized, but not simulated.")
+    with right:
+        coverage_rows = []
+        for cat, d in cov.items():
+            for status in ("IMPLEMENTED", "PARAMETERIZED", "RESEARCH_ONLY", "FUTURE"):
+                if d[status]:
+                    coverage_rows.append({"category": cat, "status": STATUS_LABEL[status],
+                                          "count": d[status]})
+        fig = px.bar(pd.DataFrame(coverage_rows), x="count", y="category", color="status",
+                     orientation="h",
+                     color_discrete_map={"SIMULATED": PALETTE["safe"],
+                                         "CONFIGURABLE": PALETTE["info"],
+                                         "RESEARCH ONLY": PALETTE["muted"],
+                                         "ROADMAP": PALETTE["accent"]})
+        fig.update_layout(height=360, barmode="stack", yaxis_title="", xaxis_title="attacks",
+                          plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                          legend=dict(orientation="h", y=-0.25, title_text=""),
+                          margin=dict(t=10, l=0, r=0))
+        st.plotly_chart(fig, width=STRETCH)
 st.divider()
 
-# Coverage map
-st.subheader("Coverage map — research surface vs simulator")
-cov = tax.coverage_by_category()
-left, right = st.columns([1.15, 1])
-with left:
-    lines = []
-    for cat, d in sorted(cov.items(), key=lambda kv: -kv[1]["total"]):
-        simulated = d["IMPLEMENTED"] + d["PARAMETERIZED"]
-        lines.append(f"{cat:34s} {coverage_bar(simulated, d['total'])}  "
-                     f"{simulated}/{d['total']} simulated")
-    st.code("\n".join(lines), language=None)
-    st.caption("Filled blocks are attacks the simulator can produce as transactions. "
-               "Empty blocks are attacks we have characterized but do not claim to simulate.")
-with right:
-    rows = []
-    for cat, d in cov.items():
-        for status in ("IMPLEMENTED", "PARAMETERIZED", "RESEARCH_ONLY", "FUTURE"):
-            if d[status]:
-                rows.append({"category": cat, "status": status, "count": d[status]})
-    fig = px.bar(pd.DataFrame(rows), x="count", y="category", color="status",
-                 orientation="h",
-                 color_discrete_map={"IMPLEMENTED": PALETTE["safe"],
-                                     "PARAMETERIZED": PALETTE["info"],
-                                     "RESEARCH_ONLY": PALETTE["muted"],
-                                     "FUTURE": PALETTE["accent"]})
-    fig.update_layout(height=330, barmode="stack", yaxis_title="", xaxis_title="attacks",
-                      plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                      legend=dict(orientation="h", y=-0.25), margin=dict(t=10))
-    st.plotly_chart(fig, width=STRETCH)
+# Keep the common path visible; specialist filters are one disclosure away.
+FILTER_KEYS = ("atlas_category", "atlas_status", "atlas_rail", "atlas_channel",
+               "atlas_role", "atlas_visibility")
 
-st.divider()
 
-# Filters
-st.subheader("Browse the atlas")
+def clear_filters():
+    for key in FILTER_KEYS:
+        st.session_state[key] = []
+    st.session_state["atlas_search"] = ""
+    st.session_state["atlas_sort"] = "Novelty"
+
+
+st.subheader("Explore attacks")
+search_col, reset_col = st.columns([4, 1], vertical_alignment="bottom")
+query = search_col.text_input("Search the atlas", placeholder="Search attacks, signals, or objectives…",
+                             key="atlas_search")
+reset_col.button("Clear filters", on_click=clear_filters, width=STRETCH)
 f1, f2, f3 = st.columns(3)
-f4, f5, f6 = st.columns(3)
-sel_cat = f1.multiselect("Fraud surface", tax.categories, default=[])
+sel_cat = f1.multiselect("Fraud surface", tax.categories, default=[], key="atlas_category")
 sel_status = f2.multiselect("Simulator status",
                             ["IMPLEMENTED", "PARAMETERIZED", "RESEARCH_ONLY", "FUTURE"],
-                            default=[])
-sel_rail = f3.multiselect("Payment rail", tax.all_rails, default=[])
-sel_channel = f4.multiselect("Channel", tax.channels, default=[])
-sel_role = f5.multiselect("Role of generative AI", tax.genai_roles, default=[])
-sel_obs = f6.multiselect("Authorization-time visibility",
-                         ["high", "partial", "low", "none"], default=[])
+                            default=[], format_func=lambda s: STATUS_LABEL[s].capitalize(),
+                            key="atlas_status")
+sel_rail = f3.multiselect("Payment rail", tax.all_rails, default=[], key="atlas_rail")
+with st.expander("More filters · channel, AI role, and visibility"):
+    f4, f5, f6 = st.columns(3)
+    sel_channel = f4.multiselect("Channel", tax.channels, default=[], key="atlas_channel")
+    sel_role = f5.multiselect("Role of generative AI", tax.genai_roles, default=[], key="atlas_role")
+    sel_obs = f6.multiselect("Authorization-time visibility",
+                             ["high", "partial", "low", "none"], default=[], key="atlas_visibility")
 
 rows = tax.attacks
+if query.strip():
+    words = query.casefold().split()
+    rows = [a for a in rows if all(word in " ".join([
+        a.name, a.category, a.attacker_objective, a.genai_mechanism,
+        a.transaction_signature, a.behavioral_signature, *a.observable_signals,
+    ]).casefold() for word in words)]
 if sel_cat:
     rows = [a for a in rows if a.category in sel_cat]
 if sel_status:
@@ -113,7 +136,7 @@ if sel_obs:
     rows = [a for a in rows if a.auth_time_observability in sel_obs]
 
 sort_by = st.radio("Order by", ["Novelty", "Defense difficulty", "Expected impact", "Name"],
-                   horizontal=True, index=0)
+                   horizontal=True, index=0, key="atlas_sort")
 keys = {"Novelty": lambda a: -a.novelty_score,
         "Defense difficulty": lambda a: -a.difficulty_rank,
         "Expected impact": lambda a: -a.severity_rank,
@@ -121,6 +144,9 @@ keys = {"Novelty": lambda a: -a.novelty_score,
 rows = sorted(rows, key=keys[sort_by])
 
 st.caption(f"{len(rows)} of {len(tax.attacks)} attacks shown.")
+if not rows:
+    st.info("No attacks match these filters. Try fewer search terms or choose Clear filters "
+            "to return to the full atlas.", icon=":material/search:")
 
 for a in rows:
     header = (f"{a.name}  ·  {a.category}"
@@ -129,9 +155,9 @@ for a in rows:
         st.markdown(
             status_pill(a.simulator_status) + observability_pill(a.auth_time_observability)
             + severity_pill(a.severity)
-            + f'<span class="pill" style="background:#33384a">NOVELTY {a.novelty_score:.1f}</span>'
-            + f'<span class="pill" style="background:#33384a">{a.channel}</span>'
-            + "".join(f'<span class="pill" style="background:#2a2f3d">{r}</span>' for r in a.rails),
+            + pill(f"NOVELTY {a.novelty_score:.1f}", PALETTE["muted"])
+            + pill(a.channel, PALETTE["muted"])
+            + "".join(pill(r, PALETTE["muted"]) for r in a.rails),
             unsafe_allow_html=True)
         if a.attacker_objective:
             st.markdown(f"**What the attacker wants** — {a.attacker_objective}")
