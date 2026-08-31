@@ -191,7 +191,9 @@ with tab_decisions:
         n = lc[0].select_slider("Batch", [4000, 8000, 15000], value=8000)
         fr = lc[1].slider("Fraud rate", 0.005, 0.05, config.DEFAULT_FRAUD_RATE, 0.005)
         seed = lc[2].number_input("Seed", value=777, step=1)
-        if lc[3].button("▶ Score fresh batch", type="primary") or "def_df" not in st.session_state:
+        # Simulate + score only on an explicit click — never automatically on first
+        # render, so entering Live mode never triggers heavy compute unasked.
+        if lc[3].button("▶ Score fresh batch", type="primary"):
             from src.generate.simulate import simulate
             with st.spinner("Simulating and scoring…"):
                 fresh = simulate(n_transactions=n, fraud_rate=fr, seed=int(seed))[0]
@@ -201,6 +203,10 @@ with tab_decisions:
                 pf = mdl.risk_probability(Xf)
                 st.session_state["def_df"] = decision_frame(
                     fresh, Xf, pf, step_up=mdl.threshold_probability)
+        if "def_df" not in st.session_state:
+            st.info("Click **▶ Score fresh batch** to simulate and score a fresh batch live. "
+                    "(Demo mode shows the committed held-out split with no compute.)", icon="▶️")
+            st.stop()
         dframe = st.session_state["def_df"]
         y = dframe["is_fraud"].to_numpy()
         scores = dframe["risk_score"].to_numpy()

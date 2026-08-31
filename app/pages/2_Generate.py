@@ -133,11 +133,18 @@ with tab_data:
             fraud_rate = st.slider("Fraud rate", 0.005, 0.08, config.DEFAULT_FRAUD_RATE, 0.005)
             seed = st.number_input("Seed", value=config.GLOBAL_SEED, step=1)
             run = st.button("▶ Generate fresh portfolio", type="primary")
-        if run or "gen_df" not in st.session_state:
+        # Simulate only on an explicit click — never automatically on first render,
+        # so flipping into Live mode can never kick off heavy compute unasked.
+        if run:
             from src.generate.simulate import simulate
             with st.spinner("Simulating…"):
                 gdf, _ = simulate(n_transactions=n_tx, fraud_rate=fraud_rate, seed=int(seed))
             st.session_state["gen_df"] = gdf
+        if "gen_df" not in st.session_state:
+            st.info("Set the parameters in the sidebar, then click **▶ Generate fresh "
+                    "portfolio** to simulate a batch live. (Demo mode shows the committed "
+                    "portfolio with no compute.)", icon="▶️")
+            st.stop()
         df = st.session_state["gen_df"]
 
     legit = df[df.is_fraud == 0]
