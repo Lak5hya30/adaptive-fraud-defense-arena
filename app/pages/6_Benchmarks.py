@@ -47,7 +47,6 @@ st.markdown(
 st.caption(f"Evaluated on the {meta.get('evaluated_on', 'held-out test set')}: "
            f"{meta.get('n_eval', 0):,} transactions, {meta.get('n_fraud_eval', 0)} fraudulent.")
 
-# --------------------------------------------------------------------------- #
 st.subheader("At each detector's own operating point")
 rows = []
 for key, m in comp.items():
@@ -67,7 +66,6 @@ st.warning(
     "comparison below re-thresholds every detector to spend the **same** false-positive "
     "budget on the **same** split. That is the comparison worth arguing about.", icon="⚖️")
 
-# --------------------------------------------------------------------------- #
 matched = comp.get("_fpr_matched")
 if matched:
     st.subheader(f"At a matched {matched['target_false_positive_rate']*100:.0f}% "
@@ -96,7 +94,6 @@ if matched:
     st.plotly_chart(fig, width=STRETCH)
     st.caption(matched["note"])
 
-# --------------------------------------------------------------------------- #
 h2h = load_head_to_head()
 if h2h:
     st.divider()
@@ -135,7 +132,6 @@ if h2h:
     with st.expander("The specifications that produced these evolved attacks"):
         st.json(h2h["specs"], expanded=False)
 
-# --------------------------------------------------------------------------- #
 ops = load_operational()
 if ops:
     st.subheader("What the false-positive rate means in practice")
@@ -154,7 +150,6 @@ if ops:
     st.caption("Per-thousand figures are the honest way to read a false-positive rate: they "
                "are customers, and someone has to answer for each one.")
 
-# --------------------------------------------------------------------------- #
 st.subheader("Where the lift actually is — recall by attack family")
 fam = load_family_recall()
 if fam:
@@ -175,7 +170,6 @@ elif "static_ml" in comp:
     st.caption("Run `python -m src.defend.diagnostics` for family recall at a reportable "
                "sample size.")
 
-# --------------------------------------------------------------------------- #
 st.divider()
 st.subheader("Why adaptation is needed — leave-one-attack-family-out")
 st.caption("Each family is removed from training entirely, then scored as a genuinely unseen "

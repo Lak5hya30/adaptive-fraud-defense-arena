@@ -39,7 +39,6 @@ GREY = "#8B93A7"
 AMBER = "#F79E1B"
 
 
-# --------------------------------------------------------------------------- #
 def _load(path):
     p = Path(path)
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
@@ -104,9 +103,7 @@ def hero_family(A) -> tuple[str | None, dict | None]:
     return fam, rec
 
 
-# --------------------------------------------------------------------------- #
 # Figures
-# --------------------------------------------------------------------------- #
 def _style(ax, title="", xlabel="", ylabel=""):
     ax.set_title(title, color=INK, fontsize=11, weight="bold", loc="left")
     ax.set_xlabel(xlabel, color=INK, fontsize=9)
@@ -331,9 +328,7 @@ def build_figures(A) -> dict:
     }
 
 
-# --------------------------------------------------------------------------- #
 # README
-# --------------------------------------------------------------------------- #
 def _md_table(headers, rows) -> str:
     out = ["| " + " | ".join(headers) + " |",
            "|" + "|".join(["---"] * len(headers)) + "|"]
@@ -947,7 +942,6 @@ def build_readme(A, figs) -> str:
     return "".join(parts)
 
 
-# --------------------------------------------------------------------------- #
 def main():
     A = load_all()
     figs = build_figures(A)

@@ -34,9 +34,7 @@ import config
 
 B = config.ATTACK_SPEC_BOUNDS
 
-# --------------------------------------------------------------------------- #
 # The specification
-# --------------------------------------------------------------------------- #
 
 # Categorical dials, mapped to the concrete numbers the injectors consume.
 AMOUNT_SCALE = {"micro": 0.05, "low": 0.45, "moderate": 1.0, "high": 1.9, "extreme": 3.4}
@@ -105,10 +103,8 @@ class AttackSpec:
         return d
 
 
-# --------------------------------------------------------------------------- #
 # Generation-0 specifications: how each family behaves before any evolution.
 # These are the lineage roots that evolved variants are compared against.
-# --------------------------------------------------------------------------- #
 BASE_SPECS: dict[str, AttackSpec] = {
     "card_testing": AttackSpec(
         "card_testing", "validate stolen card numbers with cheap probes across small merchants",

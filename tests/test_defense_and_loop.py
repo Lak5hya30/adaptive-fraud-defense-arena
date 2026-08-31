@@ -25,9 +25,7 @@ from src.generate.simulate import simulate
 from src.loop.redteam_loop import _bounded_append, _focus_mix, _status, run_loop
 
 
-# --------------------------------------------------------------------------- #
 # Rules baseline
-# --------------------------------------------------------------------------- #
 def test_rules_produce_valid_predictions():
     df, _ = simulate(n_transactions=4000, fraud_rate=0.02, seed=3)
     X, y, _ = build_xy(df)
@@ -37,9 +35,7 @@ def test_rules_produce_valid_predictions():
     assert (rules_score(X) <= 1.0).all() and (rules_score(X) >= 0.0).all()
 
 
-# --------------------------------------------------------------------------- #
 # Tiered decision policy
-# --------------------------------------------------------------------------- #
 def test_thresholds_map_to_actions():
     """The step-up tier defaults to the model's own tuned operating threshold, so
     the policy cannot drift away from the point chosen against the FP budget."""
@@ -65,9 +61,7 @@ def test_policy_summary_partitions_traffic():
     assert abs(sum(shares) - 1.0) < 1e-6
 
 
-# --------------------------------------------------------------------------- #
 # Loop internals (fast, pure)
-# --------------------------------------------------------------------------- #
 def test_status_is_derived_from_metrics():
     cfg = config.LOOP_CONFIG
     # clear recovery above the ceiling
@@ -100,9 +94,7 @@ def test_replay_buffer_is_cumulative_and_bounded():
     assert sum(len(a) for a in buf_y) <= 120
 
 
-# --------------------------------------------------------------------------- #
 # Adaptive loop integration (small, but exercises the real path)
-# --------------------------------------------------------------------------- #
 def test_adaptive_loop_end_to_end():
     res = run_loop(rounds=2, n_base=9000, n_round=6000, n_eval=6000,
                    focus=["account_takeover", "otp_relay", "adversarial_mimicry"],
@@ -145,9 +137,7 @@ def test_adaptive_loop_end_to_end():
     assert max(measured) >= 0.5, "adaptation collapsed every previously-learned family"
 
 
-# --------------------------------------------------------------------------- #
 # Reproducibility
-# --------------------------------------------------------------------------- #
 def test_simulator_is_reproducible():
     a, _ = simulate(n_transactions=4000, fraud_rate=0.02, seed=123)
     b, _ = simulate(n_transactions=4000, fraud_rate=0.02, seed=123)

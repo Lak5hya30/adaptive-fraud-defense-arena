@@ -402,7 +402,6 @@ def head_to_head(save: bool = True) -> dict | None:
     return out
 
 
-# --------------------------------------------------------------------------- #
 def run_all(save: bool = True) -> dict:
     from src.defend.train import load_dataset, split_xy
 

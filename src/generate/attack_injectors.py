@@ -47,9 +47,7 @@ _DAY_W = np.array([P.day_weight(d) for d in range(P.SIM_DAYS)], dtype=float)
 _DAY_P = _DAY_W / _DAY_W.sum()
 
 
-# --------------------------------------------------------------------------- #
 # shared helpers
-# --------------------------------------------------------------------------- #
 def _pick_day(rng: np.random.Generator) -> int:
     return int(rng.choice(P.SIM_DAYS, p=_DAY_P))
 
@@ -267,9 +265,7 @@ def _by_id(merchants) -> dict:
     return {m.merchant_id: m for m in merchants}
 
 
-# --------------------------------------------------------------------------- #
 # Injectors
-# --------------------------------------------------------------------------- #
 def card_testing(holders, merchants, rng, n, spec=None):
     """Distributed validation of stolen card numbers.
 

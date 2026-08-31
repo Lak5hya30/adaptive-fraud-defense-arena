@@ -27,9 +27,7 @@ from src.loop.weakness import (SIGNAL_TO_DIAL, WeaknessReport, _STEALTH_RANK,
                                heuristic_mutation)
 
 
-# --------------------------------------------------------------------------- #
 # The constraint layer
-# --------------------------------------------------------------------------- #
 def test_every_family_has_a_generation_zero_spec():
     from src.generate.attack_injectors import INJECTORS
     missing = sorted(set(INJECTORS) - set(BASE_SPECS))
@@ -87,9 +85,7 @@ def test_spec_diff_and_distance_describe_a_real_change():
     assert spec_distance(a, a) == 0.0
 
 
-# --------------------------------------------------------------------------- #
 # Weakness-driven mutation
-# --------------------------------------------------------------------------- #
 def _report(family: str, signals: list[str], recall: float = 0.9) -> WeaknessReport:
     return WeaknessReport(
         family=family, recall=recall, n_fraud=100, n_escaped=10,
@@ -137,9 +133,7 @@ def test_mutation_reduces_intensity_each_generation():
     assert proposal["intensity"] < prev.intensity
 
 
-# --------------------------------------------------------------------------- #
 # Champion / challenger gates
-# --------------------------------------------------------------------------- #
 def test_gate_promotes_a_genuinely_better_candidate():
     d = evaluate_candidate(
         champion_metrics={"attack_recall": 0.30, "false_positive_rate": 0.015,

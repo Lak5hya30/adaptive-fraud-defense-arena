@@ -59,9 +59,7 @@ tab_ops, tab_family, tab_decisions, tab_blind = st.tabs(
     ["⚖️ Operating point", "🎯 Recall by family", "🚦 Decisions & reason codes",
      "🕳️ Blind spots"])
 
-# --------------------------------------------------------------------------- #
 # Operating point: threshold sweep, calibration, operational volumes
-# --------------------------------------------------------------------------- #
 with tab_ops:
     sweep = load_threshold_sweep()
     st.subheader("There is no magic threshold")
@@ -132,9 +130,7 @@ with tab_ops:
                                   legend=dict(orientation="h"), margin=dict(t=10))
                 st.plotly_chart(fig, width=STRETCH)
 
-# --------------------------------------------------------------------------- #
 # Per-family recall with intervals
-# --------------------------------------------------------------------------- #
 with tab_family:
     fam = load_family_recall()
     st.subheader("Recall by attack family")
@@ -176,9 +172,7 @@ with tab_family:
             "post-transaction recall, not a hard decline, and they are reported here rather "
             "than quietly excluded.", icon="ℹ️")
 
-# --------------------------------------------------------------------------- #
 # Decisions and reason codes
-# --------------------------------------------------------------------------- #
 with tab_decisions:
     if is_demo(mode):
         dframe = load_demo_scores()
@@ -273,9 +267,7 @@ with tab_decisions:
                    "is measured in them.")
         st.dataframe(fps[show].head(40), width=STRETCH, hide_index=True)
 
-# --------------------------------------------------------------------------- #
 # Blind spots
-# --------------------------------------------------------------------------- #
 with tab_blind:
     bs = load_blind_spots()
     st.subheader("Where this defense is still weakest")

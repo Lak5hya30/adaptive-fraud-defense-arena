@@ -47,9 +47,7 @@ def frame():
     return df, X, y, atk
 
 
-# --------------------------------------------------------------------------- #
 # No single feature may separate the classes
-# --------------------------------------------------------------------------- #
 def test_no_single_feature_separates_fraud_from_genuine(frame):
     _, X, y, _ = frame
     worst = separability(X, y)[0]
@@ -134,9 +132,7 @@ def test_all_fidelity_checks_pass(frame):
     assert not failing, f"failing fidelity checks: {[c['check'] for c in failing]}"
 
 
-# --------------------------------------------------------------------------- #
 # Leakage
-# --------------------------------------------------------------------------- #
 def test_post_outcome_and_oracle_columns_never_reach_the_model(frame):
     _, X, _, _ = frame
     for col in POST_OUTCOME_COLUMNS + ORACLE_COLUMNS:
@@ -154,9 +150,7 @@ def test_the_leakage_guard_actually_fires():
             assert_auth_time_safe(X_bad)
 
 
-# --------------------------------------------------------------------------- #
 # Temporal causality, including the network counters
-# --------------------------------------------------------------------------- #
 def test_network_counters_only_look_backwards():
     """A row's features must not change when LATER rows are appended. The
     relational counters are the easy place to get this wrong, because they are
@@ -185,9 +179,7 @@ def test_first_transaction_history_is_neutral():
     assert (X.loc[first_idx, "amount_vs_card_max_prior"] == 0.0).all()
 
 
-# --------------------------------------------------------------------------- #
 # Reproducibility and configurability
-# --------------------------------------------------------------------------- #
 def test_simulation_is_reproducible():
     a, sa = simulate(n_transactions=4000, fraud_rate=0.02, seed=99)
     b, sb = simulate(n_transactions=4000, fraud_rate=0.02, seed=99)

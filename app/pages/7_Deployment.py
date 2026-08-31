@@ -91,7 +91,6 @@ Shadow / controlled rollout        NOT simulated in this prototype""",
 
 st.divider()
 
-# --------------------------------------------------------------------------- #
 st.subheader("Feature cost at authorization time")
 st.caption("Every feature the online path uses, and where its state would live.")
 rows = []
@@ -118,7 +117,6 @@ st.caption(f"{len(FEATURE_COLUMNS)} features: "
            f"profile, and {len(NETWORK_FEATURES)} from network-level counters — the signals "
            "an issuer or a single merchant cannot compute alone, and a payment network can.")
 
-# --------------------------------------------------------------------------- #
 st.subheader("Prototype scoring latency")
 st.caption("Measured here, now, on this machine, on the committed model. This is a sanity "
            "check that the feature set and model are cheap to evaluate — not a production "
@@ -155,7 +153,6 @@ if st.button("▶ Benchmark scoring on this machine"):
 
 st.divider()
 
-# --------------------------------------------------------------------------- #
 st.subheader("Model governance — champion / challenger")
 reg = load_registry()
 if not reg:
