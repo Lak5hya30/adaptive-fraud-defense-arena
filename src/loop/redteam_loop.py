@@ -46,7 +46,7 @@ import numpy as np
 import pandas as pd
 
 import config
-from src.defend.decision_policy import decide
+from src.defend.decision_policy import decide, reason_codes
 from src.defend.evaluate import evaluate
 from src.defend.governance import (PROMOTE, evaluate_candidate, registry_entry,
                                    write_registry)
@@ -605,10 +605,14 @@ def _spec_from_dict(d: dict, family: str):
 
 
 def _save_hero_example(stale_model, adapted_model, specs, seed,
-                       hero_fam: str = "account_takeover") -> None:
+                       hero_fam: str = "account_takeover", out_path=None) -> None:
     """Persist ONE concrete evolved-attack transaction the STALE model misses but
     the ADAPTED model catches, for the hero demo. Also stores hero-family recall
-    for both models on a stable held-out set."""
+    for both models on a stable held-out set.
+
+    ``out_path`` defaults to ``config.HERO_EXAMPLE_PATH``; the Judge Demo passes a
+    separate path so its closed-loop hero family can be regenerated without
+    disturbing the committed leave-one-out hero example."""
     from src.defend.features import build_xy
     if hero_fam not in specs:
         hero_fam = next(iter(specs), "account_takeover")
@@ -639,9 +643,18 @@ def _save_hero_example(stale_model, adapted_model, specs, seed,
                   (bool(v) if isinstance(v, (bool, np.bool_)) else
                    (float(v) if isinstance(v, (np.floating, float)) else
                     (int(v) if isinstance(v, (np.integer, int)) else str(v)))))
+    # Rule-based reason codes: which risk rules this one transaction trips. Model-
+    # independent (they describe the transaction, not a score), so the same codes
+    # explain what the stale model under-weighted and the adapted model learned to
+    # act on. Derived from real features — nothing here is authored by hand.
+    try:
+        codes = reason_codes(X.iloc[[pos]])[0]
+    except Exception:
+        codes = []
     spec = specs.get(hero_fam)
     example = {
         "family": hero_fam,
+        "reason_codes": codes,
         "narrative": (f"A {hero_fam.replace('_', ' ')} that EVOLVED specifically to remove the "
                       "signal the defense was leaning on. The stale model waves it through; the "
                       "adapted model — retrained on such variants via cumulative replay — flags it."),
@@ -661,7 +674,8 @@ def _save_hero_example(stale_model, adapted_model, specs, seed,
         "hero_family_recall": {"stale": stale_recall, "adapted": adapted_recall,
                                "n": int(fam_fraud.sum())},
     }
-    config.HERO_EXAMPLE_PATH.write_text(json.dumps(example, indent=2), encoding="utf-8")
+    (out_path or config.HERO_EXAMPLE_PATH).write_text(
+        json.dumps(example, indent=2), encoding="utf-8")
 
 
 def _fmt(v):

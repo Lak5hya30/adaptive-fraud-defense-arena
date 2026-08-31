@@ -28,6 +28,16 @@ st.markdown(
     "into training data for the next defense."
 )
 
+with st.container(border=True):
+    jc1, jc2 = st.columns([3, 1])
+    with jc1:
+        st.markdown("#### 🎯 New here? Start with the 2-Minute Judge Demo")
+        st.markdown("One attack, end to end — a scam evades the detector, the system learns it, "
+                    "and genuine customers stay protected. Plain language, every number from a "
+                    "committed artifact, no API key required.")
+    with jc2:
+        st.page_link("pages/0_Judge_Demo.py", label="Run the 2-Minute Demo", icon="▶️")
+
 st.markdown(
     f'<div style="font-size:1.05rem;letter-spacing:.02em;margin:.4rem 0 1rem 0">'
     f'<b style="color:{PALETTE["primary"]}">DISCOVER</b> → '

@@ -47,12 +47,15 @@ streamlit run app/Home.py
 
 The app opens on `http://localhost:8501` in **Demo mode**, which renders every page from committed artifacts. Nothing trains, nothing calls out to a network, and every figure matches this README because both are produced from the same files.
 
+**New here? Start with the 2-Minute Judge Demo** — the first page in the sidebar. It tells the whole story through one attack, in plain language: a synthetic scam evades the current detector, the system learns from it, and genuine customers stay protected — with every number read from a committed artifact and the technical detail one click away.
+
 ### Other commands
 
 | Command | What it does | Roughly |
 |---|---|---|
 | `python -m src.pipeline` | Regenerate every artifact from the seed | 45 min |
 | `python -m src.pipeline --fast` | Everything except the closed loop | 12 min |
+| `python -m src.experiments.judge_hero` | Regenerate the Judge Demo hero transaction from the committed loop models | seconds |
 | `python -m docs.build_docs` | Regenerate this README, the figures and the walkthrough from those artifacts | seconds |
 | `python -m pytest tests/ -q` | Full test suite | 11 min |
 | `python -m src.generate.fidelity` | Simulator shortcut diagnostics | 1 min |

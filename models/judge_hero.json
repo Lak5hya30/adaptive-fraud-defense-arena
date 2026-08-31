@@ -1,0 +1,79 @@
+{
+  "family": "otp_relay",
+  "reason_codes": [],
+  "narrative": "A otp relay that EVOLVED specifically to remove the signal the defense was leaning on. The stale model waves it through; the adapted model \u2014 retrained on such variants via cumulative replay \u2014 flags it.",
+  "evolved_spec": {
+    "attack_family": "otp_relay",
+    "strategy": "slow the campaign down further (defeats: residual velocity signal)",
+    "intensity": 0.576,
+    "amount_profile": "moderate",
+    "velocity_profile": "single",
+    "device_behavior": "new_device",
+    "geo_behavior": "home",
+    "merchant_behavior": "new_low_risk_merchant",
+    "timing_profile": "customer_normal",
+    "targets_signal": "residual velocity signal",
+    "rationale": "The defense catches 46% of otp_relay and its ranking of this family depends most on residual velocity signal. Moving velocity_profile to single removes that dependency; whatever the defense still detects afterwards is a genuinely different signal.",
+    "confidence": 0.6,
+    "source": "heuristic",
+    "generation": 3,
+    "derived": {
+      "amount_scale": 1.0,
+      "txns_per_card": [
+        1,
+        1
+      ],
+      "velocity_window_hours": 0.0,
+      "device_trust": 0.0,
+      "geo_km_range": [
+        0.0,
+        12.0
+      ]
+    }
+  },
+  "targets_signal": "residual velocity signal",
+  "transaction": {
+    "txn_id": "T00008092",
+    "timestamp": "2026-07-21 22:01:38.243222",
+    "cardholder_id": "CH003392",
+    "card_id": "CARD003392",
+    "merchant_id": "M00668",
+    "mcc": "5812_restaurant",
+    "mcc_risk": 0.29074659609011894,
+    "amount": 267.22,
+    "channel": "card_cnp",
+    "country": "IN",
+    "geo_city": "bengaluru",
+    "distance_from_home_km": 2.8,
+    "device_id": "NEWDEV0906402",
+    "ip_prefix": "152.54",
+    "is_3ds": true,
+    "otp_verified": true,
+    "is_new_payee": true,
+    "refund_flag": false,
+    "account_age_days": 861,
+    "auth_result": "approved",
+    "is_fraud": 1,
+    "attack_type": "otp_relay",
+    "actor_role": "fraud"
+  },
+  "stale": {
+    "score": 0.19986120379656508,
+    "flagged": false,
+    "threshold": 0.6980550750988563,
+    "probability": 0.009826152683295541,
+    "action": "APPROVE"
+  },
+  "adapted": {
+    "score": 0.8715515255400568,
+    "flagged": true,
+    "threshold": 0.836348915089901,
+    "probability": 0.3125,
+    "action": "STEP_UP"
+  },
+  "hero_family_recall": {
+    "stale": 0.1232876712328767,
+    "adapted": 0.5753424657534246,
+    "n": 73
+  }
+}
