@@ -49,3 +49,25 @@ def test_atlas_search_combines_with_filters_and_recovers_from_empty_results(app)
     from common import get_taxonomy
     total = len(get_taxonomy().attacks)
     assert any(c.value == f"{total} of {total} attacks shown." for c in app.caption)
+
+
+def test_judge_demo_advances_and_reverses_with_shared_components(app):
+    app.switch_page("pages/0_Judge_Demo.py").run()
+    next(b for b in app.button if "Run 2-Minute Demo" in b.label).click().run()
+    for stage in range(8):
+        assert not app.exception, [e.message for e in app.exception]
+        assert app.session_state.judge_stage == stage
+        if stage < 7:
+            next(b for b in app.button if b.label == "Next ⟶").click().run()
+    next(b for b in app.button if b.label == "⟵ Back").click().run()
+    assert app.session_state.judge_stage == 6
+    next(b for b in app.button if b.label == "Restart").click().run()
+    assert not app.session_state.judge_started
+
+
+def test_all_unseen_attack_demo_beats_render(app):
+    app.switch_page("pages/5_HeroDemo.py").run()
+    story = next(r for r in app.radio if r.label == "Walk the story")
+    for beat in story.options:
+        next(r for r in app.radio if r.label == "Walk the story").set_value(beat).run()
+        assert not app.exception, (beat, [e.message for e in app.exception])

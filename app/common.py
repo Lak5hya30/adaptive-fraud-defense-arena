@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 import sys
-from html import escape
 from pathlib import Path
 
 
@@ -25,18 +24,10 @@ import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
 from src.identify.taxonomy import load_taxonomy  # noqa: E402
+from ui import PALETTE, badge  # noqa: E402
 
 # Semantic colors stay consistent across charts, badges, and controls.
-PALETTE = {
-    "primary": "#6AAFFF",
-    "accent": "#F5BD61",
-    "danger": "#FF8589",
-    "safe": "#6AC99B",
-    "info": "#6AAFFF",
-    "muted": "#A1A7B2",
-    "grid": "rgba(139,147,167,0.18)",
-}
-SEVERITY_COLOR = {"critical": PALETTE["danger"], "high": "#F5A16C",
+SEVERITY_COLOR = {"critical": PALETTE["danger"], "high": "#A44D16",
                   "medium": PALETTE["accent"], "low": PALETTE["safe"]}
 CATEGORY_ORDER = ["Social Engineering", "Technical Evasion",
                   "Identity & Onboarding", "Laundering & Abuse"]
@@ -44,7 +35,8 @@ CATEGORY_ORDER = ["Social Engineering", "Technical Evasion",
 
 def page_setup(title: str, icon: str = "🛡️"):
     st.set_page_config(page_title=f"{title} · AI Defense Lab",
-                       page_icon=icon, layout="wide")
+                       page_icon=icon, layout="wide", initial_sidebar_state="auto")
+    st.session_state["_ui_row"] = 0
     # Local CSS keeps the app offline; stable Streamlit hooks avoid generated classes.
     st.markdown(
         f"<style>{(ROOT / 'app' / 'styles.css').read_text(encoding='utf-8')}</style>",
@@ -121,7 +113,7 @@ def get_defense_model():
 
 
 def severity_pill(sev: str) -> str:
-    c = SEVERITY_COLOR.get(sev, "#8B93A7")
+    c = SEVERITY_COLOR.get(sev, PALETTE["muted"])
     return pill(sev.upper(), c)
 
 
@@ -267,19 +259,19 @@ STATUS_LABEL = {
     "RESEARCH_ONLY": "RESEARCH ONLY", "FUTURE": "ROADMAP",
 }
 OBSERVABILITY_COLOR = {"high": PALETTE["safe"], "partial": PALETTE["accent"],
-                       "low": "#F5A16C", "none": PALETTE["danger"]}
+                       "low": "#A44D16", "none": PALETTE["danger"]}
 
 
 def pill(text: str, color: str) -> str:
-    return f'<span class="pill" style="--pill-color:{color}">{escape(text)}</span>'
+    return badge(text, color)
 
 
 def status_pill(status: str) -> str:
-    return pill(STATUS_LABEL.get(status, status), STATUS_COLOR.get(status, "#8B93A7"))
+    return pill(STATUS_LABEL.get(status, status), STATUS_COLOR.get(status, PALETTE["muted"]))
 
 
 def observability_pill(level: str) -> str:
-    return pill(f"AUTH-TIME: {level.upper()}", OBSERVABILITY_COLOR.get(level, "#8B93A7"))
+    return pill(f"AUTH-TIME: {level.upper()}", OBSERVABILITY_COLOR.get(level, PALETTE["muted"]))
 
 
 def coverage_bar(done: int, total: int, width: int = 18) -> str:

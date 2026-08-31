@@ -11,6 +11,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui import Metric, metric_grid, page_header, plot
+
 from common import (PALETTE, STRETCH, load_baseline, load_family_recall,
                     load_head_to_head, load_loao, load_operational, mode_selector,
                     page_setup)
@@ -18,8 +20,7 @@ from common import (PALETTE, STRETCH, load_baseline, load_family_recall,
 import config
 
 page_setup("Benchmarks", "📊")
-st.markdown('<div class="kicker">Evidence</div>', unsafe_allow_html=True)
-st.title("Rules vs Static ML vs Adaptive Defense")
+page_header("Rules vs Static ML vs Adaptive Defense", "Evidence")
 mode_selector()
 
 comp = load_baseline()
@@ -77,13 +78,9 @@ if matched:
                       "realized FPR": m["false_positive_rate"],
                       "FP per 1,000 genuine": m.get("false_positives_per_1000_legit")})
     mdf = pd.DataFrame(mrows)
-    cols = st.columns(len(mrows))
-    for c, r in zip(cols, mrows):
-        c.markdown(f'<div class="card"><span class="kicker">{r["model"]}</span><br>'
-                   f'recall <b>{r["recall"]*100:.0f}%</b><br>'
-                   f'precision {r["precision"]:.3f}<br>'
-                   f'{r["FP per 1,000 genuine"]:.1f} false positives / 1,000 genuine</div>',
-                   unsafe_allow_html=True)
+    metric_grid([Metric(r["model"], f'{r["recall"]*100:.0f}% recall',
+                        f'Precision {r["precision"]:.3f} · '
+                        f'{r["FP per 1,000 genuine"]:.1f} false positives / 1,000 genuine') for r in mrows])
     fig = go.Figure()
     for _, r in mdf.iterrows():
         fig.add_bar(name=r["model"], x=["recall", "precision", "F1"],
@@ -91,7 +88,7 @@ if matched:
     fig.update_layout(barmode="group", height=340, plot_bgcolor="rgba(0,0,0,0)",
                       paper_bgcolor="rgba(0,0,0,0)", legend=dict(orientation="h", y=-0.2),
                       margin=dict(t=10), yaxis_title="")
-    st.plotly_chart(fig, width=STRETCH)
+    plot(fig, width=STRETCH)
     st.caption(matched["note"])
 
 h2h = load_head_to_head()
@@ -109,16 +106,10 @@ if h2h:
     H_LABELS = {"static_defense": "Static defense<br>(never saw the evolved attack)",
                 "adaptive_defense": "Adaptive defense<br>(trained through the loop)",
                 "promoted_champion": "Promoted champion"}
-    cols = st.columns(len(h2h["models"]))
-    for c, (name, blk) in zip(cols, h2h["models"].items()):
-        c.markdown(
-            f'<div class="card"><span class="kicker">{H_LABELS.get(name, name)}</span><br>'
-            f'<span style="font-size:1.5rem"><b>'
-            f'{(blk["mean_evolved_recall"] or 0)*100:.0f}%</b></span><br>'
-            f'mean recall on evolved attacks<br>'
-            f'<span style="color:#8B93A7;font-size:.8rem">'
-            f'{blk["false_positive_rate"]*100:.2f}% false positives</span></div>',
-            unsafe_allow_html=True)
+    metric_grid([Metric(H_LABELS.get(name, name).replace("<br>", " "),
+                        f'{(blk["mean_evolved_recall"] or 0)*100:.0f}%',
+                        f'Mean evolved recall · {blk["false_positive_rate"]*100:.2f}% false positives')
+                 for name, blk in h2h["models"].items()])
     rows = []
     for fam in h2h["focus"]:
         row = {"evolved family": fam}
@@ -165,7 +156,7 @@ if fam:
     fig.update_layout(height=520, plot_bgcolor="rgba(0,0,0,0)",
                       paper_bgcolor="rgba(0,0,0,0)", margin=dict(t=10), yaxis_title="",
                       legend=dict(orientation="h", y=-0.15))
-    st.plotly_chart(fig, width=STRETCH)
+    plot(fig, width=STRETCH)
 elif "static_ml" in comp:
     st.caption("Run `python -m src.defend.diagnostics` for family recall at a reportable "
                "sample size.")
@@ -191,7 +182,7 @@ if loao:
                                      "after learning": PALETTE["safe"]})
     fig.update_layout(height=420, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                       margin=dict(t=10), yaxis_title="", legend=dict(orientation="h"))
-    st.plotly_chart(fig, width=STRETCH)
+    plot(fig, width=STRETCH)
     st.dataframe(ldf, width=STRETCH, hide_index=True)
     st.info(loao.get("what_this_does_not_show", ""), icon="⚠️")
 else:

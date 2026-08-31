@@ -1,15 +1,16 @@
-# A calm, high-contrast default for the lab and presentation screens.
-# Shared surfaces derive from Streamlit's theme variables in app/styles.css.
+# One light appearance. Minimal toolbar removes the viewer theme selector.
+# Charts also use an explicit light template in app/ui.py.
 [theme]
-base = "dark"
-primaryColor = "#6AAFFF"
-backgroundColor = "#151619"
-secondaryBackgroundColor = "#202226"
-textColor = "#F2F3F5"
+base = "light"
+primaryColor = "#2458C6"
+backgroundColor = "#F6F8FB"
+secondaryBackgroundColor = "#EEF2F7"
+textColor = "#25324A"
 font = "sans serif"
 
 [client]
 showSidebarNavigation = false
+toolbarMode = "minimal"
 
 [server]
 headless = true

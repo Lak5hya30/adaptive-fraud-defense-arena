@@ -17,14 +17,15 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from ui import columns, page_header
+
 from common import (PALETTE, STRETCH, load_registry, mode_selector, page_setup)
 
 import config
 from src.defend.features import FEATURE_COLUMNS, NETWORK_FEATURES
 
 page_setup("Deployment", "🏗️")
-st.markdown('<div class="kicker">Real-world feasibility</div>', unsafe_allow_html=True)
-st.title("How this would run in live payments")
+page_header("How this would run in live payments", "Real-world feasibility")
 mode_selector()
 
 st.markdown(
@@ -35,7 +36,7 @@ st.markdown(
     "decision."
 )
 
-c1, c2 = st.columns(2)
+c1, c2 = columns(2)
 with c1:
     st.subheader("Online — the authorization path")
     st.code("""Payment authorization
@@ -141,7 +142,7 @@ if st.button("▶ Benchmark scoring on this machine"):
             t0 = time.perf_counter()
             model.risk_probability(X)
             batch_ms = (time.perf_counter() - t0) * 1000
-        b1, b2, b3 = st.columns(3)
+        b1, b2, b3 = columns(3)
         b1.metric("Median, one transaction", f"{np.median(singles):.2f} ms")
         b2.metric("95th percentile", f"{np.percentile(singles, 95):.2f} ms")
         b3.metric("Batch of 2,048", f"{batch_ms:.0f} ms",

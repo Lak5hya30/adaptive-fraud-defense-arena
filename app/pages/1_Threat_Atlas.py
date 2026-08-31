@@ -13,12 +13,13 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from ui import Metric, columns, metric_grid, page_header, plot
+
 from common import (PALETTE, STATUS_LABEL, STRETCH, get_taxonomy, mode_selector,
                     observability_pill, page_setup, pill, severity_pill, status_pill)
 
 page_setup("Threat Atlas", "🗺️")
-st.markdown('<div class="kicker">Pillar 1 · Identify</div>', unsafe_allow_html=True)
-st.title("Threat Atlas")
+page_header("Threat Atlas", "Pillar 1 · Identify")
 mode_selector()
 
 tax = get_taxonomy()
@@ -30,14 +31,13 @@ st.markdown(
     "observe, understand each attack, and see exactly what the simulator can reproduce."
 )
 
-with st.container(key="atlas-metrics"):
-    c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Attacks catalogued", counts["total_attacks"], help=f'{counts["categories"]} fraud surfaces')
-c2.metric("Simulated end-to-end", counts["implemented"], help="Dedicated transaction-level injectors")
-c3.metric("Configurable today", counts["parameterized"], help="Reachable via attack-specification dials")
-c4.metric("Research only", counts["research_only"] + counts["future"], help="Characterized but not simulated")
-c5.metric("Hard at auth time", counts["auth_time_hard"],
-          help="Low or no visibility at authorization time")
+metric_grid([
+    Metric("Attacks catalogued", counts["total_attacks"], f'{counts["categories"]} fraud surfaces'),
+    Metric("Simulated end-to-end", counts["implemented"], "Dedicated injectors"),
+    Metric("Configurable today", counts["parameterized"], "Via attack-specification dials"),
+    Metric("Research only", counts["research_only"] + counts["future"], "Not simulated"),
+    Metric("Hard at auth time", counts["auth_time_hard"], "Low or no visibility"),
+])
 
 provenance_note = (
     f"Deliberately wider than the simulator. {prov.get('authored_entries', '—')} entries were "
@@ -52,7 +52,7 @@ provenance_note = (
 with st.expander("Simulator coverage · what is and isn’t reproduced"):
     st.caption(provenance_note)
     cov = tax.coverage_by_category()
-    left, right = st.columns([1, 1.3])
+    left, right = columns([1, 1.3])
     with left:
         for cat, d in sorted(cov.items(), key=lambda kv: -kv[1]["total"]):
             simulated = d["IMPLEMENTED"] + d["PARAMETERIZED"]
@@ -81,7 +81,7 @@ with st.expander("Simulator coverage · what is and isn’t reproduced"):
                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                           legend=dict(orientation="h", y=-0.25, title_text=""),
                           margin=dict(t=10, l=0, r=0))
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
 st.divider()
 
 # Keep the common path visible; specialist filters are one disclosure away.
@@ -97,23 +97,23 @@ def clear_filters():
 
 
 st.subheader("Explore attacks")
-search_col, reset_col = st.columns([4, 1], vertical_alignment="bottom")
+search_col, reset_col = columns([4, 1], vertical_alignment="bottom")
 query = search_col.text_input("Search the atlas", placeholder="Search attacks, signals, or objectives…",
                              key="atlas_search")
 reset_col.button("Clear filters", on_click=clear_filters, width=STRETCH)
-f1, f2, f3 = st.columns(3)
-sel_cat = f1.multiselect("Fraud surface", tax.categories, default=[], key="atlas_category")
+f1, f2, f3 = columns(3)
+sel_cat = f1.multiselect("Fraud surface", tax.categories, key="atlas_category")
 sel_status = f2.multiselect("Simulator status",
                             ["IMPLEMENTED", "PARAMETERIZED", "RESEARCH_ONLY", "FUTURE"],
-                            default=[], format_func=lambda s: STATUS_LABEL[s].capitalize(),
+                            format_func=lambda s: STATUS_LABEL[s].capitalize(),
                             key="atlas_status")
-sel_rail = f3.multiselect("Payment rail", tax.all_rails, default=[], key="atlas_rail")
+sel_rail = f3.multiselect("Payment rail", tax.all_rails, key="atlas_rail")
 with st.expander("More filters · channel, AI role, and visibility"):
-    f4, f5, f6 = st.columns(3)
-    sel_channel = f4.multiselect("Channel", tax.channels, default=[], key="atlas_channel")
-    sel_role = f5.multiselect("Role of generative AI", tax.genai_roles, default=[], key="atlas_role")
+    f4, f5, f6 = columns(3)
+    sel_channel = f4.multiselect("Channel", tax.channels, key="atlas_channel")
+    sel_role = f5.multiselect("Role of generative AI", tax.genai_roles, key="atlas_role")
     sel_obs = f6.multiselect("Authorization-time visibility",
-                             ["high", "partial", "low", "none"], default=[], key="atlas_visibility")
+                             ["high", "partial", "low", "none"], key="atlas_visibility")
 
 rows = tax.attacks
 if query.strip():
@@ -167,7 +167,7 @@ for a in rows:
             st.markdown(f"**In the authorization stream** — {a.transaction_signature}")
         if a.behavioral_signature:
             st.markdown(f"**In account behaviour** — {a.behavioral_signature}")
-        cc1, cc2 = st.columns(2)
+        cc1, cc2 = columns(2)
         with cc1:
             st.markdown("**Signals a detector can watch**")
             for s in a.observable_signals:

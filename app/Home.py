@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from ui import Metric, card, columns, metric_grid, page_header
+
 from common import (PALETTE, STRETCH, get_taxonomy, llm_status_badge, load_loao,
                     load_loop_history, load_metrics, load_summary, page_setup)
 
@@ -17,9 +19,7 @@ import config
 
 page_setup("Overview", "🛡️")
 
-st.markdown('<div class="kicker">Mastercard Innovation Challenge 2026 · GFF Mumbai</div>',
-            unsafe_allow_html=True)
-st.title("A learning defense for payment fraud.")
+page_header("A learning defense for payment fraud.", "Mastercard Innovation Challenge 2026 · GFF Mumbai")
 st.markdown(
     "#### A closed-loop GenAI red team / blue team for payment security.\n"
     "Traditional fraud systems learn from fraud that has already happened. This lab actively "
@@ -29,7 +29,7 @@ st.markdown(
 )
 
 with st.container(border=True, key="demo-entry"):
-    jc1, jc2 = st.columns([3, 1])
+    jc1, jc2 = columns([3, 1])
     with jc1:
         st.markdown("#### Start with the 2-Minute Judge Demo")
         st.markdown("One attack, end to end — a scam evades the detector, the system learns it, "
@@ -72,7 +72,7 @@ if hero and not underpowered:
         f'<b style="color:{PALETTE["danger"]}">{hero["recall_unseen"]*100:.0f}%</b>. '
         f'After the lab generated that family and replayed it into training, '
         f'<b style="color:{PALETTE["safe"]}">{hero["recall_after_learning"]*100:.0f}%</b>.'
-        f'</span><br><span style="color:#8B93A7;font-size:.82rem">'
+        f'</span><br><span style="color:#596579;font-size:.82rem">'
         f'Measured on {hero["n_test"]} held-out synthetic transactions{ci_txt}. This is '
         f'unseen → learned adaptation, not zero-shot detection.</span></div>',
         unsafe_allow_html=True)
@@ -82,24 +82,21 @@ elif underpowered:
             "page with their sample sizes and confidence intervals.", icon="ℹ️")
 
 # --- headline metrics -------------------------------------------------------
-c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Attacks catalogued", counts["total_attacks"],
-          help=f'{counts["implemented"]} simulated end-to-end')
-c2.metric("Transactions simulated",
-          f'{summary["n_transactions"]:,}' if summary else "—",
-          help=f'{summary["fraud_rate"]*100:.1f}% fraud' if summary else None)
-c3.metric("Recall", f'{metrics["recall"]*100:.1f}%' if metrics else "—",
-          help=f'PR-AUC {metrics["pr_auc"]:.3f}' if metrics else None)
-c4.metric("False positives / 1,000",
-          f'{metrics["false_positive_rate"]*1000:.1f}' if metrics else "—",
-          help="Per 1,000 genuine payments" if metrics else None)
-c5.metric("Red-team rounds", loop["rounds"] if loop else "—",
-          help="Weakness-driven" if loop else None)
+metric_grid([
+    Metric("Attacks catalogued", counts["total_attacks"], f'{counts["implemented"]} simulated end-to-end'),
+    Metric("Transactions simulated", f'{summary["n_transactions"]:,}' if summary else "—",
+           f'{summary["fraud_rate"]*100:.1f}% fraud' if summary else ""),
+    Metric("Recall", f'{metrics["recall"]*100:.1f}%' if metrics else "—",
+           f'PR-AUC {metrics["pr_auc"]:.3f}' if metrics else ""),
+    Metric("False positives / 1,000", f'{metrics["false_positive_rate"]*1000:.1f}' if metrics else "—",
+           "Per 1,000 genuine payments"),
+    Metric("Red-team rounds", loop["rounds"] if loop else "—", "Weakness-driven"),
+])
 
 st.divider()
 
 # --- the loop ---------------------------------------------------------------
-left, right = st.columns([1.1, 1])
+left, right = columns([1.1, 1])
 with left:
     st.subheader("The closed loop")
     st.graphviz_chart(
@@ -107,20 +104,20 @@ with left:
         digraph G {{
           rankdir=TB; bgcolor="transparent"; nodesep=0.28; ranksep=0.32;
           node [style="filled,rounded", shape=box, fontname="Helvetica",
-                fontsize=10, color="#33384a", fontcolor="#e8eaf0"];
-          edge [color="#8B93A7", fontname="Helvetica", fontsize=8, fontcolor="#b9c0d0"];
+                fontsize=10, color="#dce3ec", fontcolor="#ffffff"];
+          edge [color="#596579", fontname="Helvetica", fontsize=8, fontcolor="#596579"];
           atlas   [label="Threat Atlas\\n{counts['total_attacks']} attacks catalogued",
                    fillcolor="#7c3aed"];
           spec    [label="Red-team agent\\nstructured attack specification",
-                   fillcolor="#EB6C1E"];
+                   fillcolor="#A44D16"];
           sim     [label="Constrained simulator\\nsynthetic payment stream",
-                   fillcolor="#F79E1B", fontcolor="#1a1d26"];
+                   fillcolor="#976000"];
           defend  [label="Defense model\\nauthorization-time features",
-                   fillcolor="#3E7BFA"];
-          escaped [label="Escaped\\ntransactions", fillcolor="#E5484D"];
+                   fillcolor="#007D91"];
+          escaped [label="Escaped\\ntransactions", fillcolor="#BB3444"];
           weak    [label="Weakness analysis\\nwhich signal did it lean on?",
-                   fillcolor="#E5484D"];
-          replay  [label="Adversarial replay\\n+ retrain", fillcolor="#30A46C"];
+                   fillcolor="#BB3444"];
+          replay  [label="Adversarial replay\\n+ retrain", fillcolor="#16734D"];
           gate    [label="Champion / challenger\\npromotion gates", fillcolor="#33384a"];
           atlas -> spec -> sim -> defend;
           defend -> escaped [label=" missed "];
@@ -157,32 +154,24 @@ with right:
 st.divider()
 
 # --- pillars ----------------------------------------------------------------
-p1, p2, p3 = st.columns(3)
+p1, p2, p3 = columns(3)
 with p1:
-    st.markdown(f"""<div class="card"><div class="kicker">Identify</div>
-    <h4>{counts['total_attacks']} attacks across {counts['categories']} fraud surfaces</h4>
-    Map how generative AI changes payment fraud — social engineering, identity compromise,
-    payment instruments, authorized push payment scams, merchant abuse, and attacks aimed at
-    fraud models themselves. {counts['implemented']} are simulated end-to-end,
-    {counts['parameterized']} more are configurable, and the rest are labelled research-only.
-    </div>""", unsafe_allow_html=True)
+    card(f"{counts['total_attacks']} attacks across {counts['categories']} fraud surfaces",
+         "Map how generative AI changes payment fraud across social engineering, identity, "
+         "payment instruments, scams, merchant abuse, and attacks on fraud models.",
+         eyebrow="Identify", caption=f"{counts['implemented']} simulated end-to-end; "
+         f"{counts['parameterized']} configurable. The rest are labelled research-only.")
 with p2:
     n_cover = summary.get("n_cover_transactions") if summary else None
-    st.markdown(f"""<div class="card"><div class="kicker">Generate</div>
-    <h4>Creativity, constrained</h4>
-    The red team proposes an attack <i>specification</i> — deterministic and committed in Demo
-    mode, or generated by the optional GenAI red team. Either way a payment-domain constraint
-    layer clamps or refuses anything impossible, and a deterministic simulator executes what
-    survives. Fraud actors build ordinary-looking history first
-    {f'({n_cover:,} cover transactions)' if n_cover else ''}, so "no history" never becomes a
-    synonym for fraud.</div>""", unsafe_allow_html=True)
+    card("Creativity, constrained", "The red team proposes an attack specification. "
+         "Payment-domain constraints clamp or refuse impossible behavior before a seeded "
+         "simulator executes it. Fraud actors build ordinary-looking history first.",
+         eyebrow="Generate", caption=f"{n_cover:,} cover transactions." if n_cover else "")
 with p3:
-    st.markdown(f"""<div class="card"><div class="kicker">Defend</div>
-    <h4>{'PR-AUC ' + format(metrics['pr_auc'], '.3f') if metrics else 'Detector'}</h4>
-    Gradient boosting fused with an isolation forest over authorization-time features only,
-    including network-level counters an issuer cannot compute alone. Calibrated scores, tiered
-    approve / step-up / decline with reason codes, and a published list of its own blind spots.
-    </div>""", unsafe_allow_html=True)
+    card('PR-AUC ' + format(metrics['pr_auc'], '.3f') if metrics else 'Detector',
+         "Gradient boosting and an isolation forest use authorization-time features, "
+         "including network-level counters. Decisions carry calibrated scores and reason codes.",
+         eyebrow="Defend", caption="Approve, step up, or decline — with published blind spots.")
 
 st.divider()
 st.caption(

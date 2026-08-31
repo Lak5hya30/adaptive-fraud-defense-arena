@@ -25,6 +25,8 @@ from __future__ import annotations
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui import Metric, badge, columns, metric_grid, page_header, plot, progress_steps
+
 from common import (PALETTE, STRETCH, get_taxonomy, load_head_to_head,
                     load_json, load_loop_history, load_metrics, load_summary,
                     page_setup)
@@ -61,24 +63,8 @@ def pct(x, digits: int = 0) -> str:
     return "—" if x is None else f"{x * 100:.{digits}f}%"
 
 
-def badge(text: str, color: str) -> str:
-    return (f'<span style="display:inline-block;padding:3px 12px;border-radius:14px;'
-            f'font-size:.74rem;font-weight:700;letter-spacing:.03em;'
-            f'background:{color}22;color:{color};border:1px solid {color}55">{text}</span>')
-
-
 def progress_bar(active_phase: int):
-    cells = st.columns(len(PHASES))
-    for i, (cell, name) in enumerate(zip(cells, PHASES)):
-        on = i == active_phase
-        done = i < active_phase
-        col = PALETTE["primary"] if on else (C_PASS if done else C_GREY)
-        weight = "800" if on else "600"
-        mark = "▸ " if on else ("✓ " if done else "")
-        cell.markdown(
-            f'<div style="text-align:center;font-size:.80rem;font-weight:{weight};'
-            f'color:{col};border-top:3px solid {col};padding-top:6px">{mark}{name}</div>',
-            unsafe_allow_html=True)
+    progress_steps(PHASES, active_phase)
 
 
 def agent_mode_badge():
@@ -114,14 +100,12 @@ otp1 = (round1 or {}).get("families", {}).get(HERO_FAMILY, {})
 # =============================================================================
 # HEADER — always visible
 # =============================================================================
-st.markdown('<div class="kicker">2-Minute Judge Demo · synthetic data only</div>',
-            unsafe_allow_html=True)
-st.title("Can a fraud detector learn a new scam before criminals exploit it?")
+page_header("Can a fraud detector learn a new scam before criminals exploit it?", "2-Minute Judge Demo · synthetic data only")
 st.markdown(
     "#### Watch a synthetic fraud attack evade the current detector, see the system learn from "
     "it, and verify that genuine customers remain protected.")
 
-cols = st.columns([1, 1])
+cols = columns([1, 1])
 with cols[0]:
     agent_mode_badge()
 with cols[1]:
@@ -134,34 +118,24 @@ st.divider()
 
 # --- simplified metric cards (section 8) ------------------------------------
 if metrics and otp1 and loop:
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Frauds caught, out of 100", f"{round(metrics['recall'] * 100)}",
-              help="Recall of the current detector across the whole synthetic portfolio, at its "
-                   "tuned operating point. Technical term: recall.")
-    m1.caption(f"current detector · recall {pct(metrics['recall'], 1)}")
-
     fp_per_1000 = metrics["false_positive_rate"] * 1000
-    m2.metric("Genuine flagged, per 1,000", f"{fp_per_1000:.0f}",
-              help="How many genuine payments out of 1,000 the detector challenges or declines. "
-                   "Technical term: false-positive rate. Budget is 20 per 1,000 (2%).")
-    m2.caption(f"false-positive rate {pct(metrics['false_positive_rate'], 2)} · budget ≤ 2%")
-
     sr, ar = otp1.get("stale_recall"), otp1.get("adapted_recall")
-    m3.metric("Hero attack: before → after", f"{pct(sr)} → {pct(ar)}",
-              delta=f"+{round((ar - sr) * 100)} pts" if (sr is not None and ar is not None) else None,
-              help="The evolved OTP-relay scam: what the current detector catches, versus what "
-                   "the detector catches after learning from it. Closed-loop round 1.")
-    m3.caption(f"evolved OTP-relay · n = {otp1.get('n', '—')}")
-
     promoted = loop.get("promotion", {}).get("promoted_rounds", [])
-    m4.metric("Candidate models approved", f"{len(promoted)} of {loop.get('rounds', '—')}",
-              help="Each round the blue team trains a candidate; governance promotes it only if "
-                   "it clears every safety gate. The rest are held back — governance has teeth.")
-    m4.caption(f"{loop.get('rounds', 0) - len(promoted)} held back by the safety gate")
+    gain_note = f"+{round((ar - sr) * 100)} pts · " if sr is not None and ar is not None else ""
+    metric_grid([
+        Metric("Frauds caught, out of 100", round(metrics['recall'] * 100),
+               f"Current detector · recall {pct(metrics['recall'], 1)}"),
+        Metric("Genuine flagged, per 1,000", f"{fp_per_1000:.0f}",
+               f"False-positive rate {pct(metrics['false_positive_rate'], 2)} · budget ≤ 2%"),
+        Metric("Hero attack: before → after", f"{pct(sr)} → {pct(ar)}",
+               gain_note + f"Evolved OTP-relay · n = {otp1.get('n', '—')}", "safe"),
+        Metric("Candidate models approved", f"{len(promoted)} of {loop.get('rounds', '—')}",
+               f"{loop.get('rounds', 0) - len(promoted)} held back by the safety gate"),
+    ])
 
 with st.expander("How the synthetic data works", expanded=False):
     if summary:
-        d1, d2, d3 = st.columns(3)
+        d1, d2, d3 = columns(3)
         d1.metric("Synthetic transactions", f"{summary['n_transactions']:,}")
         d2.metric("Of which fraud", f"{summary['n_fraud']:,}",
                   f"{summary['fraud_rate'] * 100:.1f}% base rate")
@@ -215,7 +189,7 @@ def stage_meet():
 def stage_test():
     rank = (loop.get("focus_selection", {}).get("initial_ranking", []) if loop else [])
     row = next((r for r in rank if r["family"] == HERO_FAMILY), None)
-    c1, c2 = st.columns([1, 1.3])
+    c1, c2 = columns([1, 1.3])
     with c1:
         if row:
             st.metric("Current detector catches", pct(row["recall"]),
@@ -241,20 +215,20 @@ def stage_escaped():
     st.markdown("**One fraudulent transaction the current detector waved through**")
     st.caption(f"Transaction {txn.get('txn_id')} · synthetic cardholder "
                f"{txn.get('cardholder_id')} · {str(txn.get('timestamp', ''))[:16]}")
-    f = st.columns(4)
+    f = columns(4)
     f[0].metric("Amount", f"₹{txn['amount']:,.0f}")
     f[1].metric("Merchant category", txn["mcc"].split("_", 1)[-1].replace("_", " "))
     f[2].metric("Device", "new to this card" if str(txn.get("device_id", "")).startswith("NEW")
                 else "known device")
     f[3].metric("OTP / 3-D Secure", "passed" if txn.get("otp_verified") else "not done")
-    g = st.columns(4)
+    g = columns(4)
     g[0].metric("Home city?", "yes" if txn.get("distance_from_home_km", 99) < 25 else "no",
                 f"{txn.get('distance_from_home_km', 0):.0f} km from home", delta_color="off")
     g[1].metric("New payee?", "yes" if txn.get("is_new_payee") else "no")
     g[2].metric("Account age", f"{txn.get('account_age_days', 0):,} days")
     g[3].metric("Actual label", "FRAUD", "synthetic ground truth", delta_color="off")
 
-    d1, d2 = st.columns(2)
+    d1, d2 = columns(2)
     with d1:
         st.markdown(badge("current detector · APPROVE", C_STEP if s["action"] != "APPROVE"
                           else C_ATTACK), unsafe_allow_html=True)
@@ -287,7 +261,7 @@ def stage_weakness():
         fig.update_layout(height=240, margin=dict(t=8, l=8, r=8, b=8),
                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                           xaxis_title="how much the detector leans on it (AUC drop when removed)")
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
     st.info("The detector leans hardest on **3-D Secure** — but this attack *passes* 3-D Secure "
             "by relaying the OTP, so that signal is useless here. The next strongest signal the "
             "attacker can cheaply remove is the **merchant's risk level**. That becomes the "
@@ -334,7 +308,7 @@ def stage_evolve():
 def stage_retrain():
     comp = round1.get("replay_composition", {}) if round1 else {}
     ar, sr = otp1.get("adapted_recall"), otp1.get("stale_recall")
-    c1, c2 = st.columns([1.2, 1])
+    c1, c2 = columns([1.2, 1])
     with c1:
         st.markdown(
             "The escaped variants are added to the cumulative **practice dataset** — every past "
@@ -408,10 +382,10 @@ def stage_result():
                           margin=dict(t=20, b=10),
                           title=f"On the FINAL evolved generation · matched false-positive budget "
                                 f"· n = {n}")
-        st.plotly_chart(fig, width=STRETCH)
+        plot(fig, width=STRETCH)
         sfpr = static.get("false_positive_rate")
         afpr = cand.get("false_positive_rate")
-        cc1, cc2, cc3 = st.columns(3)
+        cc1, cc2, cc3 = columns(3)
         cc1.metric("Current detector", pct(s_r), "static, pre-loop", delta_color="off")
         cc2.metric("Governance-approved", pct(c_r),
                    f"+{round((c_r - s_r) * 100)} pts" if (c_r and s_r) else None)
@@ -454,16 +428,13 @@ if not (metrics and loop and round1):
     st.stop()
 
 if not st.session_state.judge_started:
-    _, mid, _ = st.columns([1, 2, 1])
-    with mid:
-        st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
+    with st.container(key="demo-start"):
         if st.button("▶  Run 2-Minute Demo", type="primary", width=STRETCH):
             st.session_state.judge_started = True
             st.session_state.judge_stage = 0
             st.rerun()
         st.caption("Eight stages, about fifteen seconds each — Attack → Evade → Analyse → "
                    "Evolve → Retrain → Govern.")
-        st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 stage = st.session_state.judge_stage
@@ -472,7 +443,7 @@ st.markdown(f"### {STAGE_TITLES[stage]}")
 STAGES[stage]()
 
 st.divider()
-nav = st.columns([1, 1, 2, 1])
+nav = columns([1, 1, 2, 1])
 if nav[0].button("⟵ Back", disabled=stage == 0, width=STRETCH):
     st.session_state.judge_stage = max(0, stage - 1)
     st.rerun()
@@ -493,11 +464,11 @@ else:
 st.divider()
 with st.expander("Technical evidence (exact figures, sample sizes, reproduction)"):
     if metrics:
-        t = st.columns(3)
+        t = columns(3)
         t[0].metric("Recall", pct(metrics["recall"], 1))
         t[1].metric("Precision", pct(metrics["precision"], 1))
         t[2].metric("F1", f"{metrics['f1']:.3f}")
-        t = st.columns(3)
+        t = columns(3)
         t[0].metric("PR-AUC", f"{metrics['pr_auc']:.3f}")
         t[1].metric("ROC-AUC", f"{metrics['roc_auc']:.3f}")
         t[2].metric("False-positive rate", pct(metrics["false_positive_rate"], 2))

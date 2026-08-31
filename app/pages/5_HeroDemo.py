@@ -16,14 +16,15 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from ui import Metric, columns, metric_grid, page_header, plot
+
 from common import (PALETTE, STRETCH, load_hero, load_loao, load_loop_history,
                     mode_selector, page_setup)
 
 import config
 
 page_setup("Hero Demo", "🎬")
-st.markdown('<div class="kicker">The 90-second story</div>', unsafe_allow_html=True)
-st.title("What happens when an unseen attack arrives?")
+page_header("What happens when an unseen attack arrives?", "The 90-second story")
 mode_selector()
 
 loao = load_loao()
@@ -91,7 +92,7 @@ elif beat.startswith("②"):
 
 elif beat.startswith("③"):
     st.header("The blind spot")
-    c1, c2 = st.columns([1, 1.4])
+    c1, c2 = columns([1, 1.4])
     with c1:
         st.metric(f"Recall on unseen {hero_family}",
                   f"{H['recall_unseen']*100:.0f}%",
@@ -114,7 +115,7 @@ elif beat.startswith("③"):
                  "distance_from_home_km", "device_id", "otp_verified", "is_new_payee")}
         st.dataframe(pd.DataFrame([show]), width=STRETCH, hide_index=True)
         s, a = hero["stale"], hero["adapted"]
-        k1, k2 = st.columns(2)
+        k1, k2 = columns(2)
         k1.metric("Stale defense", s.get("action", "—"),
                   f"fraud probability {s.get('probability', s['score']):.3f}")
         k2.metric("Adapted defense", a.get("action", "—"),
@@ -144,13 +145,11 @@ elif beat.startswith("④"):
 
 elif beat.startswith("⑤"):
     st.header("The defense learns")
-    c1, c2, c3 = st.columns([1, 0.4, 1])
-    c1.metric("Before — never seen", f"{H['recall_unseen']*100:.0f}%",
-              f"n = {H['n_test']}", delta_color="off")
-    c2.markdown("<h1 style='text-align:center;margin-top:1.2rem'>→</h1>",
-                unsafe_allow_html=True)
-    c3.metric("After — learned", f"{H['recall_after_learning']*100:.0f}%",
-              f"+{H['gain']*100:.0f} points", delta_color="normal")
+    metric_grid([
+        Metric("Before — never seen", f"{H['recall_unseen']*100:.0f}%", f"n = {H['n_test']}"),
+        Metric("After — learned", f"{H['recall_after_learning']*100:.0f}%",
+               f"+{H['gain']*100:.0f} points", "safe"),
+    ])
     if H.get("recall_after_learning_ci95"):
         lo, hi = H["recall_after_learning_ci95"]
         st.caption(f"95% interval {lo*100:.0f}–{hi*100:.0f}% on {H['n_test']} held-out "
@@ -172,7 +171,7 @@ elif beat.startswith("⑤"):
     fig.update_layout(barmode="group", height=440, xaxis_range=[0, 1.02], yaxis_title="",
                       plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                       legend=dict(orientation="h"), margin=dict(t=10))
-    st.plotly_chart(fig, width=STRETCH)
+    plot(fig, width=STRETCH)
     st.warning(
         "Read this correctly. `after learning` is what the same pipeline achieves once the "
         "family is in training — an upper bound obtained by handing the model the answer. The "
@@ -192,7 +191,7 @@ else:
         last = loop["history"][-1]
         li = last["legit_impact"]
         cc = last.get("champion_challenger", {})
-        g1, g2, g3 = st.columns(3)
+        g1, g2, g3 = columns(3)
         g1.metric("Genuine false positives after adapting",
                   f"{li['adapted_fpr']*100:.2f}%",
                   f"{li['fpr_regression']*100:+.2f} pts", delta_color="inverse")
